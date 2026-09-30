@@ -1010,6 +1010,7 @@ function fitCanvas(c){
 }
 function drawTach(){
   const { ctx, w, h } = fitCanvas($('#tach'));
+  if (w < 30 || h < 30) return;
   const cx = w / 2, cy = h / 2, r = w / 2 - 8;
   ctx.clearRect(0, 0, w, h);
   ctx.fillStyle = 'rgba(14,17,21,.78)'; ctx.beginPath(); ctx.arc(cx, cy, r + 6, 0, Math.PI * 2); ctx.fill();
@@ -1034,6 +1035,7 @@ function drawTach(){
 }
 function drawCurve(){
   const { ctx, w, h } = fitCanvas($('#curve'));
+  if (w < 30 || h < 30) return;
   const pad = { l: 34, r: 36, t: 10, b: 20 };
   const X = rpm => pad.l + (w - pad.l - pad.r) * rpm / 11000;
   const maxHp = 850, maxNm = 800;
@@ -1068,6 +1070,7 @@ function drawCurve(){
 const STROKES = [ ['Détente', COL.amber], ['Échappement', COL.exh], ['Admission', COL.air], ['Compression', COL.comp] ];
 function drawChrono(){
   const { ctx, w, h } = fitCanvas($('#chrono'));
+  if (w < 30 || h < 30) return;
   const padL = 58, padR = 12, top = 24, rowH = (h - top - 8) / 8;
   const X = a => padL + (w - padL - padR) * a / 720;
   ctx.clearRect(0, 0, w, h);
@@ -1106,6 +1109,7 @@ function drawChrono(){
 function drawKin(){
   const c = $('#kin'); if (!c) return;
   const { ctx, w, h } = fitCanvas(c);
+  if (w < 30 || h < 30) return;
   const pad = { l: 12, r: 12, t: 22, b: 22 };
   const X = a => pad.l + (w - pad.l - pad.r) * a / 360;
   const mid = (h - pad.t - pad.b) / 2 + pad.t, amp = (h - pad.t - pad.b) / 2 - 4;
@@ -1377,6 +1381,7 @@ document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click'
 
 function resize(){
   const w = viewport.clientWidth, h = viewport.clientHeight;
+  if (w < 2 || h < 2) return;
   renderer.setSize(w, h, false); camera.aspect = w / h;
   camera.position.multiplyScalar(1); camera.updateProjectionMatrix();
 }
@@ -2128,6 +2133,7 @@ function lpUpdateLabels(){
 }
 function lpResize(){
   const w = lpView.clientWidth, h = lpView.clientHeight;
+  if (w < 2 || h < 2) return;
   lr.setSize(w, h, false); lcam.aspect = w / h; lcam.updateProjectionMatrix();
   lpPtsMat.uniforms.uScale.value = lr.getDrawingBufferSize(new THREE.Vector2()).y / (2 * Math.tan(lcam.fov * DEG / 2));
 }
@@ -2199,6 +2205,7 @@ function lpUI(){
 }
 function drawPChart(){
   const { ctx, w, h } = fitCanvas($('#pchart'));
+  if (w < 30 || h < 30) return;
   const pad = { l: 30, r: 8, t: 8, b: 34 };
   const a = cycleOf(st.theta, lpCyl);
   let pm = 10; for (let i = 0; i < 720; i++) pm = Math.max(pm, cyc.p[i]);
@@ -2232,6 +2239,7 @@ function drawPChart(){
 }
 function drawPV(){
   const { ctx, w, h } = fitCanvas($('#pvchart'));
+  if (w < 30 || h < 30) return;
   const pad = { l: 30, r: 10, t: 8, b: 22 };
   let pm = 10; for (let i = 0; i < 720; i++) pm = Math.max(pm, cyc.p[i]);
   const lmin = Math.log(0.15), lmax = Math.log(pm * 1.3);
@@ -2288,6 +2296,7 @@ new IntersectionObserver(e => { trackVisible = e[0].isIntersecting; }).observe($
 function drawTrack(){
   if (!trackVisible) return;
   const { ctx, w, h } = fitCanvas($('#trackMap'));
+  if (w < 30 || h < 30) return;
   const [X, Y, sc] = trkXf(w, h, 40);
   ctx.clearRect(0, 0, w, h);
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
@@ -2359,6 +2368,7 @@ function circuitUI(){
   // courbe de vitesse
   if (!trackVisible) return;
   const { ctx, w, h } = fitCanvas($('#speedTrace'));
+  if (w < 30 || h < 30) return;
   const pad = { l: 30, r: 8, t: 8, b: 16 }, vmax = 300;
   const X = b => pad.l + (w - pad.l - pad.r) * b / NB, Y = v => h - pad.b - (h - pad.t - pad.b) * v / vmax;
   ctx.clearRect(0, 0, w, h);
@@ -2422,6 +2432,7 @@ function updateUI(){
 }
 function drawGears(){
   const { ctx, w, h } = fitCanvas($('#gears'));
+  if (w < 30 || h < 30) return;
   const pad = { l: 30, r: 8, t: 8, b: 18 }, vmax = 320, rmax = 11000;
   const X = k => pad.l + (w - pad.l - pad.r) * k / vmax, Y = r => h - pad.b - (h - pad.t - pad.b) * r / rmax;
   ctx.clearRect(0, 0, w, h);
@@ -2445,7 +2456,13 @@ function drawGears(){
   ctx.textAlign = 'left'; ctx.fillStyle = COL.muted; ctx.fillText('tr/min · km/h', pad.l + 4, pad.t + 4);
 }
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let frameErr = 0;
 function frame(now){
+  requestAnimationFrame(frame);   // on reprogramme d'abord : une erreur ne doit jamais figer la page
+  try { step(now); }
+  catch (e){ if (frameErr++ < 3) console.error(e); }
+}
+function step(now){
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   updateEngine(dt);
   circuitFrame(dt);
@@ -2476,7 +2493,6 @@ function frame(now){
   drawChrono(); drawTrack(); drawMini();
   uiT += dt;
   if (uiT > 0.08){ uiT = 0; computeCycle(); updateUI(); drawCurve(); drawKin(); drawGears(); circuitUI(); if (lpVisible){ drawPChart(); drawPV(); } }
-  requestAnimationFrame(frame);
 }
 
 // ------------------------------------------------------------------
