@@ -224,8 +224,8 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
   <div class="specs" aria-label="Fiche technique">
     <div><b>3 999 cm³</b>cylindrée</div>
     <div><b>92 × 75,2</b>alésage × course (mm)</div>
-    <div><b>420 ch</b>à 8 300 tr/min</div>
-    <div><b>400 N·m</b>à 3 900 tr/min</div>
+    <div><b id="specHp">420 ch</b><span id="specHpRpm">à 8 300 tr/min</span></div>
+    <div><b id="specNm">400 N·m</b><span id="specNmRpm">à 3 900 tr/min</span></div>
     <div><b>8 400</b>zone rouge</div>
   </div>
 </header>
@@ -239,7 +239,7 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
       <div class="unit">Régime moteur</div>
       <div class="big" id="hudRpm">0</div>
       <div class="row"><span id="hudHp">0<small>ch</small></span><span id="hudNm">0<small>N·m</small></span></div>
-      <div class="row"><span class="gearchip" id="hudGear">P</span><span id="hudKmh">0<small>km/h</small></span></div>
+      <div class="row"><span class="gearchip" id="hudGear">P</span><span id="hudKmh">0<small>km/h</small></span><span id="hudBoost" hidden></span></div>
     </div>
     <div class="playbadge">Lecture <b id="badgePlay">×1/50</b> · vilebrequin <b id="badgeAngle">0°</b></div>
     <div class="viewbar">
@@ -279,6 +279,7 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
         <button class="btn" id="shiftUp" aria-label="Palette droite, rapport supérieur">Palette +</button>
       </div>
       <div class="gear-msg" id="gearMsg" aria-live="polite"></div>
+      <div class="gear-msg" id="limitMsg" style="color:#ff8a80"></div>
       <div class="pedals">
         <div class="pedal-col">
           <input type="range" id="pedal" min="0" max="100" step="1" value="0" aria-label="Pression sur la pédale d'accélérateur">
@@ -312,9 +313,25 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
     <div class="grp">
       <h2>Préparation</h2>
       <div class="ctl">
-        <div class="head"><label for="hp">Puissance maxi visée</label><output id="hpOut">420<small>ch</small></output></div>
+        <label for="cfg">Configuration moteur</label>
+        <select id="cfg">
+          <option value="stock">S65 d'origine · 420 ch</option>
+          <option value="ess">Compresseur ESS VT2‑625 · 625 ch</option>
+        </select>
+        <div class="hint" id="cfgHint"></div>
+      </div>
+      <div class="ctl">
+        <div class="head"><label for="hp">Réglage de puissance</label><output id="hpOut">420<small>ch</small></output></div>
         <input type="range" id="hp" min="250" max="800" step="10" value="420">
-        <div class="hint">Plus de puissance à régime égal veut dire plus de pression dans le cylindre, donc plus de compression sur chaque bielle.</div>
+        <div class="hint">Au‑delà de la puissance prévue par la configuration, la pression dans les cylindres monte et les bielles encaissent plus de compression. Les injecteurs peuvent aussi saturer.</div>
+      </div>
+      <div class="ctl">
+        <label for="vmaxSel">Vitesse maxi</label>
+        <select id="vmaxSel">
+          <option value="250">Bridée à 250 km/h (d'origine)</option>
+          <option value="305">Bridée à 305 km/h</option>
+          <option value="0">Débridée</option>
+        </select>
       </div>
       <canvas id="curve" aria-label="Courbes de couple et de puissance"></canvas>
     </div>
@@ -534,7 +551,9 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
       <tr><td>Rapports DKG (1 à 7) · pont</td><td class="n">4,78 · 3,06 · 2,15 · 1,68 · 1,39 · 1,20 · 1,00 · 3,15</td><td>Constructeur</td></tr>
       <tr><td>Masse, pneus arrière</td><td class="n">1 655 kg · 265/40 R18</td><td>Constructeur</td></tr>
       <tr><td>Adhérence maxi (antipatinage)</td><td class="n">≈ 11,5 kN au sol</td><td>Estimation</td></tr>
-      <tr><td>Débit d'un injecteur</td><td class="n">4,2 mg/ms</td><td>Estimation</td></tr>
+      <tr><td>Débit d'un injecteur</td><td class="n">4,2 mg/ms · 6,3 avec le kit</td><td>Estimation</td></tr>
+      <tr><td>Kit compresseur (type ESS VT2‑625)</td><td class="n">≈ 0,55 bar à 8 300 tr/min · 625 ch</td><td>Estimation calée sur la puissance annoncée</td></tr>
+      <tr><td>Vitesse maxi d'origine</td><td class="n">250 km/h, bridée électroniquement</td><td>Constructeur</td></tr>
       <tr><td>Fin d'injection</td><td class="n">10° avant l'ouverture de l'admission</td><td>Choix du modèle</td></tr>
       <tr><td>Richesse</td><td class="n">λ = 1 ; 0,87 pied au plancher</td><td>Ordre de grandeur</td></tr>
       <tr><td>Avance à l'allumage</td><td class="n">8 à 36°, réduite en charge</td><td>Estimation</td></tr>
@@ -932,6 +951,27 @@ Object.keys(BANKS).forEach(k => {
   layers.manifolds.add(pipe);
 });
 
+// Compresseur centrifuge (configuration suralimentée)
+const scGroup = new THREE.Group(); scGroup.visible = false; engine.add(scGroup); layers.sc = scGroup;
+const scC = new THREE.Vector3(-1.75, 0.4, damper.position.z);
+{
+  const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); scGroup.add(m); return m; };
+  add(zAxis(new THREE.CylinderGeometry(0.17, 0.17, 0.14, 32)), M.bolt, scC.x, scC.y, scC.z);                  // poulie
+  add(zAxis(new THREE.CylinderGeometry(0.28, 0.3, 0.32, 32)), M.alu, scC.x, scC.y, scC.z + 0.24);             // boîtier de multiplication
+  add(new THREE.TorusGeometry(0.36, 0.16, 18, 48), M.alu, scC.x, scC.y, scC.z + 0.52);                         // volute
+  add(zAxis(new THREE.CylinderGeometry(0.2, 0.2, 0.36, 32, 1, true)), M.alu, scC.x, scC.y, scC.z + 0.72);      // entrée d'air
+  add(zAxis(new THREE.CylinderGeometry(0.21, 0.3, 0.42, 24)), new THREE.MeshStandardMaterial({ color: 0x3a3f46, roughness: 0.9 }), scC.x, scC.y, scC.z + 1.1); // filtre
+  const belt = new THREE.MeshStandardMaterial({ color: 0x15171a, roughness: 0.8 });
+  scGroup.add(tubeBetween(new THREE.Vector3(0, 0.73, scC.z), new THREE.Vector3(scC.x, scC.y + 0.17, scC.z), 0.03, belt, false));
+  scGroup.add(tubeBetween(new THREE.Vector3(0, -0.73, scC.z), new THREE.Vector3(scC.x, scC.y - 0.17, scC.z), 0.03, belt, false));
+  const out = new THREE.CatmullRomCurve3([new THREE.Vector3(scC.x + 0.36, scC.y + 0.3, scC.z + 0.52), new THREE.Vector3(scC.x + 0.45, 2.0, scC.z + 0.4),
+    new THREE.Vector3(-0.5, plenumY + 0.2, scC.z - 0.1), new THREE.Vector3(0, plenumY + 0.22, blockLen / 2 - 0.05)]);
+  scGroup.add(new THREE.Mesh(new THREE.TubeGeometry(out, 60, 0.12, 20), M.alu));
+}
+const impeller = new THREE.Group(); impeller.position.set(scC.x, scC.y, scC.z + 0.55); scGroup.add(impeller);
+impeller.add(new THREE.Mesh(zAxis(new THREE.CylinderGeometry(0.05, 0.16, 0.1, 24)), M.steel));
+for (let i = 0; i < 10; i++){ const b = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.17, 0.12), M.steel); const a = i / 10 * Math.PI * 2; b.position.set(Math.sin(a) * 0.09, Math.cos(a) * 0.09, 0); b.rotation.z = -a + 0.4; impeller.add(b); }
+
 // Sol et ombre de contact
 const floorY = -2.15;
 const grid = new THREE.GridHelper(24, 48, 0x2a3440, 0x1a2029); grid.position.y = floorY; scene.add(grid);
@@ -1196,7 +1236,18 @@ function pose(theta){
 // Voiture, boîte DKG et moteur
 // ------------------------------------------------------------------
 const CAR = { m: 1655, r: 0.334, fd: 3.15, eta: 0.9, cdA: 0.31 * 2.2, crr: 0.013,
-  ratios: [0, 4.780, 3.056, 2.153, 1.678, 1.390, 1.203, 1.000], rev: 4.10, Ie: 0.2, vmax: 250 / 3.6, grip: 11500, idle: 800 };
+  ratios: [0, 4.780, 3.056, 2.153, 1.678, 1.390, 1.203, 1.000], rev: 4.10, Ie: 0.2, vmax: 250 / 3.6, grip: 12500, idle: 800 };
+// Configurations : d'origine, ou compresseur centrifuge (pression qui monte avec le régime)
+const CFGS = {
+  stock: { hp: 420, sc: false, inj: 4.2, boost: 0,
+    hint: "Moteur atmosphérique d'origine : 420 ch à 8 300 tr/min, 400 N·m à 3 900 tr/min, injecteurs d'origine." },
+  ess: { hp: 625, sc: true, inj: 6.3, boost: 0.55,
+    hint: "Compresseur centrifuge entraîné par courroie depuis le vilebrequin. La pression monte avec le carré du régime : environ 0,13 bar à 4 000 tr/min et 0,55 bar à 8 300 tr/min. Le kit comprend des injecteurs plus gros et une cartographie qui enrichit le mélange et retarde l'allumage. Valeurs estimées." },
+};
+st.cfg = CFGS.stock;
+const boostBar = rpm => st.cfg.sc ? st.cfg.boost * Math.pow(Math.min(rpm, 9000) / 8300, 2) : 0;
+const baseTorque = rpm => stockTorque(rpm) * (1 + 0.89 * boostBar(rpm));
+const torqueCurve = rpm => baseTorque(rpm) * st.hp / st.cfg.hp;
 const SEL_NAMES = { P: 'Parking', R: 'Marche arrière', N: 'Point mort', D: 'Drive', S: 'Sport', M: 'Manuel' };
 Object.assign(st, { sel: 'P', gear: 1, v: 0, pedal: 0, brake: false, clutch: 'open', shiftT: 0, shiftUp: false, lastShift: 0,
   accel: 0, simT: 0, t0: null, t0100: null, spin: false, limCut: false, vCut: false, dfco: false, fuelOn: true, forced: false, thrMap: 0 });
@@ -1204,7 +1255,7 @@ const ratioOf = g => (st.sel === 'R' ? CAR.rev : CAR.ratios[g]) * CAR.fd;
 const rpmAt = (g, v) => Math.abs(v) / CAR.r * 60 / (2 * Math.PI) * ratioOf(g);
 const RPM_PER_RAD = 60 / (2 * Math.PI);
 function engineTorque(rpm, thr){
-  const full = stockTorque(rpm) * st.hp / 420;
+  const full = torqueCurve(rpm);
   return thr * full - (1 - thr) * (25 + 0.012 * rpm);   // couple net : pertes par pompage et frein moteur quand on lève le pied
 }
 function stepVehicle(h){
@@ -1373,6 +1424,7 @@ addLabel('Piston', '', 'pistons', v => { const c = cyls[7]; return c.piston.loca
 addLabel('Arbres à cames', '', 'valvetrain', v => v.copy(toWorld('B', 0, DECK + 0.46, -2.35)));
 addLabel('Papillons individuels', '', 'manifolds', v => v.copy(itbs[3].position));
 addLabel("Collecteur d'échappement", '', 'manifolds', v => v.set(-2.25, 0.1, 0.8));
+addLabel('Compresseur', '', 'sc', v => v.set(scC.x, scC.y + 0.62, scC.z + 0.55));
 function updateLabels(){
   const W = viewport.clientWidth, H = viewport.clientHeight;
   const show = $('input[data-layer=labels]').checked;
@@ -1449,10 +1501,9 @@ function drawCurve(){
     for (let r = 800; r <= 11000; r += 100){ const x = X(r), y = Y(fn(r)); r === 800 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
     ctx.stroke(); ctx.setLineDash([]);
   };
-  const k = st.hp / 420;
   plot(r => stockTorque(r) * r / 9549 / 0.7355, YP, COL.dim, [3, 3], 1);
-  plot(r => stockTorque(r) * k * r / 9549 / 0.7355, YP, COL.amber, [], 2);
-  plot(r => stockTorque(r) * k, YT, COL.air, [], 2);
+  plot(r => torqueCurve(r) * r / 9549 / 0.7355, YP, COL.amber, [], 2);
+  plot(r => torqueCurve(r), YT, COL.air, [], 2);
   const x = X(st.rpm);
   ctx.strokeStyle = COL.muted; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, h - pad.b); ctx.stroke();
   ctx.fillStyle = COL.amber; ctx.beginPath(); ctx.arc(x, YP(st.power), 4, 0, Math.PI * 2); ctx.fill();
@@ -1556,7 +1607,9 @@ function startAudio(){
   const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.8; const gn = ctx.createGain(); gn.gain.value = 0.08;
   noise.connect(bp).connect(gn).connect(filt);
   o1.start(); o2.start(); noise.start();
-  audio = { ctx, master, filt, o1, o2, bp, nb };
+  const wh = ctx.createOscillator(); wh.type = 'sine'; const gw = ctx.createGain(); gw.gain.value = 0;
+  wh.connect(gw).connect(ctx.destination); wh.start();
+  audio = { ctx, master, filt, o1, o2, bp, nb, wh, gw };
   return true;
 }
 function updateAudio(){
@@ -1568,6 +1621,8 @@ function updateAudio(){
   audio.filt.frequency.setTargetAtTime(250 + st.throttle * 18 + st.rpm * 0.35, t, 0.05);
   const on = st.rpm > 30 && !st.cut;
   audio.master.gain.setTargetAtTime(on ? 0.05 + 0.12 * st.throttle / 100 : 0, t, st.cut ? 0.005 : 0.08);
+  audio.wh.frequency.setTargetAtTime(400 + st.rpm * 0.75, t, 0.05);   // sifflement du compresseur
+  audio.gw.gain.setTargetAtTime(st.cfg.sc && st.rpm > 1 ? 0.004 + 0.03 * Math.min(1, st.rpm / 8300) * (0.3 + 0.7 * st.throttle / 100) : 0, t, 0.1);
 }
 function audioBang(){
   if (!audio) return;
@@ -1608,6 +1663,25 @@ window.addEventListener('keydown', e => {
 });
 window.addEventListener('keyup', e => { if (e.key === ' ') setBrake(false); });
 bindRange('hp', v => { st.hp = v; $('#hpOut').innerHTML = `${v}<small>ch</small>`; });
+function applyCfg(key){
+  st.cfg = CFGS[key];
+  $('#hp').value = st.cfg.hp; st.hp = st.cfg.hp; $('#hpOut').innerHTML = `${st.cfg.hp}<small>ch</small>`;
+  $('#cfgHint').textContent = st.cfg.hint;
+  updateSpecs();
+  scGroup.visible = st.cfg.sc;
+  if (st.cfg.sc && $('#vmaxSel').value === '250'){ $('#vmaxSel').value = '0'; applyVmax(); }
+}
+function updateSpecs(){
+  let hp = 0, hpR = 0, nm = 0, nmR = 0;
+  for (let r = 1000; r <= SPEC.redline; r += 50){ const t = torqueCurve(r), h = t * r / 9549 / 0.7355; if (h > hp){ hp = h; hpR = r; } if (t > nm){ nm = t; nmR = r; } }
+  $('#specHp').textContent = `${nf.format(Math.round(hp / 5) * 5)} ch`; $('#specHpRpm').textContent = `à ${nf.format(hpR)} tr/min`;
+  $('#specNm').textContent = `${nf.format(Math.round(nm / 5) * 5)} N·m`; $('#specNmRpm').textContent = `à ${nf.format(nmR)} tr/min`;
+}
+$('#hp').addEventListener('change', updateSpecs);
+function applyVmax(){ const v = +$('#vmaxSel').value; CAR.vmax = v ? v / 3.6 : Infinity; }
+$('#cfg').addEventListener('change', e => applyCfg(e.target.value));
+$('#vmaxSel').addEventListener('change', applyVmax);
+applyCfg('stock');
 bindRange('play', v => { st.playback = Math.pow(10, -3 + 3 * v / 100); $('#playOut').textContent = fmtPlay(st.playback); $('#badgePlay').textContent = fmtPlay(st.playback); });
 bindRange('angle', v => { if (st.paused) st.theta = v; });
 $('#limiter').addEventListener('change', e => st.limiter = e.target.checked);
@@ -1662,7 +1736,7 @@ new ResizeObserver(resize).observe(viewport); resize();
 // ------------------------------------------------------------------
 const inWin = (a, s, e) => { const dur = ((e - s) % 720 + 720) % 720; return ((((a - s) % 720) + 720) % 720) < dur; };
 const A_CM2 = Math.PI * 4.6 * 4.6, VD = A_CM2 * 7.52, CR = 12, VC = VD / (CR - 1);
-const INJ_FLOW = 4.2, EOI = 330;
+const EOI = 330;
 const VOL = new Float32Array(720);
 for (let a = 0; a < 720; a++) VOL[a] = VC + A_CM2 * (R + L - pistonS(a * DEG)) * 10;
 const cyc = { p: new Float32Array(720), T: new Float32Array(720), xb: new Float32Array(720), fuelMg: 0, sparkA: 700, sparkDur: 10, soi: 200, eoi: EOI };
@@ -1670,18 +1744,20 @@ const _pm = new Float32Array(720), _g = new Float32Array(720);
 function computeCycle(){
   const rpm = Math.max(st.rpm, 300), rpmN = rpm / 8400;
   const thr = st.broken ? 0 : st.throttle / 100;
-  const boost = st.hp / 420;
-  const pman = Math.min(1.0, 0.22 + 0.78 * thr) * Math.max(1, boost * (0.3 + 0.7 * thr));
+  const extra = st.hp / st.cfg.hp;
+  const bb = boostBar(rpm) * Math.pow(thr, 1.5);
+  const pman = (0.22 + 0.78 * thr) * (1 + bb) * (extra > 1 ? 1 + (extra - 1) * thr : 1);
+  const boost = pman - 1;
   const pexh = 1.03 + 0.28 * rpmN * rpmN * (0.4 + thr);
   const ve = 0.8 + 0.2 * stockTorque(rpm) / 400;
   const airMg = pman * 1e5 / (287 * 318) * VD * ve;
-  const lambda = thr > 0.8 ? 1 - 0.13 * (thr - 0.8) / 0.2 : 1;
+  const lambda = thr > 0.8 ? 1 - (st.cfg.sc ? 0.18 : 0.13) * (thr - 0.8) / 0.2 : 1;
   const fuelOn = st.fuelOn && st.rpm > 1;
   const fuelMg = fuelOn ? airMg / (14.7 * lambda) : 0;
   const cycleMs = 120000 / rpm;
-  const injMs = fuelMg > 0 ? fuelMg / INJ_FLOW + 0.4 : 0;
+  const injMs = fuelMg > 0 ? fuelMg / st.cfg.inj + 0.4 : 0;
   const injDeg = Math.min(injMs, cycleMs * 0.97) * rpm * 6 / 1000;
-  let adv = THREE.MathUtils.clamp(10 + 24 * (rpm - 800) / 6000, 8, 36) - 9 * thr - Math.max(0, boost - 1) * 20;
+  let adv = THREE.MathUtils.clamp(10 + 24 * (rpm - 800) / 6000, 8, 36) - 9 * thr - Math.max(0, boost) * 14 - Math.max(0, extra - 1) * 20;
   adv = THREE.MathUtils.clamp(adv, 3, 40);
   const burn = 40 + 16 * rpmN, d0 = -adv + 6;
   const Vivc = VOL[590];
@@ -2581,6 +2657,10 @@ function updateUI(){
   setHTML('gearSub', st.sel === 'D' || st.sel === 'S' || st.sel === 'M' ? `${SEL_NAMES[st.sel]} · ${st.gear}${st.gear === 1 ? 're' : 'e'}` : SEL_NAMES[st.sel]);
   document.querySelectorAll('[data-sel]').forEach(b => b.classList.toggle('on', b.dataset.sel === st.sel));
   setHTML('hudKmh', `${nf.format(kmh)}<small>km/h</small>`);
+  const hb = $('#hudBoost'); hb.hidden = !st.cfg.sc;
+  if (st.cfg.sc) setHTML('hudBoost', `${cyc.pman >= 1 ? '+' : ''}${nf1.format(cyc.pman - 1)}<small>bar</small>`);
+  setHTML('limitMsg', st.vCut ? `Bridage électronique à ${nf.format(CAR.vmax * 3.6)} km/h : le calculateur coupe l'injection. Changez la vitesse maxi dans « Préparation ».`
+    : st.limCut && ['D', 'S', 'M'].includes(st.sel) && st.clutch === 'locked' ? 'Limiteur de régime : passez le rapport supérieur.' : '');
   setHTML('roKmh', `${nf.format(kmh)}<small>km/h</small>`);
   setHTML('roClutch', st.clutch === 'locked' ? (st.spin ? 'Fermé · antipatinage' : 'Fermé') : st.clutch === 'slip' ? 'Patine' : 'Ouvert');
   setHTML('roAccel', `${nf1.format(st.accel)}<small>g</small>`);
@@ -2611,7 +2691,7 @@ function drawGears(){
     const kl = Math.min(vmax - 8, SPEC.redline / perKmh(g));
     ctx.fillStyle = cur ? COL.amber : COL.muted; ctx.fillText(g, X(kl), Y(SPEC.redline) - 7);
   }
-  ctx.strokeStyle = COL.muted; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(X(250), pad.t); ctx.lineTo(X(250), h - pad.b); ctx.stroke(); ctx.setLineDash([]);
+  if (isFinite(CAR.vmax)){ const xv = X(CAR.vmax * 3.6); ctx.strokeStyle = COL.muted; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(xv, pad.t); ctx.lineTo(xv, h - pad.b); ctx.stroke(); ctx.setLineDash([]); }
   ctx.fillStyle = COL.fg; ctx.beginPath(); ctx.arc(X(Math.min(vmax, Math.abs(st.v) * 3.6)), Y(Math.min(rmax, st.rpm)), 4, 0, Math.PI * 2); ctx.fill();
   ctx.textAlign = 'left'; ctx.fillStyle = COL.muted; ctx.fillText('tr/min · km/h', pad.l + 4, pad.t + 4);
 }
@@ -2624,6 +2704,7 @@ function frame(now){
   let dA = st.theta - th0; if (dA < -360) dA += 720;
   pose(st.theta);
   updateFlow(dA);
+  if (scGroup.visible) impeller.rotation.z -= dA * DEG * 3;
   lpUpdate(dt);
   updateDebris(dt);
   updateSystem(sparks, dt, 0.6); updateSystem(smoke, dt, 0.4);
