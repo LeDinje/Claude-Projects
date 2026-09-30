@@ -1,0 +1,1328 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Anatomie du V8 S65</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: plein écran 3D + pupitre d'instruments à droite, puis chronogramme et article sur une colonne */
+:root{
+  --bg:#0e1115; --bg-2:#141920; --panel:#171c23; --line:#28303a; --line-2:#343e4a;
+  --fg:#e6e9ed; --muted:#8c96a3; --dim:#5d6773;
+  --amber:#f5a524; --air:#5cb4e8; --comp:#a58cf0; --exh:#9aa1a9; --red:#ef4444; --ok:#4fd18b;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{margin:0;font:15px/1.55 var(--f-body);padding-inline:16px;padding-block:0 48px}
+a{color:var(--air)}
+.wrap{max-width:1440px;margin-inline:auto}
+
+/* En-tête */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 32px;padding-block:22px 16px}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:700 clamp(34px,5vw,56px)/.95 var(--f-display);letter-spacing:.01em;margin:8px 0 0;text-transform:uppercase;text-wrap:balance}
+h1 em{font-style:normal;color:var(--amber)}
+.specs{display:flex;flex-wrap:wrap;gap:6px 20px;font:500 13px/1.3 var(--f-mono);color:var(--muted)}
+.specs b{display:block;font:600 22px/1.1 var(--f-display);color:var(--fg);letter-spacing:.02em}
+
+/* Scène */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px}
+.viewport{position:relative;min-height:560px;height:min(78vh,780px);border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 35%,#1d242d 0%,#12161c 55%,#0b0d10 100%)}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font:500 11px/1 var(--f-mono);color:var(--fg);white-space:nowrap;
+  padding:3px 6px;border-radius:4px;background:rgba(14,17,21,.72);border:1px solid var(--line-2)}
+.lbl.cyl{font:700 13px/1 var(--f-display);padding:3px 7px;letter-spacing:.04em}
+.lbl.cyl.fire{background:var(--amber);color:#1a1206;border-color:var(--amber)}
+.lbl.cyl.dead{background:var(--red);color:#fff;border-color:var(--red)}
+#tach{position:absolute;left:12px;top:12px;width:176px;height:176px;pointer-events:none}
+.hud{position:absolute;left:198px;top:18px;display:grid;gap:2px;pointer-events:none}
+.hud .big{font:600 44px/1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.hud .unit{font:500 11px/1 var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.hud .row{display:flex;gap:16px;margin-top:6px;font:600 22px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.hud .row small{font:500 11px var(--f-mono);color:var(--muted);margin-left:3px}
+.viewbar{position:absolute;right:10px;bottom:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.playbadge{position:absolute;right:12px;top:12px;font:500 12px/1 var(--f-mono);color:var(--muted);background:rgba(14,17,21,.72);
+  border:1px solid var(--line-2);border-radius:4px;padding:6px 8px;pointer-events:none}
+.playbadge b{color:var(--fg);font-weight:500}
+#flash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 55%,rgba(255,120,40,.55),rgba(239,68,68,.25) 40%,transparent 75%);opacity:0}
+#flash.on{animation:flash 1.2s ease-out}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+.alert{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100% - 32px));background:rgba(20,12,12,.94);
+  border:1px solid var(--red);border-radius:10px;padding:16px 18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.alert h3{margin:0 0 6px;font:700 26px/1 var(--f-display);text-transform:uppercase;color:#ff8a80;letter-spacing:.02em}
+.alert p{margin:0 0 10px;color:#e8d9d9;font-size:14px}
+.alert dl{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;margin:0 0 12px;font:13px var(--f-mono)}
+.alert dt{color:#b89a9a}.alert dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.alert .btns{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Boutons */
+.btn{appearance:none;border:1px solid var(--line-2);background:var(--bg-2);color:var(--fg);font:500 13px/1 var(--f-body);padding:8px 11px;border-radius:6px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--air);outline-offset:2px}
+.btn.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn.danger{background:#3a1414;border-color:#7f2626;color:#ffb4ae}
+.btn.danger:hover{background:#4b1818;border-color:var(--red)}
+.btn.solid{background:var(--amber);color:#1b1305;border-color:var(--amber);font-weight:600}
+.viewbar .btn{background:rgba(20,25,32,.85);padding:7px 10px;font-size:12px}
+
+/* Pupitre */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 16px 16px;overflow:auto;max-height:min(78vh,780px);min-height:560px}
+.grp{padding-block:14px;border-bottom:1px solid var(--line);display:grid;gap:12px}
+.grp:last-child{border-bottom:0}
+.grp h2{margin:0;font:600 13px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ctl{display:grid;gap:6px}
+.ctl .head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ctl label{font-weight:500;font-size:14px}
+.ctl output{font:600 20px/1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.ctl output small{font:500 11px var(--f-mono);color:var(--muted);margin-left:3px}
+.ctl .hint{font-size:12px;color:var(--muted);line-height:1.4}
+input[type=range]{width:100%;accent-color:var(--amber);margin:0}
+input[type=range]:disabled{opacity:.35}
+.switch{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer}
+.switch input{width:18px;height:18px;accent-color:var(--amber);margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:999px;padding:5px 10px 5px 8px;font-size:13px;cursor:pointer;user-select:none}
+.chip input{margin:0;accent-color:var(--amber)}
+.chip:has(input:checked){border-color:var(--muted);background:var(--bg-2)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.seg .btn{padding:8px 4px}
+.row2{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select{background:var(--bg-2);color:var(--fg);border:1px solid var(--line-2);border-radius:6px;font:500 13px var(--f-body);padding:7px 8px}
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.ro{min-width:0}
+.ro .k{font-size:11.5px;color:var(--muted);line-height:1.25}
+.ro .v{font:600 21px/1.1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.ro .v small{font:500 11px var(--f-mono);color:var(--muted);margin-left:3px}
+.meter{display:grid;gap:5px}
+.meter .bar{height:8px;border-radius:4px;background:var(--bg-2);border:1px solid var(--line);overflow:hidden;position:relative}
+.meter .bar i{position:absolute;inset:0 auto 0 0;width:0;background:var(--ok);border-radius:3px}
+.meter .bar .tick{position:absolute;top:-1px;bottom:-1px;width:1px;background:var(--muted)}
+.meter .head{display:flex;justify-content:space-between;font-size:12.5px}
+.meter .head b{font:600 15px var(--f-display);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:999px;background:#18301f;color:var(--ok)}
+.pill.warn{background:#3a2a0d;color:var(--amber)}
+.pill.crit{background:#3d1414;color:#ff8a80}
+#curve{width:100%;height:150px;display:block}
+
+/* Chronogramme */
+.block{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.block-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 20px;margin-bottom:8px}
+.block-head h2{margin:0;font:600 22px/1.1 var(--f-display);text-transform:uppercase;letter-spacing:.03em}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+.canvas-scroll{overflow-x:auto}
+#chrono{width:100%;min-width:560px;height:250px;display:block}
+
+/* Article */
+article{max-width:760px;margin:40px auto 0}
+article h2{font:700 34px/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em;margin:48px 0 14px;text-wrap:balance}
+article h2 .num{color:var(--amber);margin-right:10px}
+article p{margin:0 0 14px;color:#cdd3da;max-width:65ch}
+article strong{color:var(--fg)}
+.formula{font:500 15px/1.6 var(--f-mono);background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0 0 14px;overflow-x:auto;color:var(--fg)}
+.figure{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:6px 0 18px}
+.figure figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
+#kin{width:100%;height:230px;display:block}
+.tbl-wrap{overflow-x:auto;margin:0 0 14px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+th{font:500 12px var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.note{font-size:13px;color:var(--muted)}
+
+@media (max-width: 980px){
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .viewport{height:62vh;min-height:420px}
+  .panel{max-height:none;min-height:0}
+}
+@media (max-width: 560px){
+  #tach{width:120px;height:120px;left:8px;top:8px}
+  .hud{left:136px;top:12px}
+  .hud .big{font-size:32px}
+  .hud .row{font-size:17px;gap:10px}
+  .playbadge{display:none}
+}
+@media (prefers-reduced-motion: reduce){ #flash.on{animation:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <div class="eyebrow">V8 atmosphérique · 90° · vilebrequin croisé · 8 papillons</div>
+    <h1>Anatomie du V8 <em>S65</em></h1>
+  </div>
+  <div class="specs" aria-label="Fiche technique">
+    <div><b>3 999 cm³</b>cylindrée</div>
+    <div><b>92 × 75,2</b>alésage × course (mm)</div>
+    <div><b>420 ch</b>à 8 300 tr/min</div>
+    <div><b>400 N·m</b>à 3 900 tr/min</div>
+    <div><b>8 400</b>zone rouge</div>
+  </div>
+</header>
+
+<section class="stage">
+  <div class="viewport" id="viewport">
+    <canvas id="gl" aria-label="Vue 3D du moteur : faites glisser pour tourner, molette pour zoomer"></canvas>
+    <div id="labels"></div>
+    <canvas id="tach" width="352" height="352" aria-hidden="true"></canvas>
+    <div class="hud" aria-live="off">
+      <div class="unit">Régime moteur</div>
+      <div class="big" id="hudRpm">0</div>
+      <div class="row"><span id="hudHp">0<small>ch</small></span><span id="hudNm">0<small>N·m</small></span></div>
+    </div>
+    <div class="playbadge">Lecture <b id="badgePlay">×1/50</b> · vilebrequin <b id="badgeAngle">0°</b></div>
+    <div class="viewbar">
+      <button class="btn" data-view="iso">3/4</button>
+      <button class="btn" data-view="front">Face</button>
+      <button class="btn" data-view="side">Côté</button>
+      <button class="btn" data-view="top">Dessus</button>
+      <button class="btn" id="pauseBtn">Pause</button>
+      <button class="btn" id="soundBtn">Son : coupé</button>
+    </div>
+    <div id="flash"></div>
+    <div class="alert" id="alert" hidden role="alertdialog" aria-labelledby="alertTitle">
+      <h3 id="alertTitle">Bielle rompue</h3>
+      <p id="alertText"></p>
+      <dl id="alertData"></dl>
+      <div class="btns">
+        <button class="btn solid" id="alertReset">Monter un moteur neuf</button>
+        <button class="btn" id="alertClose">Regarder les dégâts</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="panel" aria-label="Commandes du moteur">
+    <div class="grp">
+      <h2>Régime & charge</h2>
+      <div class="ctl">
+        <div class="head"><label for="rpm">Régime demandé</label><output id="rpmOut">3 000<small>tr/min</small></output></div>
+        <input type="range" id="rpm" min="800" max="11000" step="50" value="3000">
+      </div>
+      <div class="ctl">
+        <div class="head"><label for="thr">Ouverture des papillons</label><output id="thrOut">60<small>%</small></output></div>
+        <input type="range" id="thr" min="0" max="100" step="1" value="60">
+      </div>
+      <label class="switch"><input type="checkbox" id="limiter" checked> Limiteur à 8 400 tr/min</label>
+    </div>
+
+    <div class="grp">
+      <h2>Préparation</h2>
+      <div class="ctl">
+        <div class="head"><label for="hp">Puissance maxi visée</label><output id="hpOut">420<small>ch</small></output></div>
+        <input type="range" id="hp" min="250" max="800" step="10" value="420">
+        <div class="hint">Plus de puissance à régime égal veut dire plus de pression dans le cylindre, donc plus de compression sur chaque bielle.</div>
+      </div>
+      <canvas id="curve" aria-label="Courbes de couple et de puissance"></canvas>
+    </div>
+
+    <div class="grp">
+      <h2>Lecture</h2>
+      <div class="ctl">
+        <div class="head"><label for="play">Ralenti de l'animation</label><output id="playOut">×1/50</output></div>
+        <input type="range" id="play" min="0" max="100" step="any" value="43.37">
+        <div class="hint">À 8 000 tr/min, le vilebrequin fait 133 tours par seconde : l'animation est ralentie pour qu'on puisse suivre les pistons. Les chiffres restent ceux du régime réel.</div>
+      </div>
+      <div class="ctl">
+        <div class="head"><label for="angle">Angle du vilebrequin (en pause)</label><output id="angleOut">0<small>°</small></output></div>
+        <input type="range" id="angle" min="0" max="719" step="1" value="0" disabled>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Affichage</h2>
+      <div class="seg" role="group" aria-label="Préréglages d'affichage">
+        <button class="btn" data-preset="full">Complet</button>
+        <button class="btn on" data-preset="xray">Écorché</button>
+        <button class="btn" data-preset="skeleton">Squelette</button>
+      </div>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" data-layer="block" checked>Bloc</label>
+        <label class="chip"><input type="checkbox" data-layer="heads" checked>Culasses</label>
+        <label class="chip"><input type="checkbox" data-layer="valvetrain" checked>Distribution</label>
+        <label class="chip"><input type="checkbox" data-layer="manifolds" checked>Admission / échappement</label>
+        <label class="chip"><input type="checkbox" data-layer="liners" checked>Chemises</label>
+        <label class="chip"><input type="checkbox" data-layer="gas" checked>Gaz</label>
+        <label class="chip"><input type="checkbox" data-layer="pistons" checked>Pistons</label>
+        <label class="chip"><input type="checkbox" data-layer="rods" checked>Bielles</label>
+        <label class="chip"><input type="checkbox" data-layer="crank" checked>Vilebrequin</label>
+        <label class="chip"><input type="checkbox" data-layer="labels" checked>Étiquettes</label>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Sollicitation des bielles</h2>
+      <div class="meter">
+        <div class="head"><span>Charge / limite <span class="pill" id="stressPill">OK</span></span><b id="stressVal">0 %</b></div>
+        <div class="bar"><i id="stressBar"></i><span class="tick" style="left:85%"></span></div>
+      </div>
+      <div class="meter">
+        <div class="head"><span>Fatigue accumulée</span><b id="fatVal">0 %</b></div>
+        <div class="bar"><i id="fatBar"></i></div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k">Traction au PMH échappement</div><div class="v" id="roTens">0<small>kN</small></div></div>
+        <div class="ro"><div class="k">Compression à la combustion</div><div class="v" id="roComp">0<small>kN</small></div></div>
+        <div class="ro"><div class="k">Pression max cylindre</div><div class="v" id="roPmax">0<small>bar</small></div></div>
+        <div class="ro"><div class="k">Accélération piston au PMH</div><div class="v" id="roAcc">0<small>g</small></div></div>
+        <div class="ro"><div class="k">Vitesse moyenne piston</div><div class="v" id="roVp">0<small>m/s</small></div></div>
+        <div class="ro"><div class="k">Cylindre en combustion</div><div class="v" id="roFire">–</div></div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Casse</h2>
+      <div class="row2">
+        <label for="breakCyl" class="hint" style="font-size:13px">Bielle</label>
+        <select id="breakCyl">
+          <option value="rand">au hasard</option>
+          <option value="1">n° 1</option><option value="2">n° 2</option><option value="3">n° 3</option><option value="4">n° 4</option>
+          <option value="5">n° 5</option><option value="6">n° 6</option><option value="7">n° 7</option><option value="8">n° 8</option>
+        </select>
+        <button class="btn danger" id="breakBtn">Casser la bielle</button>
+      </div>
+      <button class="btn" id="resetBtn">Monter un moteur neuf</button>
+      <div class="hint">La bielle peut aussi céder seule : coupez le limiteur et montez au-delà de 10 000 tr/min, ou poussez la puissance vers 650 ch et plus.</div>
+    </div>
+  </aside>
+</section>
+
+<section class="block" aria-labelledby="chronoTitle">
+  <div class="block-head">
+    <h2 id="chronoTitle">Chronogramme · ordre d'allumage 1‑5‑4‑8‑6‑3‑7‑2</h2>
+    <div class="legend">
+      <span style="--c:var(--air)">Admission</span>
+      <span style="--c:var(--comp)">Compression</span>
+      <span style="--c:var(--amber)">Combustion / détente</span>
+      <span style="--c:var(--exh)">Échappement</span>
+    </div>
+  </div>
+  <div class="canvas-scroll"><canvas id="chrono" aria-label="Cycle à quatre temps des huit cylindres sur 720 degrés"></canvas></div>
+</section>
+
+<article>
+  <h2><span class="num">1</span>Ce que vous regardez</h2>
+  <p>Le S65 est un V8 à 90° de 4 litres, conçu pour tourner haut : 420 ch à 8 300 tr/min sans turbo. Les cylindres 1 à 4 forment un banc, les cylindres 5 à 8 l'autre. Chaque paire de bielles face à face partage le même maneton du vilebrequin, ce qui explique le léger décalage des deux bancs le long de l'axe.</p>
+  <p>Le vilebrequin est <strong>croisé</strong> : ses quatre manetons sont décalés de 90° les uns des autres. Il y a une combustion tous les 90° de rotation, dans l'ordre <strong>1‑5‑4‑8‑6‑3‑7‑2</strong>. Dans la vue 3D, la couleur du gaz dans chaque cylindre indique le temps en cours, et l'étiquette du cylindre qui brûle passe en orange.</p>
+  <p>Chaque cylindre a quatre soupapes commandées par deux arbres à cames (admission côté intérieur du V, échappement côté extérieur). Les arbres tournent deux fois moins vite que le vilebrequin, puisqu'un cycle complet dure deux tours.</p>
+
+  <h2><span class="num">2</span>Le système bielle‑manivelle</h2>
+  <p>Le piston ne descend pas à vitesse constante. Sa position dépend du rayon de manivelle <em>r</em> (la moitié de la course, 37,6 mm) et de la longueur de bielle <em>l</em> :</p>
+  <div class="formula">x(θ) = r·cos θ + √(l² − r²·sin² θ)<br>a(θ) ≈ r·ω²·(cos θ + λ·cos 2θ)    avec λ = r / l ≈ 0,27</div>
+  <p>Le terme en <em>cos 2θ</em> rend l'accélération plus forte au point mort haut qu'au point mort bas. La courbe ci‑dessous suit le cylindre 1 au régime actuel de la simulation.</p>
+  <figure class="figure" style="margin-inline:0">
+    <canvas id="kin" aria-label="Position, vitesse et accélération du piston 1"></canvas>
+    <figcaption id="kinCap">Position, vitesse et accélération du piston n° 1 sur un tour.</figcaption>
+  </figure>
+
+  <h2><span class="num">3</span>Pourquoi une bielle casse</h2>
+  <p><strong>En traction, au point mort haut d'échappement.</strong> À la fin de l'échappement, le piston arrive en haut sans pression de gaz pour le freiner. Toute la masse en mouvement alternatif tire sur la bielle :</p>
+  <div class="formula">F = m · r · ω² · (1 + λ)</div>
+  <p>La force croît avec le carré du régime : 10 % de tours en plus, c'est 21 % d'effort en plus. Au régime maxi du S65, chaque bielle encaisse environ 25 kN, soit le poids de deux voitures et demie, à chaque cycle, 70 fois par seconde.</p>
+  <p><strong>En compression, à la combustion.</strong> Quelques degrés après le point mort haut, la pression des gaz dépasse 90 bar sur un piston de 66 cm² : environ 60 kN. Une préparation qui augmente fortement le couple augmente cette pression, et la bielle finit par flamber.</p>
+  <p><strong>La fatigue et les coussinets.</strong> Une bielle casse rarement au premier coup de trop. Les pics de charge répétés font progresser des micro‑fissures. Sur le S65, les coussinets de bielle sont réputés comme le point faible : un coussinet usé laisse du jeu, la tête de bielle est martelée à chaque point mort haut, puis grippe ou se rompt. Libérée, la bielle est projetée par le vilebrequin contre le carter et le perce.</p>
+
+  <h2><span class="num">4</span>Hypothèses du modèle</h2>
+  <p>Les cotes principales sont celles du moteur. Les masses, les pressions et les limites de rupture sont des estimations choisies pour que les ordres de grandeur soient réalistes. Ce n'est pas un calcul de dimensionnement.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Grandeur</th><th>Valeur</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>Alésage × course</td><td class="n">92 × 75,2 mm</td><td>Constructeur</td></tr>
+      <tr><td>Entraxe de bielle</td><td class="n">140 mm</td><td>Estimation</td></tr>
+      <tr><td>Masse alternative (piston + ⅓ bielle)</td><td class="n">0,69 kg</td><td>Estimation</td></tr>
+      <tr><td>Pression max à 400 N·m</td><td class="n">≈ 100 bar</td><td>Ordre de grandeur, moteur atmosphérique</td></tr>
+      <tr><td>Limite en traction de la bielle</td><td class="n">40 kN</td><td>Choix du modèle</td></tr>
+      <tr><td>Limite en compression de la bielle</td><td class="n">95 kN</td><td>Choix du modèle</td></tr>
+      <tr><td>Début de la fatigue</td><td class="n">85 % de la limite</td><td>Choix du modèle</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Rotation, angles de distribution et ordre d'allumage sont cohérents entre eux : chaque piston est au point mort haut exactement quand son cylindre s'allume dans le chronogramme.</p>
+</article>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const DEG = Math.PI / 180;
+const css = getComputedStyle(document.documentElement);
+const C = k => css.getPropertyValue(k).trim();
+const COL = { amber:C('--amber'), air:C('--air'), comp:C('--comp'), exh:C('--exh'), red:C('--red'), ok:C('--ok'),
+  fg:C('--fg'), muted:C('--muted'), dim:C('--dim'), line:C('--line'), line2:C('--line-2'), bg2:C('--bg-2') };
+const nf = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
+const nf1 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+// ------------------------------------------------------------------
+// Données moteur (1 unité 3D = 100 mm)
+// ------------------------------------------------------------------
+const SPEC = { bore: 92, stroke: 75.2, rod: 140, ptc: 30, pitch: 98, redline: 8400 };
+const MM = 0.01;
+const R = SPEC.stroke / 2 * MM, L = SPEC.rod * MM, PTC = SPEC.ptc * MM;
+const LAMBDA = R / L;
+const DECK = R + L + PTC + 0.03;
+const BORE_R = SPEC.bore / 2 * MM;
+const PITCH = SPEC.pitch * MM;
+const BANK_OFF = 0.115;
+const Rm = SPEC.stroke / 2000;                        // rayon de manivelle en m
+const M_REC = 0.48 + 0.62 / 3;                        // masse alternative (kg)
+const AREA = Math.PI * Math.pow(SPEC.bore / 2000, 2); // m²
+const LIM_TENS = 40e3, LIM_COMP = 95e3;
+const BANKS = { A: { beta: -45 * DEG, side: 1 }, B: { beta: 45 * DEG, side: -1 } };
+const FIRE_ORDER = [1, 5, 4, 8, 6, 3, 7, 2];
+const FIRE = {}; FIRE_ORDER.forEach((c, i) => FIRE[c] = i * 90);
+// Angle de chaque maneton : le cylindre du banc A est au PMH quand θ = FIRE (mod 360)
+const THROW = [0, 1, 2, 3].map(j => BANKS.A.beta - (FIRE[j + 1] % 360) * DEG);
+// Distribution (degrés du cycle, 0 = PMH combustion)
+const IN_OPEN = 340, IN_CLOSE = 590, EX_OPEN = 130, EX_CLOSE = 380;
+
+const TQ = [[0,170],[800,250],[1500,292],[2500,342],[3900,400],[5000,393],[6000,386],[7000,378],[8300,356],[8400,350],[9000,330],[10000,286],[11000,236],[12000,190]];
+function stockTorque(rpm){
+  for (let i = 1; i < TQ.length; i++) if (rpm <= TQ[i][0]) {
+    const [x0,y0] = TQ[i-1], [x1,y1] = TQ[i]; return y0 + (y1 - y0) * (rpm - x0) / (x1 - x0);
+  }
+  return TQ[TQ.length-1][1];
+}
+const pistonS = g => { const s = Math.sin(g); return R * Math.cos(g) + Math.sqrt(L * L - R * R * s * s); };
+const cycleOf = (theta, c) => (((theta - FIRE[c]) % 720) + 720) % 720;
+function lift(a, open, close){
+  const dur = ((close - open) % 720 + 720) % 720;
+  const x = ((a - open) % 720 + 720) % 720;
+  return x > dur ? 0 : Math.pow(Math.sin(Math.PI * x / dur), 1.4);
+}
+
+// ------------------------------------------------------------------
+// État
+// ------------------------------------------------------------------
+const st = {
+  targetRpm: 3000, rpm: 900, throttle: 60, hp: 420, limiter: true,
+  playback: 1/50, paused: false, theta: 0,
+  torque: 0, power: 0, fin: 0, fcomp: 0, pmax: 0, idx: 0, damage: 0, cut: false,
+  broken: null, breakInfo: null, shake: 0,
+};
+
+// ------------------------------------------------------------------
+// Rendu
+// ------------------------------------------------------------------
+const viewport = $('#viewport');
+const canvas = $('#gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setClearColor(0x000000, 0);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 200);
+camera.position.set(7.2, 4.6, 8.2);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.target.set(0, 0.9, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 3;
+controls.maxDistance = 30;
+
+// Environnement studio pour les reflets métalliques
+(function makeEnv(){
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const env = new THREE.Scene();
+  const g = new THREE.SphereGeometry(20, 32, 16);
+  const cols = [], p = g.attributes.position;
+  for (let i = 0; i < p.count; i++){
+    const t = (p.getY(i) / 20 + 1) / 2;
+    const c = new THREE.Color(0.03, 0.035, 0.045).lerp(new THREE.Color(0.42, 0.46, 0.52), Math.pow(t, 1.6));
+    cols.push(c.r, c.g, c.b);
+  }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+  env.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
+  const soft = (w, h, pos, col) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide }));
+    m.position.set(...pos); m.lookAt(0, 0, 0); env.add(m);
+  };
+  soft(14, 5, [0, 15, 4], new THREE.Color(3.2, 3.2, 3.3));
+  soft(6, 10, [-15, 4, 6], new THREE.Color(1.4, 1.5, 1.8));
+  soft(6, 10, [15, 3, -4], new THREE.Color(2.0, 1.7, 1.3));
+  scene.environment = pmrem.fromScene(env, 0.04).texture;
+})();
+
+scene.add(new THREE.HemisphereLight(0xbfd4ee, 0x1a1410, 0.35));
+const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(5, 9, 6); scene.add(key);
+const rim = new THREE.DirectionalLight(0x9cc4ff, 0.6); rim.position.set(-6, 3, -7); scene.add(rim);
+const fireLights = [new THREE.PointLight(0xff8a2a, 0, 3.2, 2), new THREE.PointLight(0xff8a2a, 0, 3.2, 2)];
+fireLights.forEach(l => scene.add(l));
+
+// Matériaux
+const M = {
+  steel:  new THREE.MeshStandardMaterial({ color: 0xb9c1ca, metalness: 0.95, roughness: 0.26 }),
+  forged: new THREE.MeshStandardMaterial({ color: 0x8f99a5, metalness: 0.92, roughness: 0.36 }),
+  bolt:   new THREE.MeshStandardMaterial({ color: 0x3c4148, metalness: 0.9, roughness: 0.4 }),
+  alu:    new THREE.MeshStandardMaterial({ color: 0xdadee3, metalness: 0.78, roughness: 0.3 }),
+  crown:  new THREE.MeshStandardMaterial({ color: 0x5b524a, metalness: 0.5, roughness: 0.55 }),
+  ringM:  new THREE.MeshStandardMaterial({ color: 0x2a2d31, metalness: 0.8, roughness: 0.4 }),
+  cam:    new THREE.MeshStandardMaterial({ color: 0xa8b0ba, metalness: 0.95, roughness: 0.22 }),
+  valve:  new THREE.MeshStandardMaterial({ color: 0xc9ced5, metalness: 0.9, roughness: 0.3 }),
+  plug:   new THREE.MeshStandardMaterial({ color: 0xf1ede6, metalness: 0.0, roughness: 0.5 }),
+  block:  new THREE.MeshStandardMaterial({ color: 0x9aa7b5, metalness: 0.35, roughness: 0.45, transparent: true, opacity: 0.1, depthWrite: false, side: THREE.DoubleSide }),
+  head:   new THREE.MeshStandardMaterial({ color: 0x8e99a6, metalness: 0.5, roughness: 0.4, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide }),
+  cover:  new THREE.MeshStandardMaterial({ color: 0x2b2f35, metalness: 0.3, roughness: 0.55, transparent: true, opacity: 0.14, depthWrite: false, side: THREE.DoubleSide }),
+  edge:   new THREE.LineBasicMaterial({ color: 0x8aa0b8, transparent: true, opacity: 0.45 }),
+  liner:  new THREE.MeshStandardMaterial({ color: 0xa6c8ea, metalness: 0.2, roughness: 0.1, transparent: true, opacity: 0.09, depthWrite: false, side: THREE.DoubleSide }),
+  header: new THREE.MeshStandardMaterial({ color: 0x9b8774, metalness: 0.85, roughness: 0.33, emissive: 0xff4d12, emissiveIntensity: 0 }),
+  runner: new THREE.MeshStandardMaterial({ color: 0x24282d, metalness: 0.3, roughness: 0.45 }),
+  itb:    new THREE.MeshStandardMaterial({ color: 0x8b939d, metalness: 0.85, roughness: 0.3 }),
+  plenum: new THREE.MeshStandardMaterial({ color: 0x2f343a, metalness: 0.2, roughness: 0.6, transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide }),
+  debris: new THREE.MeshStandardMaterial({ color: 0x9aa3ad, metalness: 0.9, roughness: 0.35 }),
+};
+
+const engine = new THREE.Group(); scene.add(engine);
+const layers = {};
+const layer = name => { if (!layers[name]) { layers[name] = new THREE.Group(); engine.add(layers[name]); } return layers[name]; };
+['block','heads','valvetrain','manifolds','liners','gas','pistons','rods','crank'].forEach(layer);
+
+const zAxis = g => { g.rotateX(Math.PI / 2); return g; };
+function withEdges(mesh, mat = M.edge){
+  const e = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry, 25), mat);
+  mesh.add(e); return mesh;
+}
+function bankFrame(bankKey, parent){
+  const f = new THREE.Group(); f.rotation.z = -BANKS[bankKey].beta; parent.add(f); return f;
+}
+function toWorld(bankKey, x, y, z){
+  const b = BANKS[bankKey].beta;
+  const c = Math.cos(-b), s = Math.sin(-b);
+  return new THREE.Vector3(x * c - y * s, x * s + y * c, z);
+}
+
+// ---------------- Cylindres ----------------
+const cyls = [];
+for (let c = 1; c <= 8; c++){
+  const bankKey = c <= 4 ? 'A' : 'B', j = (c - 1) % 4;
+  cyls.push({ n: c, bankKey, bank: BANKS[bankKey], j, beta: BANKS[bankKey].beta,
+    z: (1.5 - j) * PITCH + (bankKey === 'A' ? -BANK_OFF : BANK_OFF) });
+}
+
+// ---------------- Vilebrequin ----------------
+const crank = new THREE.Group(); layer('crank').add(crank);
+const webShape = (() => {
+  const s = new THREE.Shape();
+  s.moveTo(0.33, R);
+  s.absarc(0, R, 0.33, 0, Math.PI, false);
+  s.lineTo(-0.72 * Math.cos(30 * DEG), -0.72 * Math.sin(30 * DEG));
+  s.absarc(0, 0, 0.8, Math.PI + 30 * DEG, 2 * Math.PI - 30 * DEG, false);
+  s.lineTo(0.33, R);
+  return s;
+})();
+const webGeo = new THREE.ExtrudeGeometry(webShape, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 2, curveSegments: 24 });
+webGeo.translate(0, 0, -0.06);
+for (let k = 0; k < 5; k++){
+  const m = new THREE.Mesh(zAxis(new THREE.CylinderGeometry(0.3, 0.3, 0.24, 32)), M.steel);
+  m.position.z = (2 - k) * PITCH; crank.add(m);
+}
+THROW.forEach((a, j) => {
+  const pz = (1.5 - j) * PITCH;
+  const pin = new THREE.Mesh(zAxis(new THREE.CylinderGeometry(0.24, 0.24, 0.52, 32)), M.steel);
+  pin.position.set(R * Math.sin(a), R * Math.cos(a), pz); crank.add(pin);
+  [-0.315, 0.315].forEach(dz => {
+    const w = new THREE.Mesh(webGeo, M.forged); w.rotation.z = -a; w.position.z = pz + dz; crank.add(w);
+  });
+});
+const nose = new THREE.Mesh(zAxis(new THREE.CylinderGeometry(0.2, 0.2, 0.7, 24)), M.steel); nose.position.z = 2 * PITCH + 0.45; crank.add(nose);
+const damper = new THREE.Mesh(zAxis(new THREE.CylinderGeometry(0.72, 0.72, 0.22, 48)), M.bolt); damper.position.z = 2 * PITCH + 0.62; crank.add(damper);
+const tail = new THREE.Mesh(zAxis(new THREE.CylinderGeometry(0.28, 0.28, 0.4, 24)), M.steel); tail.position.z = -2 * PITCH - 0.3; crank.add(tail);
+const flywheel = new THREE.Mesh(zAxis(new THREE.CylinderGeometry(1.3, 1.3, 0.14, 64)), M.forged); flywheel.position.z = -2 * PITCH - 0.52; crank.add(flywheel);
+const ringGear = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.05, 8, 96), M.steel); ringGear.position.z = flywheel.position.z; crank.add(ringGear);
+for (let i = 0; i < 6; i++){ // trous d'allègement : rendent la rotation lisible
+  const a = i * Math.PI / 3;
+  const h = new THREE.Mesh(zAxis(new THREE.CylinderGeometry(0.16, 0.16, 0.16, 20)), M.bolt);
+  h.position.set(Math.sin(a) * 0.82, Math.cos(a) * 0.82, flywheel.position.z); crank.add(h);
+}
+const mark = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.3, 0.05), new THREE.MeshBasicMaterial({ color: 0xf5a524 }));
+mark.position.set(0, 0.55, damper.position.z + 0.12); crank.add(mark);
+
+// ---------------- Bielles ----------------
+const rodShape = (() => {
+  const s = new THREE.Shape();
+  s.moveTo(-0.15, 0.28); s.lineTo(0.15, 0.28); s.lineTo(0.085, L - 0.14); s.lineTo(-0.085, L - 0.14); s.lineTo(-0.15, 0.28);
+  return s;
+})();
+const shankGeo = new THREE.ExtrudeGeometry(rodShape, { depth: 0.11, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.012, bevelSegments: 1 });
+shankGeo.translate(0, 0, -0.055);
+const bigUpGeo = zAxis(new THREE.CylinderGeometry(0.36, 0.36, 0.2, 32, 1, false, Math.PI / 2, Math.PI));
+const capGeo = zAxis(new THREE.CylinderGeometry(0.36, 0.36, 0.2, 32, 1, false, -Math.PI / 2, Math.PI));
+const smallGeo = zAxis(new THREE.CylinderGeometry(0.16, 0.16, 0.16, 24));
+const boltGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.46, 10);
+cyls.forEach(cy => {
+  const rod = new THREE.Group();
+  rod.add(new THREE.Mesh(bigUpGeo, M.forged));
+  rod.add(new THREE.Mesh(shankGeo, M.forged));
+  const sm = new THREE.Mesh(smallGeo, M.forged); sm.position.y = L; rod.add(sm);
+  const cap = new THREE.Group();
+  cap.add(new THREE.Mesh(capGeo, M.forged));
+  [-0.27, 0.27].forEach(x => { const b = new THREE.Mesh(boltGeo, M.bolt); b.position.set(x, 0.02, 0); cap.add(b); });
+  rod.add(cap);
+  rod.position.z = cy.z;
+  layer('rods').add(rod);
+  cy.rod = rod; cy.cap = cap;
+});
+
+// ---------------- Pistons, chemises, gaz, bloc, culasses ----------------
+const pistonBody = new THREE.CylinderGeometry(BORE_R - 0.012, BORE_R - 0.012, 0.44, 40); pistonBody.translate(0, 0.07, 0);
+const crownGeo = new THREE.CylinderGeometry(BORE_R - 0.02, BORE_R - 0.012, 0.035, 40); crownGeo.translate(0, PTC - 0.0, 0);
+const ringGeo = new THREE.TorusGeometry(BORE_R - 0.008, 0.009, 6, 48); ringGeo.rotateX(Math.PI / 2);
+const wristGeo = zAxis(new THREE.CylinderGeometry(0.1, 0.1, 0.8, 20));
+const linerGeo = new THREE.CylinderGeometry(BORE_R + 0.012, BORE_R + 0.012, DECK - 1.02, 40, 1, true); linerGeo.translate(0, (DECK + 1.02) / 2, 0);
+const gasGeo = new THREE.CylinderGeometry(BORE_R - 0.02, BORE_R - 0.02, 1, 32); gasGeo.translate(0, 0.5, 0);
+const valveStem = new THREE.CylinderGeometry(0.028, 0.028, 0.55, 8); valveStem.translate(0, 0.3, 0);
+const valveHead = new THREE.CylinderGeometry(0.12, 0.06, 0.04, 20);
+const glowTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'); const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, 'rgba(255,245,210,1)'); r.addColorStop(0.25, 'rgba(255,170,60,.85)'); r.addColorStop(0.6, 'rgba(255,90,20,.25)'); r.addColorStop(1, 'rgba(255,60,0,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c);
+})();
+
+const frames = {};
+Object.keys(BANKS).forEach(k => {
+  frames[k] = {};
+  ['block','heads','valvetrain','liners','gas','pistons'].forEach(n => frames[k][n] = bankFrame(k, layers[n]));
+});
+
+cyls.forEach(cy => {
+  const F = frames[cy.bankKey];
+  // piston
+  const p = new THREE.Group();
+  p.add(new THREE.Mesh(pistonBody, M.alu));
+  p.add(new THREE.Mesh(crownGeo, M.crown));
+  [PTC - 0.05, PTC - 0.1, PTC - 0.15].forEach(y => { const r = new THREE.Mesh(ringGeo, M.ringM); r.position.y = y; p.add(r); });
+  p.add(new THREE.Mesh(wristGeo, M.steel));
+  p.position.z = cy.z; F.pistons.add(p); cy.piston = p;
+  // chemise
+  const ln = new THREE.Mesh(linerGeo, M.liner); ln.position.z = cy.z; F.liners.add(ln);
+  // gaz
+  const gm = new THREE.MeshBasicMaterial({ color: 0x5cb4e8, transparent: true, opacity: 0.4, depthWrite: false });
+  const gas = new THREE.Mesh(gasGeo, gm); gas.position.z = cy.z; F.gas.add(gas); cy.gas = gas;
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+  glow.position.set(0, DECK - 0.05, cy.z); glow.scale.setScalar(0.001); F.gas.add(glow); cy.glow = glow;
+  // soupapes : 2 admission (côté V) + 2 échappement
+  cy.valves = [];
+  const side = cy.bank.side;
+  [[side * 0.2, 'in'], [-side * 0.2, 'ex']].forEach(([x, kind]) => {
+    [-0.17, 0.17].forEach(dz => {
+      const v = new THREE.Group();
+      v.add(new THREE.Mesh(valveStem, M.valve)); v.add(new THREE.Mesh(valveHead, M.valve));
+      v.position.set(x, DECK + 0.02, cy.z + dz); v.rotation.z = (kind === 'in' ? -side : side) * 0.18;
+      F.valvetrain.add(v); cy.valves.push({ v, kind, x });
+    });
+  });
+  const plug = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.55, 10), M.plug);
+  plug.position.set(0, DECK + 0.33, cy.z); F.heads.add(plug);
+});
+
+// Bloc
+const blockLen = 4 * PITCH + 0.45;
+Object.keys(BANKS).forEach(k => {
+  const g = new THREE.BoxGeometry(1.2, DECK - 0.9, blockLen); g.translate(0, (DECK + 0.9) / 2, 0);
+  frames[k].block.add(withEdges(new THREE.Mesh(g, M.block)));
+  // culasse
+  const hg = new THREE.BoxGeometry(1.36, 0.62, blockLen + 0.1); hg.translate(0, DECK + 0.31, 0);
+  frames[k].heads.add(withEdges(new THREE.Mesh(hg, M.head)));
+  const cg = new THREE.BoxGeometry(1.14, 0.24, blockLen - 0.1); cg.translate(0, DECK + 0.74, 0);
+  frames[k].heads.add(withEdges(new THREE.Mesh(cg, M.cover)));
+});
+const caseGeo = new THREE.BoxGeometry(2.7, 1.8, blockLen); caseGeo.translate(0, 0.05, 0);
+const crankcase = withEdges(new THREE.Mesh(caseGeo, M.block)); layers.block.add(crankcase);
+const panGeo = new THREE.BoxGeometry(2.1, 0.7, blockLen - 0.3); panGeo.translate(0, -1.2, 0);
+layers.block.add(withEdges(new THREE.Mesh(panGeo, M.block)));
+const WALL_X = 1.35;
+
+// Arbres à cames (2 par banc), à demi-vitesse du vilebrequin
+const camShafts = [];
+Object.keys(BANKS).forEach(k => {
+  const side = BANKS[k].side;
+  [['in', side * 0.24, IN_OPEN, IN_CLOSE], ['ex', -side * 0.24, EX_OPEN, EX_CLOSE]].forEach(([kind, x, o, c]) => {
+    const shaft = new THREE.Group(); shaft.position.set(x, DECK + 0.46, 0);
+    const bar = new THREE.Mesh(zAxis(new THREE.CylinderGeometry(0.065, 0.065, blockLen + 0.2, 16)), M.cam); shaft.add(bar);
+    const gear = new THREE.Mesh(zAxis(new THREE.CylinderGeometry(0.26, 0.26, 0.05, 32)), M.bolt); gear.position.z = blockLen / 2 + 0.05; shaft.add(gear);
+    const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.12, 0.06), new THREE.MeshBasicMaterial({ color: 0xf5a524 }));
+    tooth.position.set(0, 0.2, gear.position.z + 0.01); shaft.add(tooth);
+    const peak = (o + (((c - o) % 720 + 720) % 720) / 2) % 720;
+    cyls.filter(cy => cy.bankKey === k).forEach(cy => {
+      [-0.17, 0.17].forEach(dz => {
+        const piv = new THREE.Group(); piv.position.z = cy.z + dz; piv.rotation.z = (FIRE[cy.n] + peak) / 2 * DEG;
+        const lobe = new THREE.Mesh(zAxis(new THREE.CylinderGeometry(0.1, 0.1, 0.07, 20)), M.cam); lobe.position.y = -0.05; piv.add(lobe);
+        shaft.add(piv);
+      });
+    });
+    frames[k].valvetrain.add(shaft); camShafts.push(shaft);
+  });
+});
+
+// Admission : pipes, papillons individuels, boîte à air
+const plenumY = 3.25;
+const pg = new THREE.BoxGeometry(1.6, 0.5, blockLen); pg.translate(0, plenumY + 0.22, 0);
+const plenum = withEdges(new THREE.Mesh(pg, M.plenum)); layers.manifolds.add(plenum);
+function tubeBetween(a, b, r, mat){
+  const d = new THREE.Vector3().subVectors(b, a); const len = d.length();
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 20, 1, true), mat);
+  m.position.copy(a).addScaledVector(d, 0.5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+  return m;
+}
+const itbs = [];
+cyls.forEach(cy => {
+  const s = cy.bank.side;
+  const a = toWorld(cy.bankKey, s * 0.6, DECK + 0.22, cy.z);
+  const b = new THREE.Vector3(-Math.sign(a.x) * -0.35, plenumY, cy.z);
+  layers.manifolds.add(tubeBetween(a, b, 0.13, M.runner));
+  const tb = a.clone().lerp(b, 0.45);
+  const body = tubeBetween(tb.clone().lerp(a, 0.1), tb.clone().lerp(b, 0.1), 0.165, M.itb);
+  layers.manifolds.add(body); itbs.push(body);
+  // collecteur d'échappement
+  const out = toWorld(cy.bankKey, -s * 0.66, DECK + 0.2, cy.z);
+  const sx = Math.sign(out.x);
+  const pts = [out, toWorld(cy.bankKey, -s * 1.05, DECK + 0.1, cy.z),
+    new THREE.Vector3(sx * 2.25, 0.1, cy.z * 0.9), new THREE.Vector3(sx * 1.85, -1.35, cy.z * 0.55 - 0.35),
+    new THREE.Vector3(sx * 1.55, -1.75, -1.6)];
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.1, 12), M.header);
+  layers.manifolds.add(tube);
+});
+[1, -1].forEach(sx => {
+  const pipe = tubeBetween(new THREE.Vector3(sx * 1.55, -1.75, -1.6), new THREE.Vector3(sx * 1.4, -1.8, -3.6), 0.2, M.header);
+  layers.manifolds.add(pipe);
+});
+
+// Sol et ombre de contact
+const floorY = -2.15;
+const grid = new THREE.GridHelper(24, 48, 0x2a3440, 0x1a2029); grid.position.y = floorY; scene.add(grid);
+const shadowTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+  const r = g.createRadialGradient(128, 128, 10, 128, 128, 128); r.addColorStop(0, 'rgba(0,0,0,.55)'); r.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 256, 256); return new THREE.CanvasTexture(c);
+})();
+const shadow = new THREE.Mesh(new THREE.PlaneGeometry(7, 9), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
+shadow.rotation.x = -Math.PI / 2; shadow.position.y = floorY + 0.005; scene.add(shadow);
+
+// ------------------------------------------------------------------
+// Particules et débris
+// ------------------------------------------------------------------
+const dotTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  const r = g.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+})();
+function makeSystem(max, size, blending, opacity){
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(max * 3).fill(-999), col = new Float32Array(max * 3);
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const mat = new THREE.PointsMaterial({ size, map: dotTex, vertexColors: true, transparent: true, opacity, depthWrite: false, blending });
+  const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; engine.add(pts);
+  return { max, pos, col, geo, vel: new Float32Array(max * 3), life: new Float32Array(max), total: new Float32Array(max),
+    base: new Float32Array(max * 3), grav: new Float32Array(max), next: 0 };
+}
+const sparks = makeSystem(700, 0.07, THREE.AdditiveBlending, 1);
+const smoke = makeSystem(260, 0.9, THREE.NormalBlending, 0.38);
+function emit(sys, p, v, life, color, grav){
+  const i = sys.next; sys.next = (sys.next + 1) % sys.max;
+  sys.pos.set([p.x, p.y, p.z], i * 3); sys.vel.set([v.x, v.y, v.z], i * 3);
+  sys.base.set(color, i * 3); sys.col.set(color, i * 3);
+  sys.life[i] = life; sys.total[i] = life; sys.grav[i] = grav;
+}
+function updateSystem(sys, dt, drag){
+  for (let i = 0; i < sys.max; i++){
+    if (sys.life[i] <= 0) continue;
+    sys.life[i] -= dt;
+    const o = i * 3;
+    if (sys.life[i] <= 0){ sys.pos[o + 1] = -999; continue; }
+    sys.vel[o + 1] -= sys.grav[i] * dt;
+    const k = Math.exp(-drag * dt);
+    sys.vel[o] *= k; sys.vel[o + 1] *= k; sys.vel[o + 2] *= k;
+    sys.pos[o] += sys.vel[o] * dt; sys.pos[o + 1] += sys.vel[o + 1] * dt; sys.pos[o + 2] += sys.vel[o + 2] * dt;
+    if (sys.pos[o + 1] < floorY + 0.03){ sys.pos[o + 1] = floorY + 0.03; sys.vel[o + 1] *= -0.3; sys.vel[o] *= 0.7; sys.vel[o + 2] *= 0.7; }
+    const t = sys.life[i] / sys.total[i];
+    sys.col[o] = sys.base[o] * t; sys.col[o + 1] = sys.base[o + 1] * t * t; sys.col[o + 2] = sys.base[o + 2] * t * t;
+  }
+  sys.geo.attributes.position.needsUpdate = true; sys.geo.attributes.color.needsUpdate = true;
+}
+const shards = [];
+const shardGeo = new THREE.BoxGeometry(0.07, 0.03, 0.05);
+const holes = [];
+const rv = (a) => (Math.random() * 2 - 1) * a;
+
+function makeHole(p, sx){
+  const g = new THREE.Group(); g.position.copy(p); g.position.x = sx * (WALL_X + 0.01); g.rotation.y = sx * Math.PI / 2;
+  const sh = new THREE.Shape(); const n = 16;
+  for (let i = 0; i <= n; i++){
+    const a = i / n * Math.PI * 2, r = 0.26 + Math.random() * 0.16 * (i % 2 ? 1 : 0.4);
+    const x = Math.cos(a) * r * 1.2, y = Math.sin(a) * r;
+    i ? sh.lineTo(x, y) : sh.moveTo(x, y);
+  }
+  const fill = new THREE.Mesh(new THREE.ShapeGeometry(sh), new THREE.MeshBasicMaterial({ color: 0x050403, side: THREE.DoubleSide }));
+  g.add(fill);
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0xff7a2a, transparent: true, opacity: 1 });
+  g.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(sh.getPoints()), edgeMat));
+  const cracks = [];
+  for (let i = 0; i < 7; i++){
+    const a = Math.random() * Math.PI * 2, r0 = 0.32, r1 = 0.55 + Math.random() * 0.35;
+    cracks.push(new THREE.Vector3(Math.cos(a) * r0 * 1.2, Math.sin(a) * r0, 0), new THREE.Vector3(Math.cos(a + rv(0.2)) * r1 * 1.2, Math.sin(a + rv(0.2)) * r1, 0));
+  }
+  g.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cracks), new THREE.LineBasicMaterial({ color: 0x1b1d20 })));
+  engine.add(g); holes.push({ g, edgeMat, t: 0 });
+}
+const puddle = new THREE.Mesh(new THREE.CircleGeometry(1, 40), new THREE.MeshStandardMaterial({ color: 0x1a120a, metalness: 0.2, roughness: 0.05, transparent: true, opacity: 0.85 }));
+puddle.rotation.x = -Math.PI / 2; puddle.position.y = floorY + 0.01; puddle.visible = false; scene.add(puddle);
+
+let debris = null; // { rod, cap, piston state }
+
+// ------------------------------------------------------------------
+// Casse
+// ------------------------------------------------------------------
+function breakRod(n, reason){
+  if (st.broken) return;
+  const cy = cyls.find(c => c.n === n);
+  st.broken = n;
+  st.breakInfo = { n, reason, rpm: st.rpm, hp: st.hp, fin: st.fin, fcomp: st.fcomp, idx: st.idx };
+  const psi = st.theta * DEG + THROW[cy.j];
+  const sx = Math.sign(Math.sin(cy.beta)) || 1;
+  // la bielle part vers le flanc du carter, avec la vitesse tangentielle du maneton
+  const tang = new THREE.Vector3(Math.cos(psi), -Math.sin(psi), 0);
+  const v = new THREE.Vector3(sx * 7.5, -0.8, rv(0.6)).addScaledVector(tang, 2.5);
+  engine.attach(cy.cap);
+  debris = {
+    cy, sx, t: 0, hit: false,
+    rod: { o: cy.rod, v, w: new THREE.Vector3(rv(3), rv(3), -sx * 11) },
+    cap: { o: cy.cap, v: new THREE.Vector3(-sx * 3 + rv(1), -4, rv(1.5)), w: new THREE.Vector3(rv(12), rv(12), rv(12)) },
+    piston: { y: cy.piston.position.y, v: 3.2 },
+  };
+  st.shake = 1;
+  const f = $('#flash'); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
+  audioBang();
+  setTimeout(showAlert, 900);
+}
+function showAlert(){
+  const b = st.breakInfo; if (!b) return;
+  const why = {
+    manual: 'Rupture déclenchée à la main.',
+    tension: 'Rupture en traction : la masse du piston, lancée au point mort haut, a arraché la tête de bielle.',
+    compression: 'Rupture en compression : la pression de combustion a fait flamber la bielle.',
+  }[b.reason];
+  $('#alertTitle').textContent = `Bielle n° ${b.n} rompue`;
+  $('#alertText').textContent = `${why} Libérée, elle a été projetée par le vilebrequin et a percé le carter.`;
+  $('#alertData').innerHTML = `
+    <dt>Régime</dt><dd>${nf.format(b.rpm)} tr/min</dd>
+    <dt>Puissance visée</dt><dd>${nf.format(b.hp)} ch</dd>
+    <dt>Traction au PMH</dt><dd>${nf1.format(b.fin / 1000)} kN</dd>
+    <dt>Compression</dt><dd>${nf1.format(b.fcomp / 1000)} kN</dd>
+    <dt>Charge / limite</dt><dd>${nf.format(b.idx * 100)} %</dd>`;
+  $('#alert').hidden = false;
+}
+function resetEngine(){
+  st.broken = null; st.breakInfo = null; st.damage = 0; st.shake = 0;
+  cyls.forEach(cy => {
+    cy.rod.add(cy.cap); cy.cap.position.set(0, 0, 0); cy.cap.rotation.set(0, 0, 0);
+    cy.rod.rotation.set(0, 0, 0); cy.piston.rotation.set(0, 0, 0); cy.rod.position.z = cy.z;
+  });
+  debris = null;
+  holes.forEach(h => { engine.remove(h.g); }); holes.length = 0;
+  shards.forEach(s => engine.remove(s.m)); shards.length = 0;
+  [sparks, smoke].forEach(s => { s.life.fill(0); s.pos.fill(-999); s.geo.attributes.position.needsUpdate = true; });
+  puddle.visible = false; puddle.scale.setScalar(0.01);
+  engine.position.set(0, 0, 0);
+  $('#alert').hidden = true;
+  st.rpm = 900;
+}
+function rigid(b, dt){
+  b.v.y -= 9.8 * dt;
+  b.o.position.addScaledVector(b.v, dt);
+  b.o.rotation.x += b.w.x * dt; b.o.rotation.y += b.w.y * dt; b.o.rotation.z += b.w.z * dt;
+  if (b.o.position.y < floorY + 0.15){
+    b.o.position.y = floorY + 0.15; b.v.y *= -0.3; b.v.x *= 0.6; b.v.z *= 0.6; b.w.multiplyScalar(0.6);
+  }
+}
+function burst(p, sx){
+  for (let i = 0; i < 260; i++){
+    emit(sparks, p, new THREE.Vector3(sx * (2 + Math.random() * 7), rv(4) + 1.5, rv(4)), 0.4 + Math.random() * 0.9, [1, 0.62 + Math.random() * 0.3, 0.25], 9);
+  }
+  for (let i = 0; i < 160; i++){
+    emit(sparks, p, new THREE.Vector3(sx * (1 + Math.random() * 4), rv(2), rv(2.5)), 1.2 + Math.random() * 1.6, [0.35, 0.22, 0.08], 6);
+  }
+  for (let i = 0; i < 40; i++){
+    const m = new THREE.Mesh(shardGeo, M.debris); m.position.copy(p); engine.add(m);
+    shards.push({ m, o: m, v: new THREE.Vector3(sx * (2 + Math.random() * 6), rv(3) + 2, rv(3)), w: new THREE.Vector3(rv(20), rv(20), rv(20)) });
+  }
+}
+function updateDebris(dt){
+  if (!debris) return;
+  const d = debris; d.t += dt;
+  rigid(d.rod, dt); rigid(d.cap, dt);
+  // la bielle frappe le flanc du carter
+  if (!d.hit && Math.abs(d.rod.o.position.x) > WALL_X - 0.25){
+    d.hit = true;
+    const p = new THREE.Vector3(d.sx * WALL_X, THREE.MathUtils.clamp(d.rod.o.position.y, -0.55, 0.65), d.cy.z);
+    makeHole(p, d.sx); burst(p, d.sx);
+    d.rod.v.multiplyScalar(0.45); d.rod.v.x = d.sx * Math.abs(d.rod.v.x);
+    puddle.visible = true; puddle.position.set(d.sx * 2.2, floorY + 0.01, d.cy.z); puddle.scale.setScalar(0.05);
+    st.shake = 1.4;
+  }
+  // piston libre : il monte sur son élan, frappe la culasse, retombe et se met en travers
+  const pp = d.piston;
+  pp.v -= 9.8 * 0.35 * dt; pp.y += pp.v * dt;
+  const top = DECK - PTC - 0.012, bottom = 1.05;
+  if (pp.y > top){ pp.y = top; if (pp.v > 0.8){ const w = toWorld(d.cy.bankKey, 0, DECK, d.cy.z);
+      for (let i = 0; i < 40; i++) emit(sparks, w, new THREE.Vector3(rv(2), rv(2), rv(2)), 0.3 + Math.random() * 0.4, [1, 0.8, 0.4], 2); }
+    pp.v *= -0.25; }
+  if (pp.y < bottom){ pp.y = bottom; pp.v = 0; }
+  d.cy.piston.position.y = pp.y;
+  d.cy.piston.rotation.x = Math.min(0.09, d.t * 0.05);
+  // fumée et huile qui s'échappent par le trou
+  if (d.hit && d.t < 9 && Math.random() < 0.6){
+    const h = holes[holes.length - 1].g.position;
+    emit(smoke, h, new THREE.Vector3(d.sx * (0.3 + Math.random() * 0.6), 0.5 + Math.random() * 0.7, rv(0.3)), 2.5 + Math.random() * 2, [0.32, 0.31, 0.3], -0.25);
+    if (st.rpm > 200) emit(sparks, h, new THREE.Vector3(d.sx * (0.5 + Math.random() * 1.5), rv(0.5), rv(0.6)), 1.5, [0.3, 0.2, 0.07], 7);
+  }
+  holes.forEach(h => { h.t += dt; h.edgeMat.opacity = Math.max(0.15, 1 - h.t / 4); h.edgeMat.color.setRGB(1, Math.max(0.25, 0.48 - h.t * 0.05), 0.16); });
+  if (puddle.visible) puddle.scale.setScalar(Math.min(1.25, puddle.scale.x + dt * 0.12));
+  shards.forEach(s => rigid(s, dt));
+}
+
+// ------------------------------------------------------------------
+// Pose (cinématique)
+// ------------------------------------------------------------------
+const gasCol = new THREE.Color();
+const cAir = new THREE.Color(COL.air), cComp = new THREE.Color(COL.comp), cFire = new THREE.Color(COL.amber), cExh = new THREE.Color(COL.exh), cHot = new THREE.Color(0xfff1c9);
+function pose(theta){
+  crank.rotation.z = -theta * DEG;
+  camShafts.forEach(s => s.rotation.z = -theta / 2 * DEG);
+  const load = st.rpm > 1 ? THREE.MathUtils.clamp(st.pmax / 110, 0.2, 1.8) : 0;
+  const lit = [null, null];
+  cyls.forEach(cy => {
+    const a = cycleOf(theta, cy.n);
+    const psi = theta * DEG + THROW[cy.j];
+    const g = psi - cy.beta;
+    const s = pistonS(g);
+    const dead = st.broken === cy.n;
+    if (!dead){
+      cy.piston.position.y = s;
+      const cx = R * Math.sin(psi), cyy = R * Math.cos(psi);
+      const px = s * Math.sin(cy.beta), py = s * Math.cos(cy.beta);
+      cy.rod.position.set(cx, cyy, cy.z);
+      cy.rod.rotation.set(0, 0, -Math.atan2(px - cx, py - cyy));
+    }
+    // gaz : couleur du temps en cours
+    const crown = cy.piston.position.y + PTC;
+    cy.gas.position.y = crown;
+    cy.gas.scale.y = Math.max(0.01, DECK + 0.06 - crown);
+    let op = 0.36;
+    if (dead){ gasCol.set(0x3a3a3a); op = 0.2; }
+    else if (a < 180){ const t = a / 180; gasCol.copy(cHot).lerp(cFire, Math.min(1, t * 4)).lerp(cExh, Math.max(0, t - 0.4)); op = 0.55 - t * 0.2; }
+    else if (a < 360) gasCol.copy(cExh);
+    else if (a < 540) gasCol.copy(cAir);
+    else gasCol.copy(cAir).lerp(cComp, (a - 540) / 120 > 1 ? 1 : (a - 540) / 120);
+    cy.gas.material.color.copy(gasCol); cy.gas.material.opacity = op;
+    // flamme : étincelle 10° avant PMH, combustion jusqu'à ~60° après
+    let gI = 0;
+    if (!dead && st.rpm > 1 && !st.cut){
+      if (a > 710) gI = (a - 710) / 10 * 0.5;
+      else if (a < 70) gI = Math.pow(1 - a / 70, 1.6);
+    }
+    gI *= load;
+    cy.glow.scale.setScalar(0.001 + gI * 1.3);
+    cy.glow.material.opacity = Math.min(1, gI * 1.2);
+    const bi = cy.bankKey === 'A' ? 0 : 1;
+    if (gI > 0.05 && (!lit[bi] || gI > lit[bi].i)) lit[bi] = { i: gI, cy };
+    // soupapes
+    const li = lift(a, IN_OPEN, IN_CLOSE), le = lift(a, EX_OPEN, EX_CLOSE);
+    cy.valves.forEach(({ v, kind }) => { v.position.y = DECK + 0.02 - 0.11 * (kind === 'in' ? li : le); });
+    cy.a = a;
+  });
+  lit.forEach((l, i) => {
+    const L2 = fireLights[i];
+    if (!l){ L2.intensity = 0; return; }
+    L2.position.copy(toWorld(l.cy.bankKey, 0, DECK - 0.1, l.cy.z));
+    L2.intensity = l.i * 3.5;
+  });
+  M.header.emissiveIntensity = st.broken ? M.header.emissiveIntensity * 0.995 : THREE.MathUtils.clamp((st.power - 60) / 500, 0, 0.55);
+}
+
+// ------------------------------------------------------------------
+// Physique moteur
+// ------------------------------------------------------------------
+function updateEngine(dt){
+  let target = st.broken ? 0 : st.targetRpm;
+  const lim = st.limiter && !st.broken;
+  if (lim) target = Math.min(target, SPEC.redline + 40);
+  const rate = st.broken ? 1.3 : (target > st.rpm ? 1.8 + st.throttle / 40 : 2.2);
+  st.rpm += (target - st.rpm) * Math.min(1, dt * rate);
+  if (st.broken && st.rpm < 40) st.rpm = 0;
+  if (!st.broken && st.rpm < 700) st.rpm = Math.max(st.rpm, 700);
+  st.cut = lim && st.targetRpm > SPEC.redline && st.rpm > SPEC.redline - 30 && (performance.now() % 160) < 70;
+  if (st.cut) st.rpm -= 60;
+  const thr = st.broken ? 0 : st.throttle / 100;
+  st.torque = st.cut ? 0 : stockTorque(st.rpm) * st.hp / 420 * thr;
+  st.power = st.torque * st.rpm / 9549 / 0.7355;
+  const w = st.rpm * 2 * Math.PI / 60;
+  st.fin = M_REC * Rm * w * w * (1 + LAMBDA);
+  st.pmax = st.rpm > 1 ? (st.cut ? 0 : 12 + 88 * st.torque / 400) : 0;
+  st.fgas = st.pmax * 1e5 * AREA;
+  st.fcomp = Math.max(0, st.fgas - st.fin);
+  const it = st.fin / LIM_TENS, ic = st.fcomp / LIM_COMP;
+  st.idx = Math.max(it, ic);
+  if (!st.broken && st.idx > 0.85){
+    st.damage += Math.pow((st.idx - 0.85) / 0.15, 3) * 0.4 * dt;
+    if (st.damage >= 1){
+      st.damage = 1;
+      const sel = $('#breakCyl').value;
+      breakRod(sel === 'rand' ? 1 + Math.floor(Math.random() * 8) : +sel, it >= ic ? 'tension' : 'compression');
+    }
+  }
+}
+
+// ------------------------------------------------------------------
+// Étiquettes
+// ------------------------------------------------------------------
+const labelsEl = $('#labels');
+const labels = [];
+function addLabel(text, cls, layerName, getPos){
+  const el = document.createElement('div'); el.className = 'lbl ' + (cls || ''); el.textContent = text; labelsEl.appendChild(el);
+  labels.push({ el, layerName, getPos, v: new THREE.Vector3() });
+  return el;
+}
+cyls.forEach(cy => {
+  cy.label = addLabel(String(cy.n), 'cyl', null, v => v.copy(toWorld(cy.bankKey, 0, DECK + 1.1, cy.z)));
+});
+const tmp = new THREE.Vector3();
+addLabel('Vilebrequin', '', 'crank', v => v.set(0, -0.9, 2 * PITCH + 0.62));
+addLabel('Volant moteur', '', 'crank', v => v.set(0, -1.45, -2 * PITCH - 0.52));
+addLabel('Bielle', '', 'rods', v => { const c = cyls[4]; return c.rod.localToWorld(v.set(0, L * 0.5, 0)); });
+addLabel('Piston', '', 'pistons', v => { const c = cyls[7]; return c.piston.localToWorld(v.set(0, PTC, 0)); });
+addLabel('Arbres à cames', '', 'valvetrain', v => v.copy(toWorld('B', 0, DECK + 0.46, -2.35)));
+addLabel('Papillons individuels', '', 'manifolds', v => v.copy(itbs[3].position));
+addLabel("Collecteur d'échappement", '', 'manifolds', v => v.set(-2.25, 0.1, 0.8));
+function updateLabels(){
+  const W = viewport.clientWidth, H = viewport.clientHeight;
+  const show = $('input[data-layer=labels]').checked;
+  labels.forEach(l => {
+    const vis = show && (!l.layerName || layers[l.layerName].visible);
+    if (!vis){ l.el.style.display = 'none'; return; }
+    l.getPos(l.v); engine.localToWorld(l.v); l.v.project(camera);
+    if (l.v.z > 1){ l.el.style.display = 'none'; return; }
+    l.el.style.display = '';
+    l.el.style.transform = `translate(${(l.v.x * 0.5 + 0.5) * W}px, ${(-l.v.y * 0.5 + 0.5) * H}px) translate(-50%,-50%)`;
+  });
+  let firing = null;
+  cyls.forEach(cy => {
+    const f = st.broken !== cy.n && st.rpm > 1 && (cy.a < 70 || cy.a > 710);
+    if (f && (!firing || (cy.a < 70 ? cy.a : cy.a - 720) < (firing.a < 70 ? firing.a : firing.a - 720))) firing = cy;
+    cy.label.classList.toggle('fire', f);
+    cy.label.classList.toggle('dead', st.broken === cy.n);
+  });
+  return firing;
+}
+
+// ------------------------------------------------------------------
+// Instruments 2D
+// ------------------------------------------------------------------
+function fitCanvas(c){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.round(c.clientWidth * dpr), h = Math.round(c.clientHeight * dpr);
+  if (c.width !== w || c.height !== h){ c.width = w; c.height = h; }
+  const ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w: c.clientWidth, h: c.clientHeight };
+}
+function drawTach(){
+  const { ctx, w, h } = fitCanvas($('#tach'));
+  const cx = w / 2, cy = h / 2, r = w / 2 - 8;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = 'rgba(14,17,21,.78)'; ctx.beginPath(); ctx.arc(cx, cy, r + 6, 0, Math.PI * 2); ctx.fill();
+  const a0 = Math.PI * 0.75, span = Math.PI * 1.5, max = 11000;
+  const ang = rpm => a0 + span * Math.min(rpm, max) / max;
+  ctx.lineWidth = 5; ctx.strokeStyle = COL.line2; ctx.beginPath(); ctx.arc(cx, cy, r - 4, a0, a0 + span); ctx.stroke();
+  ctx.strokeStyle = COL.red; ctx.beginPath(); ctx.arc(cx, cy, r - 4, ang(SPEC.redline), a0 + span); ctx.stroke();
+  ctx.lineWidth = 5; ctx.strokeStyle = st.rpm > SPEC.redline ? COL.red : COL.amber;
+  ctx.beginPath(); ctx.arc(cx, cy, r - 4, a0, ang(st.rpm)); ctx.stroke();
+  ctx.fillStyle = COL.muted; ctx.font = `500 ${Math.max(9, w / 17)}px "IBM Plex Mono", monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (let k = 0; k <= 11; k++){
+    const a = ang(k * 1000);
+    ctx.strokeStyle = k * 1000 >= SPEC.redline ? COL.red : COL.muted; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * (r - 12), cy + Math.sin(a) * (r - 12)); ctx.lineTo(cx + Math.cos(a) * (r - 18), cy + Math.sin(a) * (r - 18)); ctx.stroke();
+    if (k % 2 === 0 || w > 150) ctx.fillText(k, cx + Math.cos(a) * (r - 30), cy + Math.sin(a) * (r - 30));
+  }
+  const a = ang(st.rpm);
+  ctx.strokeStyle = COL.fg; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(cx - Math.cos(a) * 10, cy - Math.sin(a) * 10); ctx.lineTo(cx + Math.cos(a) * (r - 14), cy + Math.sin(a) * (r - 14)); ctx.stroke();
+  ctx.fillStyle = COL.fg; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = COL.muted; ctx.font = `500 ${Math.max(8, w / 22)}px "IBM Plex Mono", monospace`; ctx.fillText('×1000 tr/min', cx, cy + r * 0.45);
+}
+function drawCurve(){
+  const { ctx, w, h } = fitCanvas($('#curve'));
+  const pad = { l: 34, r: 36, t: 10, b: 20 };
+  const X = rpm => pad.l + (w - pad.l - pad.r) * rpm / 11000;
+  const maxHp = 850, maxNm = 800;
+  const YP = hp => h - pad.b - (h - pad.t - pad.b) * hp / maxHp;
+  const YT = nm => h - pad.b - (h - pad.t - pad.b) * nm / maxNm;
+  ctx.clearRect(0, 0, w, h);
+  ctx.font = '10px "IBM Plex Mono", monospace'; ctx.textBaseline = 'middle';
+  ctx.strokeStyle = COL.line; ctx.lineWidth = 1;
+  for (let k = 0; k <= 4; k++){ const y = YP(k * 200); ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+    ctx.fillStyle = COL.amber; ctx.textAlign = 'right'; ctx.fillText(k * 200, pad.l - 5, y);
+    ctx.fillStyle = COL.air; ctx.textAlign = 'left'; ctx.fillText(Math.round(k * 200 * maxNm / maxHp), w - pad.r + 5, y); }
+  ctx.fillStyle = COL.muted; ctx.textAlign = 'center';
+  for (let k = 0; k <= 10; k += 2) ctx.fillText(k + 'k', X(k * 1000), h - 8);
+  ctx.fillStyle = 'rgba(239,68,68,.12)'; ctx.fillRect(X(SPEC.redline), pad.t, X(11000) - X(SPEC.redline), h - pad.t - pad.b);
+  const plot = (fn, Y, color, dash, width) => {
+    ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash); ctx.beginPath();
+    for (let r = 800; r <= 11000; r += 100){ const x = X(r), y = Y(fn(r)); r === 800 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
+    ctx.stroke(); ctx.setLineDash([]);
+  };
+  const k = st.hp / 420;
+  plot(r => stockTorque(r) * r / 9549 / 0.7355, YP, COL.dim, [3, 3], 1);
+  plot(r => stockTorque(r) * k * r / 9549 / 0.7355, YP, COL.amber, [], 2);
+  plot(r => stockTorque(r) * k, YT, COL.air, [], 2);
+  const x = X(st.rpm);
+  ctx.strokeStyle = COL.muted; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, h - pad.b); ctx.stroke();
+  ctx.fillStyle = COL.amber; ctx.beginPath(); ctx.arc(x, YP(st.power), 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = COL.air; ctx.beginPath(); ctx.arc(x, YT(st.torque), 4, 0, Math.PI * 2); ctx.fill();
+  ctx.textAlign = 'left'; ctx.font = '10px "IBM Plex Mono", monospace';
+  ctx.fillStyle = COL.amber; ctx.fillText('ch', pad.l + 4, pad.t + 4);
+  ctx.fillStyle = COL.air; ctx.fillText('N·m', pad.l + 26, pad.t + 4);
+  ctx.fillStyle = COL.dim; ctx.fillText('- - origine', pad.l + 60, pad.t + 4);
+}
+const STROKES = [ ['Détente', COL.amber], ['Échappement', COL.exh], ['Admission', COL.air], ['Compression', COL.comp] ];
+function drawChrono(){
+  const { ctx, w, h } = fitCanvas($('#chrono'));
+  const padL = 58, padR = 12, top = 24, rowH = (h - top - 8) / 8;
+  const X = a => padL + (w - padL - padR) * a / 720;
+  ctx.clearRect(0, 0, w, h);
+  ctx.font = '11px "IBM Plex Mono", monospace'; ctx.textBaseline = 'middle';
+  for (let d = 0; d <= 720; d += 90){
+    ctx.strokeStyle = COL.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(d), top - 4); ctx.lineTo(X(d), h - 8); ctx.stroke();
+    ctx.fillStyle = COL.muted; ctx.textAlign = 'center'; ctx.fillText(d + '°', X(d), 10);
+  }
+  for (let r = 0; r < 8; r++){
+    const n = r + 1, y = top + r * rowH;
+    const dead = st.broken === n;
+    ctx.globalAlpha = dead ? 0.25 : 1;
+    for (let k = 0; k < 4; k++){
+      const s = (FIRE[n] + k * 180) % 720, e = s + 180;
+      ctx.fillStyle = STROKES[k][1];
+      const seg = (a, b) => { ctx.fillRect(X(a) + 0.5, y + 3, X(b) - X(a) - 1, rowH - 6); };
+      if (e <= 720) seg(s, e); else { seg(s, 720); seg(0, e - 720); }
+      if (w > 700 && e <= 720){ ctx.fillStyle = 'rgba(10,12,15,.7)'; ctx.textAlign = 'center'; ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillText(STROKES[k][0], X(s + 90), y + rowH / 2); }
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = dead ? COL.red : COL.fg; ctx.textAlign = 'left'; ctx.font = '600 13px "Barlow Condensed", sans-serif';
+    ctx.fillText('Cyl. ' + n + (n <= 4 ? '  A' : '  B'), 6, y + rowH / 2);
+  }
+  const x = X(st.theta);
+  ctx.strokeStyle = COL.fg; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, top - 6); ctx.lineTo(x, h - 6); ctx.stroke();
+  ctx.fillStyle = COL.fg; ctx.beginPath(); ctx.moveTo(x - 5, top - 10); ctx.lineTo(x + 5, top - 10); ctx.lineTo(x, top - 4); ctx.fill();
+}
+function drawKin(){
+  const c = $('#kin'); if (!c) return;
+  const { ctx, w, h } = fitCanvas(c);
+  const pad = { l: 12, r: 12, t: 22, b: 22 };
+  const X = a => pad.l + (w - pad.l - pad.r) * a / 360;
+  const mid = (h - pad.t - pad.b) / 2 + pad.t, amp = (h - pad.t - pad.b) / 2 - 4;
+  const w0 = Math.max(st.rpm, 1) * 2 * Math.PI / 60;
+  const pos = g => (R + L - pistonS(g)) / MM;                      // mm depuis le PMH
+  const vel = g => { const e = 1e-3; return -(pistonS(g + e) - pistonS(g - e)) / (2 * e) * w0 * 0.1; }; // m/s
+  const acc = g => Rm * w0 * w0 * (Math.cos(g) + LAMBDA * Math.cos(2 * g)) / 9.81; // g
+  const aMax = Rm * w0 * w0 * (1 + LAMBDA) / 9.81, vMax = 1.63 * Rm * w0 * 1.02, pMax = SPEC.stroke;
+  ctx.clearRect(0, 0, w, h);
+  ctx.strokeStyle = COL.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(pad.l, mid); ctx.lineTo(w - pad.r, mid); ctx.stroke();
+  ctx.font = '11px "IBM Plex Mono", monospace'; ctx.textBaseline = 'middle'; ctx.fillStyle = COL.muted; ctx.textAlign = 'center';
+  [[0, 'PMH'], [180, 'PMB'], [360, 'PMH']].forEach(([a, t]) => {
+    ctx.strokeStyle = COL.line; ctx.beginPath(); ctx.moveTo(X(a), pad.t); ctx.lineTo(X(a), h - pad.b); ctx.stroke();
+    ctx.fillText(t, THREE.MathUtils.clamp(X(a), 20, w - 20), h - 8);
+  });
+  const curve = (fn, scale, color) => {
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
+    for (let d = 0; d <= 360; d += 2){ const x = X(d), y = mid - fn(d * DEG) / scale * amp; d ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke();
+  };
+  curve(g => pos(g) * 2 - pMax, pMax, COL.air);
+  curve(vel, vMax, COL.comp);
+  curve(acc, aMax, COL.amber);
+  const g = ((st.theta % 360) + 360) % 360;
+  const x = X(g);
+  ctx.strokeStyle = COL.fg; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, pad.t - 6); ctx.lineTo(x, h - pad.b); ctx.stroke();
+  ctx.textAlign = 'left';
+  const items = [[`course ${nf1.format(pos(g * DEG))} mm`, COL.air], [`vitesse ${nf1.format(vel(g * DEG))} m/s`, COL.comp], [`accél. ${nf.format(acc(g * DEG))} g`, COL.amber]];
+  let tx = pad.l;
+  items.forEach(([t, col]) => { ctx.fillStyle = col; ctx.fillText(t, tx, 9); tx += ctx.measureText(t).width + 16; });
+  const aB = Rm * w0 * w0 * (1 - LAMBDA) / 9.81;
+  $('#kinCap').textContent = `Piston n° 1 à ${nf.format(st.rpm)} tr/min : ${nf.format(aMax)} g au point mort haut, ${nf.format(aB)} g au point mort bas. Courbes normalisées ; le curseur suit la vue 3D.`;
+}
+
+// ------------------------------------------------------------------
+// Son (synthèse simple, démarrée par l'utilisateur)
+// ------------------------------------------------------------------
+let audio = null;
+function startAudio(){
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+  const ctx = new AC();
+  const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+  const filt = ctx.createBiquadFilter(); filt.type = 'lowpass'; filt.Q.value = 3; filt.connect(master);
+  const o1 = ctx.createOscillator(); o1.type = 'sawtooth';
+  const o2 = ctx.createOscillator(); o2.type = 'square';
+  const g1 = ctx.createGain(); g1.gain.value = 0.55; const g2 = ctx.createGain(); g2.gain.value = 0.22;
+  o1.connect(g1).connect(filt); o2.connect(g2).connect(filt);
+  const nb = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = nb.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const noise = ctx.createBufferSource(); noise.buffer = nb; noise.loop = true;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.8; const gn = ctx.createGain(); gn.gain.value = 0.08;
+  noise.connect(bp).connect(gn).connect(filt);
+  o1.start(); o2.start(); noise.start();
+  audio = { ctx, master, filt, o1, o2, bp, nb };
+  return true;
+}
+function updateAudio(){
+  if (!audio) return;
+  const t = audio.ctx.currentTime, f = Math.max(st.rpm, 1) / 60 * 4;
+  audio.o1.frequency.setTargetAtTime(f / 2, t, 0.03);
+  audio.o2.frequency.setTargetAtTime(f, t, 0.03);
+  audio.bp.frequency.setTargetAtTime(f * 3, t, 0.05);
+  audio.filt.frequency.setTargetAtTime(250 + st.throttle * 18 + st.rpm * 0.35, t, 0.05);
+  const on = st.rpm > 30 && !st.cut;
+  audio.master.gain.setTargetAtTime(on ? 0.05 + 0.12 * st.throttle / 100 : 0, t, st.cut ? 0.005 : 0.08);
+}
+function audioBang(){
+  if (!audio) return;
+  const { ctx, nb } = audio;
+  const src = ctx.createBufferSource(); src.buffer = nb;
+  const g = ctx.createGain(); const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800;
+  g.gain.setValueAtTime(0.9, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+  src.connect(lp).connect(g).connect(ctx.destination); src.start(); src.stop(ctx.currentTime + 1);
+}
+
+// ------------------------------------------------------------------
+// Interface
+// ------------------------------------------------------------------
+const fmtPlay = f => f >= 0.999 ? '×1 (temps réel)' : '×1/' + nf.format(Math.round(1 / f));
+function bindRange(id, fn){ const el = $('#' + id); el.addEventListener('input', () => fn(+el.value)); fn(+el.value); }
+bindRange('rpm', v => { st.targetRpm = v; $('#rpmOut').innerHTML = `${nf.format(v)}<small>tr/min</small>`; });
+bindRange('thr', v => { st.throttle = v; $('#thrOut').innerHTML = `${v}<small>%</small>`; });
+bindRange('hp', v => { st.hp = v; $('#hpOut').innerHTML = `${v}<small>ch</small>`; });
+bindRange('play', v => { st.playback = Math.pow(10, -3 + 3 * v / 100); $('#playOut').textContent = fmtPlay(st.playback); $('#badgePlay').textContent = fmtPlay(st.playback); });
+bindRange('angle', v => { if (st.paused) st.theta = v; });
+$('#limiter').addEventListener('change', e => st.limiter = e.target.checked);
+$('#pauseBtn').addEventListener('click', () => {
+  st.paused = !st.paused;
+  $('#pauseBtn').textContent = st.paused ? 'Reprendre' : 'Pause';
+  $('#pauseBtn').classList.toggle('on', st.paused);
+  const a = $('#angle'); a.disabled = !st.paused; a.value = Math.round(st.theta);
+});
+$('#soundBtn').addEventListener('click', () => {
+  if (!audio){ if (startAudio()) $('#soundBtn').textContent = 'Son : actif'; return; }
+  if (audio.ctx.state === 'running'){ audio.ctx.suspend(); $('#soundBtn').textContent = 'Son : coupé'; }
+  else { audio.ctx.resume(); $('#soundBtn').textContent = 'Son : actif'; }
+});
+$('#breakBtn').addEventListener('click', () => {
+  const sel = $('#breakCyl').value;
+  breakRod(sel === 'rand' ? 1 + Math.floor(Math.random() * 8) : +sel, 'manual');
+});
+$('#resetBtn').addEventListener('click', resetEngine);
+$('#alertReset').addEventListener('click', resetEngine);
+$('#alertClose').addEventListener('click', () => $('#alert').hidden = true);
+
+document.querySelectorAll('input[data-layer]').forEach(cb => {
+  const apply = () => { if (layers[cb.dataset.layer]) layers[cb.dataset.layer].visible = cb.checked; };
+  cb.addEventListener('change', apply); apply();
+});
+const PRESETS = {
+  full:     { layers: ['block','heads','valvetrain','manifolds','liners','gas','pistons','rods','crank','labels'], block: 0.94, head: 0.96, cover: 0.97, plenum: 0.9 },
+  xray:     { layers: ['block','heads','valvetrain','manifolds','liners','gas','pistons','rods','crank','labels'], block: 0.1, head: 0.16, cover: 0.14, plenum: 0.18 },
+  skeleton: { layers: ['valvetrain','gas','pistons','rods','crank','labels'], block: 0.1, head: 0.16, cover: 0.14, plenum: 0.18 },
+};
+document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => {
+  const p = PRESETS[b.dataset.preset];
+  document.querySelectorAll('[data-preset]').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('input[data-layer]').forEach(cb => { cb.checked = p.layers.includes(cb.dataset.layer); cb.dispatchEvent(new Event('change')); });
+  [['block', p.block], ['head', p.head], ['cover', p.cover], ['plenum', p.plenum]].forEach(([k, o]) => {
+    M[k].opacity = o; M[k].depthWrite = o > 0.8; M[k].needsUpdate = true;
+  });
+  M.edge.opacity = p.block > 0.8 ? 0.15 : 0.45;
+}));
+
+const VIEWS = { iso: [7.2, 4.6, 8.2], front: [0, 1.2, 11.5], side: [12, 1.2, 0.01], top: [0.01, 13, 0.6] };
+let camAnim = null;
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => {
+  camAnim = { from: camera.position.clone(), to: new THREE.Vector3(...VIEWS[b.dataset.view]), tFrom: controls.target.clone(), tTo: new THREE.Vector3(0, 0.9, 0), t: 0 };
+}));
+
+function resize(){
+  const w = viewport.clientWidth, h = viewport.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h;
+  camera.position.multiplyScalar(1); camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(viewport); resize();
+
+// ------------------------------------------------------------------
+// Boucle
+// ------------------------------------------------------------------
+let last = performance.now(), uiT = 0, firingCyl = null;
+const setHTML = (id, html) => { const el = document.getElementById(id); if (el._v !== html){ el.innerHTML = html; el._v = html; } };
+function updateUI(){
+  setHTML('hudRpm', nf.format(Math.round(st.rpm / 10) * 10));
+  setHTML('hudHp', `${nf.format(st.power)}<small>ch</small>`);
+  setHTML('hudNm', `${nf.format(st.torque)}<small>N·m</small>`);
+  setHTML('badgeAngle', `${Math.round(st.theta)}°`);
+  setHTML('roTens', `${nf1.format(st.fin / 1000)}<small>kN</small>`);
+  setHTML('roComp', `${nf1.format(st.fcomp / 1000)}<small>kN</small>`);
+  setHTML('roPmax', `${nf.format(st.pmax)}<small>bar</small>`);
+  setHTML('roAcc', `${nf.format(Rm * Math.pow(st.rpm * Math.PI / 30, 2) * (1 + LAMBDA) / 9.81)}<small>g</small>`);
+  setHTML('roVp', `${nf1.format(2 * SPEC.stroke / 1000 * st.rpm / 60)}<small>m/s</small>`);
+  setHTML('roFire', st.broken && st.rpm < 1 ? '–' : (firingCyl ? `n° ${firingCyl.n}` : '–'));
+  const pct = st.idx * 100;
+  $('#stressBar').style.width = Math.min(100, pct) + '%';
+  $('#stressBar').style.background = pct >= 100 ? COL.red : pct >= 85 ? COL.amber : COL.ok;
+  setHTML('stressVal', `${nf.format(pct)} %`);
+  const pill = $('#stressPill');
+  const state = st.broken ? ['Rompue', 'crit'] : pct >= 100 ? ['Rupture imminente', 'crit'] : pct >= 85 ? ['Fatigue', 'warn'] : ['OK', ''];
+  if (pill.textContent !== state[0]){ pill.textContent = state[0]; pill.className = 'pill ' + state[1]; }
+  $('#fatBar').style.width = (st.damage * 100) + '%';
+  $('#fatBar').style.background = st.damage > 0.6 ? COL.red : COL.amber;
+  setHTML('fatVal', `${nf.format(st.damage * 100)} %`);
+  if (st.paused) $('#angle').value = Math.round(st.theta);
+  setHTML('angleOut', `${Math.round(st.theta)}<small>°</small>`);
+}
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function frame(now){
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  updateEngine(dt);
+  if (!st.paused) st.theta = (st.theta + st.rpm * st.playback / 60 * 360 * dt) % 720;
+  pose(st.theta);
+  updateDebris(dt);
+  updateSystem(sparks, dt, 0.6); updateSystem(smoke, dt, 0.4);
+  if (camAnim){
+    camAnim.t = Math.min(1, camAnim.t + dt * 1.6); const e = 1 - Math.pow(1 - camAnim.t, 3);
+    camera.position.lerpVectors(camAnim.from, camAnim.to, e); controls.target.lerpVectors(camAnim.tFrom, camAnim.tTo, e);
+    if (camAnim.t >= 1) camAnim = null;
+  }
+  controls.update();
+  if (st.shake > 0 && !reduceMotion){ st.shake = Math.max(0, st.shake - dt * 1.6); const k = st.shake * st.shake * 0.12; engine.position.set(rv(k), rv(k), rv(k)); }
+  else engine.position.set(0, 0, 0);
+  renderer.render(scene, camera);
+  firingCyl = updateLabels();
+  drawTach(); drawChrono();
+  uiT += dt;
+  if (uiT > 0.08){ uiT = 0; updateUI(); drawCurve(); drawKin(); updateAudio(); }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
