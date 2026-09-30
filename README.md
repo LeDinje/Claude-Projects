@@ -12,6 +12,8 @@ Simulateur 3D interactif du V8 S65 (4,0 L, 90°, vilebrequin croisé), dans une 
 - Préréglages d'affichage : complet, écorché, squelette ; calques à cocher
 - Ralenti réglable (de ×1/1000 au temps réel), pause et réglage manuel de l'angle du vilebrequin
 - Efforts sur les bielles (traction au PMH, compression à la combustion), fatigue et casse : manuelle, en surrégime ou par excès de puissance
-- Chronogramme des 8 cylindres (ordre 1-5-4-8-6-3-7-2), courbes cinématiques du piston, son synthétisé
+- Mode circuit : piste fictive de 3,9 km, adhérence limitée en virage (cercle d'adhérence), sorties de piste, chrono au tour avec secteurs, écart en direct sur le meilleur tour, courbe de vitesse, pilote automatique
+- Son de V8 synthétisé en temps réel : impulsions d'échappement dans l'ordre d'allumage, un conduit par banc (grondement du vilebrequin croisé), souffle des trompettes, pétarades au lever de pied, sifflement du compresseur
+- Chronogramme des 8 cylindres (ordre 1-5-4-8-6-3-7-2), courbes cinématiques du piston
 
 Ouvrir `s65-v8/index.html` dans un navigateur (Three.js est chargé depuis jsDelivr).

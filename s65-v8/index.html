@@ -163,6 +163,27 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
 #gears{width:100%;height:140px;display:block}
 .gearchip{font:700 18px/1 var(--f-display);background:var(--fg);color:var(--bg);border-radius:4px;padding:3px 8px}
 
+/* Circuit */
+.circ-grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:12px}
+.circ-map{position:relative;min-height:420px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:radial-gradient(120% 100% at 50% 40%,#18241c 0%,#101612 70%,#0b0f0c 100%)}
+#trackMap{position:absolute;inset:0;width:100%;height:100%;display:block}
+.circ-over{position:absolute;left:14px;top:12px;display:grid;gap:4px;pointer-events:none}
+.lap-now{font:700 44px/1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.delta{font:600 18px/1 var(--f-display);font-variant-numeric:tabular-nums;padding:3px 8px;border-radius:4px;justify-self:start}
+.delta.neg{background:#153a24;color:var(--ok)} .delta.pos{background:#3d1414;color:#ff8a80}
+.circ-msg{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);max-width:calc(100% - 28px);background:rgba(14,17,21,.88);border:1px solid var(--line-2);
+  border-radius:8px;padding:8px 12px;font-size:14px;text-align:center;pointer-events:none}
+.circ-side{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:12px;align-content:start}
+.drive-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn.big{font:700 22px/1 var(--f-display);text-transform:uppercase;letter-spacing:.04em;padding:18px 0;touch-action:none;user-select:none}
+.btn.gas{border-color:#2f6b45;color:var(--ok)} .btn.gas.on{background:#2f6b45;color:#fff}
+.laps{width:100%;font-size:13px}
+.laps td,.laps th{padding:4px 6px}
+.laps tr.best td{color:var(--ok)} .laps tr.inv td{color:var(--dim);text-decoration:line-through}
+#speedTrace{width:100%;height:130px;display:block}
+#miniMap{position:absolute;right:12px;top:44px;width:190px;height:150px;pointer-events:none;display:none;background:rgba(14,17,21,.72);border:1px solid var(--line-2);border-radius:6px}
+body.in-circuit #miniMap{display:block}
+
 /* Coupe du cylindre */
 .loupe-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px}
 .loupe-view{position:relative;height:min(76vh,720px);min-height:520px;border:1px solid var(--line);border-radius:10px;overflow:hidden;
@@ -190,6 +211,7 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
 #pvchart{width:100%;height:170px;display:block}
 
 @media (max-width: 980px){
+  .circ-grid{grid-template-columns:minmax(0,1fr)}
   .loupe-grid{grid-template-columns:minmax(0,1fr)}
   .loupe-view{height:70vh;min-height:460px}
   .loupe-side{max-height:none}
@@ -241,6 +263,7 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
       <div class="row"><span id="hudHp">0<small>ch</small></span><span id="hudNm">0<small>N·m</small></span></div>
       <div class="row"><span class="gearchip" id="hudGear">P</span><span id="hudKmh">0<small>km/h</small></span><span id="hudBoost" hidden></span></div>
     </div>
+    <canvas id="miniMap" width="380" height="300" aria-hidden="true"></canvas>
     <div class="playbadge">Lecture <b id="badgePlay">×1/50</b> · vilebrequin <b id="badgeAngle">0°</b></div>
     <div class="viewbar">
       <button class="btn" data-view="iso">3/4</button>
@@ -409,6 +432,46 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
   </aside>
 </section>
 
+<section class="block" id="circuitSec" aria-labelledby="circuitTitle">
+  <div class="block-head">
+    <h2 id="circuitTitle">Mode circuit</h2>
+    <div class="legend"><span style="--c:var(--ok)">Accélération</span><span style="--c:var(--red)">Freinage</span><span style="--c:var(--muted)">Piste fictive · <b id="trkLen"></b></span></div>
+  </div>
+  <div class="circ-grid">
+    <div class="circ-map">
+      <canvas id="trackMap" aria-label="Plan du circuit avec la position de la voiture"></canvas>
+      <div class="circ-over">
+        <span class="unit" style="font:500 11px var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase" id="lapLbl">Tour en cours</span>
+        <span class="lap-now" id="lapNow">–</span>
+        <span class="delta" id="lapDelta" hidden></span>
+      </div>
+      <div class="circ-msg" id="circMsg" hidden></div>
+    </div>
+    <aside class="circ-side">
+      <div class="row2">
+        <button class="btn solid" id="circStart">Aller en piste</button>
+        <button class="btn" id="circStop">Quitter la piste</button>
+        <label class="switch"><input type="checkbox" id="circAuto"> Pilote automatique</label>
+      </div>
+      <div class="drive-btns">
+        <button class="btn big gas" id="gasHold">Gaz</button>
+        <button class="btn big brake" id="brakeHold">Frein</button>
+      </div>
+      <div class="hint">En piste, la direction est automatique : vous gérez les gaz, le freinage et les rapports. Clavier : ↑ gaz, ↓ ou espace frein (maintenir), + / − palettes. Trop vite dans un virage, c'est la sortie de piste et le tour ne compte pas.</div>
+      <div class="readouts">
+        <div class="ro"><div class="k">Meilleur tour</div><div class="v" id="lapBest">–</div></div>
+        <div class="ro"><div class="k">Dernier tour</div><div class="v" id="lapLast">–</div></div>
+        <div class="ro"><div class="k">Secteurs (tour en cours)</div><div class="v" id="lapSecs" style="font-size:16px">–</div></div>
+        <div class="ro"><div class="k">Accélération latérale</div><div class="v" id="latG">0<small>g</small></div></div>
+        <div class="ro"><div class="k">Vitesse de pointe</div><div class="v" id="lapTop">–</div></div>
+        <div class="ro"><div class="k">Sorties de piste</div><div class="v" id="lapOffs">0</div></div>
+      </div>
+      <canvas id="speedTrace" aria-label="Vitesse le long du tour : tour en cours et meilleur tour"></canvas>
+      <div class="tbl-wrap" style="margin:0"><table class="laps"><thead><tr><th>Tour</th><th>Temps</th><th>S1</th><th>S2</th><th>S3</th></tr></thead><tbody id="lapRows"><tr><td colspan="5" class="hint">Aucun tour chronométré.</td></tr></tbody></table></div>
+    </aside>
+  </div>
+</section>
+
 <section class="block" id="loupeSec" aria-labelledby="loupeTitle">
   <div class="block-head">
     <h2 id="loupeTitle">Au cœur du cylindre n° <span id="lpTitleCyl">1</span></h2>
@@ -554,6 +617,9 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
       <tr><td>Débit d'un injecteur</td><td class="n">4,2 mg/ms · 6,3 avec le kit</td><td>Estimation</td></tr>
       <tr><td>Kit compresseur (type ESS VT2‑625)</td><td class="n">≈ 0,55 bar à 8 300 tr/min · 625 ch</td><td>Estimation calée sur la puissance annoncée</td></tr>
       <tr><td>Vitesse maxi d'origine</td><td class="n">250 km/h, bridée électroniquement</td><td>Constructeur</td></tr>
+      <tr><td>Adhérence en virage · au freinage</td><td class="n">1,05 g · 1,1 g (cercle d'adhérence)</td><td>Estimation, pneus sport</td></tr>
+      <tr><td>Circuit</td><td class="n">Tracé fictif</td><td>Choix du modèle</td></tr>
+      <tr><td>Son</td><td class="n">Synthèse : impulsions dans l'ordre 1‑5‑4‑8‑6‑3‑7‑2, un échappement par banc, souffle des trompettes</td><td>Modèle, pas un enregistrement</td></tr>
       <tr><td>Fin d'injection</td><td class="n">10° avant l'ouverture de l'admission</td><td>Choix du modèle</td></tr>
       <tr><td>Richesse</td><td class="n">λ = 1 ; 0,87 pied au plancher</td><td>Ordre de grandeur</td></tr>
       <tr><td>Avance à l'allumage</td><td class="n">8 à 36°, réduite en charge</td><td>Estimation</td></tr>
@@ -1259,6 +1325,7 @@ function engineTorque(rpm, thr){
   return thr * full - (1 - thr) * (25 + 0.012 * rpm);   // couple net : pertes par pompage et frein moteur quand on lève le pied
 }
 function stepVehicle(h){
+  const grip = circuitGrip(h);
   const broken = !!st.broken, sel = st.sel;
   const coupled = !broken && (sel === 'D' || sel === 'S' || sel === 'M' || sel === 'R');
   const sport = sel === 'S' || sel === 'M';
@@ -1292,7 +1359,7 @@ function stepVehicle(h){
       st.rpm += (Te - Tc) / CAR.Ie * h * RPM_PER_RAD;
       Fdrive = Tc * ratio * CAR.eta / CAR.r;
     }
-    if (Fdrive > CAR.grip){ Fdrive = CAR.grip; st.spin = true; }
+    if (Fdrive > CAR.grip * grip){ Fdrive = CAR.grip * grip; st.spin = true; }
     Fdrive *= dir;
   } else {
     st.clutch = 'open';
@@ -1301,12 +1368,13 @@ function stepVehicle(h){
   // résistances : air, roulement, frein, cliquet de parking
   const v = st.v, sg = Math.sign(v);
   const Fres = Math.abs(v) > 0.02 ? sg * (0.5 * 1.2 * CAR.cdA * v * v + CAR.crr * CAR.m * 9.81) : 0;
-  const Fb = (st.brake ? 1.0 * CAR.m * 9.81 : 0) + (sel === 'P' ? 3 * CAR.m * 9.81 : 0);
+  const Fb = (st.brake ? (circ.on ? 1.1 * grip : 1.0) * CAR.m * 9.81 : 0) + (sel === 'P' ? 3 * CAR.m * 9.81 : 0) + circuitDrag();
   const mEff = CAR.m + (locked ? CAR.Ie * Math.pow(ratio / CAR.r, 2) : 0);
   let nv = v + (Fdrive - Fres) / mEff * h;
   if (Fb > 0){ const dv = Fb / CAR.m * h; nv = Math.abs(nv) <= dv ? 0 : nv - Math.sign(nv) * dv; }
   if (Math.abs(nv) < 0.01 && Math.abs(Fdrive) < CAR.crr * CAR.m * 9.81) nv = 0;
   st.v = nv;
+  if (circ.on) circ.s += st.v * h;
   if (locked){
     const target = Math.max(0, st.v * dir) / CAR.r * RPM_PER_RAD * ratio;
     st.rpm += (target - st.rpm) * Math.min(1, h * 30);
@@ -1319,6 +1387,125 @@ function shiftTo(g){
   if (g === st.gear) return;
   st.shiftUp = g > st.gear; st.gear = g; st.shiftT = 0.12; st.lastShift = st.simT;
 }
+// ------------------------------------------------------------------
+// Circuit : piste fictive, adhérence en virage, chrono
+// ------------------------------------------------------------------
+const MU_LAT = 1.05;   // adhérence latérale, en g
+const TRACK_PTS = [[0, 0], [450, 0], [900, 0], [990, 30], [1010, 120], [950, 170], [820, 160], [700, 200], [620, 300], [640, 420], [760, 480],
+  [900, 520], [960, 620], [900, 720], [760, 720], [560, 640], [360, 560], [240, 600], [180, 540], [100, 560], [-60, 480], [-150, 340], [-160, 180], [-110, 60], [-60, 10]];
+const TRK = (() => {
+  const curve = new THREE.CatmullRomCurve3(TRACK_PTS.map(p => new THREE.Vector3(p[0], p[1], 0)), true, 'centripetal');
+  const Ltot = curve.getLength(), N = Math.round(Ltot / 2), ds = Ltot / N;
+  const pts = curve.getSpacedPoints(N);
+  const x = new Float32Array(N), y = new Float32Array(N), hd = new Float32Array(N);
+  let k = new Float32Array(N);
+  for (let i = 0; i < N; i++){ x[i] = pts[i].x; y[i] = pts[i].y; }
+  for (let i = 0; i < N; i++){ const a = (i + 1) % N, b = (i - 1 + N) % N; hd[i] = Math.atan2(y[a] - y[b], x[a] - x[b]); }
+  for (let i = 0; i < N; i++){ let d = hd[(i + 1) % N] - hd[(i - 1 + N) % N]; d = Math.atan2(Math.sin(d), Math.cos(d)); k[i] = d / (2 * ds); }
+  for (let pass = 0; pass < 3; pass++){ const k2 = new Float32Array(N); for (let i = 0; i < N; i++){ let sum = 0; for (let j = -4; j <= 4; j++) sum += k[(i + j + N) % N]; k2[i] = sum / 9; } k = k2; }
+  const vT = new Float32Array(N);
+  for (let i = 0; i < N; i++) vT[i] = Math.min(120, Math.sqrt(MU_LAT * 0.97 * 9.81 / Math.max(Math.abs(k[i]), 1e-5)));
+  const aB = 0.92 * 9.81;
+  for (let pass = 0; pass < 3; pass++) for (let i = N - 1; i >= 0; i--){ const j = (i + 1) % N; vT[i] = Math.min(vT[i], Math.sqrt(vT[j] * vT[j] + 2 * aB * ds)); }
+  const corners = []; let n = 0;
+  for (let i = 0; i < N; i++){
+    const a = Math.abs(k[i]);
+    if (a > 1 / 180 && a >= Math.abs(k[(i + 1) % N]) && a >= Math.abs(k[(i - 1 + N) % N])){
+      if (corners.length && (i - corners[corners.length - 1].i) * ds < 90){ if (a > Math.abs(k[corners[corners.length - 1].i])) corners[corners.length - 1].i = i; continue; }
+      corners.push({ i, name: 'V' + (++n) });
+    }
+  }
+  return { N, ds, L: Ltot, x, y, hd, k, vT, corners };
+})();
+const trkIdx = s => ((Math.floor(s / TRK.ds) % TRK.N) + TRK.N) % TRK.N;
+const BUCKET = 10, NB = Math.ceil(TRK.L / BUCKET);
+const circ = { on: false, auto: false, s: 0, lapStart: null, lapN: 0, valid: true, offT: 0, offs: 0, lat: 0,
+  sectors: [], bestSectors: [null, null, null], best: null, last: null, laps: [], topSpeed: 0,
+  tAt: new Float32Array(NB).fill(-1), bestTAt: null, spd: new Float32Array(NB), bestSpd: null, lastSpd: null, ctl: new Int8Array(NB), prevB: 0,
+  gas: false, msg: '', msgT: 0 };
+function circuitGrip(h){
+  if (!circ.on){ circ.lat = 0; return 1; }
+  const k = TRK.k[trkIdx(circ.s)], lat = st.v * st.v * Math.abs(k), lim = MU_LAT * 9.81;
+  circ.lat = lat / 9.81;
+  const use = Math.min(1, lat / lim);
+  if (lat > lim * 1.2 && circ.offT <= 0){
+    circ.offT = 1.6; circ.valid = false; circ.offs++;
+    const c = nearestCorner(circ.s); circMsg(`Sortie de piste${c ? ' au virage ' + c.name.slice(1) : ''} à ${nf.format(st.v * 3.6)} km/h : freinez plus tôt.`);
+  }
+  if (circ.offT > 0) circ.offT -= h;
+  return Math.sqrt(Math.max(0.08, 1 - use * use));
+}
+function circuitDrag(){
+  if (!circ.on) return 0;
+  let F = 0;
+  const k = TRK.k[trkIdx(circ.s)], lat = st.v * st.v * Math.abs(k), lim = MU_LAT * 9.81;
+  if (lat > lim) F += CAR.m * Math.min(lat - lim, 6);        // les pneus glissent : on perd de la vitesse
+  if (circ.offT > 0 && st.v > 11) F += CAR.m * 9.81 * 0.7;     // bac à graviers
+  return F;
+}
+function nearestCorner(s){
+  const i = trkIdx(s); let best = null, bd = 1e9;
+  TRK.corners.forEach(c => { let d = Math.abs(c.i - i); d = Math.min(d, TRK.N - d); if (d < bd){ bd = d; best = c; } });
+  return bd * TRK.ds < 150 ? best : null;
+}
+function circMsg(t){ circ.msg = t; circ.msgT = 4; }
+const fmtLap = t => { if (t === null || t === undefined || !isFinite(t)) return '–'; const m = Math.floor(t / 60), sec = t - m * 60; return `${m}:${sec < 10 ? '0' : ''}${sec.toFixed(3).replace('.', ',')}`; };
+function circuitStart(){
+  if (st.broken){ msg('Montez un moteur neuf avant d\'aller en piste.'); return; }
+  circ.on = true; circ.s = TRK.L - 120; circ.lapStart = null; circ.valid = true; circ.offT = 0; circ.sectors = []; circ.prevB = trkIdx(circ.s) * TRK.ds / BUCKET | 0;
+  st.v = 0; st.pedal = 0; st.brake = false; $('#pedal').value = 0;
+  st.sel = 'N'; selectGear('S'); st.gear = 1;
+  circMsg('Sur la grille. Gaz ! Le chrono démarre au passage de la ligne.');
+  document.body.classList.add('in-circuit');
+}
+function circuitStop(){ circ.on = false; circ.auto = false; $('#circAuto').checked = false; st.brake = false; document.body.classList.remove('in-circuit'); }
+function circuitFrame(dt){
+  if (!circ.on) return;
+  if (circ.msgT > 0) circ.msgT -= dt;
+  // pilote automatique : suit la vitesse cible en anticipant
+  if (circ.auto && !st.broken){
+    if (!['D', 'S', 'M'].includes(st.sel)) selectGear('S');
+    let vt = 1e9; const i0 = trkIdx(circ.s), look = Math.ceil((st.v * 0.3 + 4) / TRK.ds);
+    for (let j = 0; j <= look; j++) vt = Math.min(vt, TRK.vT[(i0 + j) % TRK.N]);
+    if (st.v > vt + 0.4){ st.brake = true; st.pedal = 0; }
+    else { st.brake = false; st.pedal = st.v < vt - 1.5 ? 1 : THREE.MathUtils.clamp(0.3 + (vt - st.v) * 0.4, 0.15, 1); }
+    $('#pedal').value = Math.round(st.pedal * 100);
+  }
+  // tours et secteurs
+  while (circ.s >= TRK.L){ circ.s -= TRK.L; circuitLine(); }
+  while (circ.s < 0) circ.s += TRK.L;
+  const lapT = circ.lapStart === null ? null : st.simT - circ.lapStart;
+  const b = Math.min(NB - 1, Math.floor(circ.s / BUCKET));
+  if (lapT !== null){
+    let pb = circ.prevB;
+    while (pb !== b){ pb = (pb + 1) % NB; if (circ.tAt[pb] < 0){ circ.tAt[pb] = lapT; circ.spd[pb] = st.v * 3.6; circ.ctl[pb] = st.brake ? -1 : st.pedal > 0.6 ? 1 : 0; } }
+    for (let sct = 1; sct <= 2; sct++){
+      if (circ.sectors.length === sct - 1 && circ.s >= TRK.L * sct / 3){ circ.sectors.push(lapT); }
+    }
+  }
+  circ.prevB = b;
+  circ.topSpeed = Math.max(circ.topSpeed, st.v * 3.6);
+}
+function circuitLine(){
+  const now = st.simT;
+  if (circ.lapStart !== null){
+    const t = now - circ.lapStart;
+    const secs = [circ.sectors[0], circ.sectors[1] - circ.sectors[0], t - circ.sectors[1]];
+    const valid = circ.valid && circ.sectors.length === 2;
+    circ.lapN++;
+    circ.laps.unshift({ n: circ.lapN, t, valid, secs, top: circ.topSpeed });
+    circ.laps = circ.laps.slice(0, 8);
+    circ.last = t; circ.lastSpd = circ.spd.slice();
+    if (valid && (circ.best === null || t < circ.best)){
+      circ.best = t; circ.bestTAt = circ.tAt.slice(); circ.bestSpd = circ.spd.slice(); circ.bestSectors = secs;
+      circMsg(`Meilleur tour : ${fmtLap(t)}`);
+    } else if (!valid) circMsg(`Tour ${circ.lapN} non valable (sortie de piste) : ${fmtLap(t)}`);
+    else circMsg(`Tour ${circ.lapN} : ${fmtLap(t)} (${t - circ.best >= 0 ? '+' : ''}${(t - circ.best).toFixed(2).replace('.', ',')} s)`);
+  } else circMsg('Chrono lancé !');
+  circ.lapStart = now; circ.valid = true; circ.sectors = []; circ.topSpeed = 0;
+  circ.tAt.fill(-1); circ.spd.fill(0); circ.ctl.fill(0); circ.prevB = 0;
+}
+
 let msgTimer = 0;
 function msg(t){ $('#gearMsg').textContent = t; clearTimeout(msgTimer); if (t) msgTimer = setTimeout(() => $('#gearMsg').textContent = '', 4000); }
 function autoShift(){
@@ -1591,47 +1778,128 @@ function drawKin(){
 // ------------------------------------------------------------------
 // Son (synthèse simple, démarrée par l'utilisateur)
 // ------------------------------------------------------------------
+// Synthèse du V8 : impulsions d'échappement dans l'ordre d'allumage, un conduit par banc,
+// souffle d'admission des trompettes, pétarades au lever de pied, sifflement du compresseur.
+class V8Synth {
+  constructor(sr){
+    this.sr = sr; this.phase = 0;
+    this.rpm = 0; this.tRpm = 0; this.load = 0; this.tLoad = 0; this.thr = 0; this.tThr = 0;
+    this.fuel = true; this.dfco = false; this.sc = 0; this.vol = 0.9; this.tVol = 0.9;
+    const FO = [1, 5, 4, 8, 6, 3, 7, 2];
+    this.ev = FO.map((c, i) => [i * 90, c <= 4 ? 0 : 1, c]);
+    this.cylAmp = new Float32Array(9); for (let c = 0; c < 9; c++) this.cylAmp[c] = 0.88 + Math.random() * 0.24;
+    this.pT = [1e9, 1e9]; this.pA = [0, 0]; this.pLen = [80, 80]; this.nEnv = [0, 0];
+    this.res = [0, 1].map(b => [[150, 0.45, 1.0], [410, 0.3, 0.8], [1050, 0.45, 0.45], [2400, 0.6, 0.18]]
+      .map(([f, q, g]) => ({ f: f * (b ? 1.04 : 1), q, g, low: 0, band: 0 })));
+    this.thump = [0, 0]; this.lp = [0, 0]; this.dc = [0, 0];
+    this.inR = { f: 1200, q: 0.35, low: 0, band: 0 }; this.inEnv = 0;
+    this.whPh = 0; this.popCool = 0; this.bangT = 0;
+  }
+  setParams(p){
+    if (p.bang){ this.bangT = this.sr * 0.9; return; }
+    this.tRpm = p.rpm; this.tLoad = p.load; this.tThr = p.thr; this.fuel = p.fuel; this.dfco = p.dfco; this.sc = p.sc;
+    if (p.vol !== undefined) this.tVol = p.vol;
+  }
+  svf(r, x){
+    const f = 2 * Math.sin(Math.PI * Math.min(r.f, this.sr * 0.2) / this.sr);
+    r.low += f * r.band; const hi = x - r.low - r.q * r.band; r.band += f * hi; return r.band;
+  }
+  process(L, R, n){
+    const sr = this.sr, nDecay = Math.exp(-1 / (sr * 0.0016)), inDecay = Math.exp(-1 / (sr * 0.005));
+    for (let i = 0; i < n; i++){
+      this.rpm += (this.tRpm - this.rpm) * 0.002;
+      this.load += (this.tLoad - this.load) * 0.001;
+      this.thr += (this.tThr - this.thr) * 0.001;
+      this.vol += (this.tVol - this.vol) * 0.001;
+      const prev = this.phase;
+      this.phase += this.rpm / 60 * 360 / sr;
+      let wrapped = false; if (this.phase >= 720){ this.phase -= 720; wrapped = true; }
+      if (this.rpm > 60) for (let k = 0; k < 8; k++){
+        const a = this.ev[k][0];
+        const crossed = wrapped ? (a >= prev || a < this.phase) : (a >= prev && a < this.phase);
+        if (!crossed) continue;
+        const b = this.ev[k][1], c = this.ev[k][2];
+        const gap = 60 / (this.rpm * 4);                       // temps entre deux explosions
+        this.pLen[b] = Math.max(12, Math.round(sr * Math.min(0.0024, gap * 0.6)));
+        this.pT[b] = 0;
+        if (this.fuel){
+          const A = (0.22 + 0.78 * this.load) * this.cylAmp[c] * (0.9 + Math.random() * 0.2);
+          this.pA[b] = A; this.nEnv[b] = A * 0.45;
+        } else {
+          this.pA[b] = 0.07; this.nEnv[b] = 0.02;
+          if (this.dfco && this.rpm > 2800 && this.popCool <= 0 && Math.random() < 0.07){
+            this.pA[b] = 1.3; this.nEnv[b] = 1.4; this.popCool = sr * 0.06;
+          }
+        }
+        this.inEnv = Math.max(this.inEnv, 0.4 + 0.6 * this.thr);
+      }
+      if (this.popCool > 0) this.popCool--;
+      let oL = 0, oR = 0;
+      const open = 0.04 + 0.22 * this.thr + 0.2 * Math.min(1, this.rpm / 8500);
+      for (let b = 0; b < 2; b++){
+        let x = 0;
+        if (this.pT[b] < this.pLen[b]){ x = this.pA[b] * Math.sin(Math.PI * this.pT[b] / this.pLen[b]); this.pT[b]++; }
+        const nz = (Math.random() * 2 - 1) * this.nEnv[b]; this.nEnv[b] *= nDecay;
+        const exc = x + nz * 0.6;
+        let y = 0; const rs = this.res[b];
+        for (let k = 0; k < rs.length; k++) y += this.svf(rs[k], exc) * rs[k].g;
+        this.thump[b] += (exc - this.thump[b]) * 0.025;
+        let s = y * 0.9 + this.thump[b] * 2.4;
+        this.lp[b] += (s - this.lp[b]) * open;
+        s = this.lp[b];
+        this.dc[b] += (s - this.dc[b]) * 0.0015; s -= this.dc[b];
+        if (b === 0){ oL += s * 0.78; oR += s * 0.32; } else { oR += s * 0.78; oL += s * 0.32; }
+      }
+      this.inEnv *= inDecay;
+      this.inR.f = 650 + this.rpm * 0.3;
+      const ib = this.svf(this.inR, Math.random() * 2 - 1) * this.inEnv * this.thr * Math.min(1, this.rpm / 5500) * 0.55;
+      oL += ib; oR += ib;
+      if (this.sc){
+        this.whPh += (400 + this.rpm * 0.75) / sr; if (this.whPh > 1) this.whPh -= 1;
+        const w = Math.sin(2 * Math.PI * this.whPh) * 0.045 * Math.min(1, this.rpm / 8300) * (0.3 + 0.7 * this.thr);
+        oL += w; oR += w;
+      }
+      if (this.bangT > 0){ const e = this.bangT / (sr * 0.9); const bn = (Math.random() * 2 - 1) * e * e * 1.6; oL += bn; oR += bn; this.bangT--; }
+      L[i] = Math.tanh(oL * 1.5) * this.vol * 0.55;
+      R[i] = Math.tanh(oR * 1.5) * this.vol * 0.55;
+    }
+  }
+}
 let audio = null;
-function startAudio(){
+async function startAudio(){
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
   const ctx = new AC();
-  const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
-  const filt = ctx.createBiquadFilter(); filt.type = 'lowpass'; filt.Q.value = 3; filt.connect(master);
-  const o1 = ctx.createOscillator(); o1.type = 'sawtooth';
-  const o2 = ctx.createOscillator(); o2.type = 'square';
-  const g1 = ctx.createGain(); g1.gain.value = 0.55; const g2 = ctx.createGain(); g2.gain.value = 0.22;
-  o1.connect(g1).connect(filt); o2.connect(g2).connect(filt);
-  const nb = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = nb.getChannelData(0);
-  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-  const noise = ctx.createBufferSource(); noise.buffer = nb; noise.loop = true;
-  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.8; const gn = ctx.createGain(); gn.gain.value = 0.08;
-  noise.connect(bp).connect(gn).connect(filt);
-  o1.start(); o2.start(); noise.start();
-  const wh = ctx.createOscillator(); wh.type = 'sine'; const gw = ctx.createGain(); gw.gain.value = 0;
-  wh.connect(gw).connect(ctx.destination); wh.start();
-  audio = { ctx, master, filt, o1, o2, bp, nb, wh, gw };
+  let node = null, post;
+  try {
+    const src = V8Synth.toString() + `
+      class V8Proc extends AudioWorkletProcessor {
+        constructor(){ super(); this.s = new V8Synth(sampleRate); this.port.onmessage = e => this.s.setParams(e.data); }
+        process(inp, out){ const o = out[0]; this.s.process(o[0], o[1] || o[0], o[0].length); return true; }
+      }
+      registerProcessor('v8-synth', V8Proc);`;
+    const url = URL.createObjectURL(new Blob([src], { type: 'application/javascript' }));
+    await ctx.audioWorklet.addModule(url);
+    node = new AudioWorkletNode(ctx, 'v8-synth', { numberOfInputs: 0, outputChannelCount: [2] });
+    post = m => node.port.postMessage(m);
+  } catch (e){
+    // repli si le navigateur refuse le worklet : même synthèse sur le fil principal
+    const synth = new V8Synth(ctx.sampleRate);
+    node = ctx.createScriptProcessor(2048, 0, 2);
+    node.onaudioprocess = ev => synth.process(ev.outputBuffer.getChannelData(0), ev.outputBuffer.getChannelData(1), ev.outputBuffer.length);
+    post = m => synth.setParams(m);
+  }
+  node.connect(ctx.destination);
+  audio = { ctx, post };
+  updateAudio();
   return true;
 }
 function updateAudio(){
   if (!audio) return;
-  const t = audio.ctx.currentTime, f = Math.max(st.rpm, 1) / 60 * 4;
-  audio.o1.frequency.setTargetAtTime(f / 2, t, 0.03);
-  audio.o2.frequency.setTargetAtTime(f, t, 0.03);
-  audio.bp.frequency.setTargetAtTime(f * 3, t, 0.05);
-  audio.filt.frequency.setTargetAtTime(250 + st.throttle * 18 + st.rpm * 0.35, t, 0.05);
-  const on = st.rpm > 30 && !st.cut;
-  audio.master.gain.setTargetAtTime(on ? 0.05 + 0.12 * st.throttle / 100 : 0, t, st.cut ? 0.005 : 0.08);
-  audio.wh.frequency.setTargetAtTime(400 + st.rpm * 0.75, t, 0.05);   // sifflement du compresseur
-  audio.gw.gain.setTargetAtTime(st.cfg.sc && st.rpm > 1 ? 0.004 + 0.03 * Math.min(1, st.rpm / 8300) * (0.3 + 0.7 * st.throttle / 100) : 0, t, 0.1);
+  const maxT = torqueCurve(Math.max(st.rpm, 1000)) || 1;
+  audio.post({ rpm: st.rpm, load: THREE.MathUtils.clamp(st.torque / maxT, 0, 1), thr: st.throttle / 100,
+    fuel: st.fuelOn && st.rpm > 1, dfco: st.dfco || st.limCut, sc: st.cfg.sc ? 1 : 0 });
 }
-function audioBang(){
-  if (!audio) return;
-  const { ctx, nb } = audio;
-  const src = ctx.createBufferSource(); src.buffer = nb;
-  const g = ctx.createGain(); const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800;
-  g.gain.setValueAtTime(0.9, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
-  src.connect(lp).connect(g).connect(ctx.destination); src.start(); src.stop(ctx.currentTime + 1);
-}
+function audioBang(){ if (audio) audio.post({ bang: true }); }
 
 // ------------------------------------------------------------------
 // Interface
@@ -1652,16 +1920,34 @@ document.querySelectorAll('[data-sel]').forEach(b => b.addEventListener('click',
 $('#shiftUp').addEventListener('click', () => paddle(1));
 $('#shiftDown').addEventListener('click', () => paddle(-1));
 $('#moneyBtn').addEventListener('click', moneyShift);
+$('#trkLen').textContent = `${nf1.format(TRK.L / 1000)} km · ${TRK.corners.length} virages`;
+$('#circStart').addEventListener('click', circuitStart);
+$('#circStop').addEventListener('click', circuitStop);
+$('#circAuto').addEventListener('change', e => { circ.auto = e.target.checked; if (!circ.auto){ st.brake = false; setPedal(0); } else if (!circ.on) circuitStart(); });
+const holdBtn = (el, on, off) => {
+  el.addEventListener('pointerdown', e => { e.preventDefault(); el.setPointerCapture(e.pointerId); el.classList.add('on'); on(); });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => el.addEventListener(ev, () => { el.classList.remove('on'); off(); }));
+};
+holdBtn($('#gasHold'), () => { if (!circ.auto) setPedal(100); }, () => { if (!circ.auto) setPedal(0); });
+holdBtn($('#brakeHold'), () => { if (!circ.auto){ setPedal(0); setBrake(true); } }, () => setBrake(false));
 window.addEventListener('keydown', e => {
   const tag = (e.target.tagName || '').toLowerCase();
   if (tag === 'select' || (tag === 'input' && e.target.type !== 'checkbox')) return;
+  if (circ.on && !circ.auto && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
+    e.preventDefault(); if (e.repeat) return;
+    if (e.key === 'ArrowUp') setPedal(100); else { setPedal(0); setBrake(true); }
+    return;
+  }
   if (e.key === 'ArrowUp'){ e.preventDefault(); setPedal(+$('#pedal').value + 10); }
   else if (e.key === 'ArrowDown'){ e.preventDefault(); setPedal(+$('#pedal').value - 10); }
   else if (e.key === ' ' && !e.repeat){ e.preventDefault(); setBrake(true); }
   else if (e.key === '+' || e.key === '='){ paddle(1); }
   else if (e.key === '-'){ paddle(-1); }
 });
-window.addEventListener('keyup', e => { if (e.key === ' ') setBrake(false); });
+window.addEventListener('keyup', e => {
+  if (e.key === ' ') setBrake(false);
+  if (circ.on && !circ.auto){ if (e.key === 'ArrowUp') setPedal(0); if (e.key === 'ArrowDown') setBrake(false); }
+});
 bindRange('hp', v => { st.hp = v; $('#hpOut').innerHTML = `${v}<small>ch</small>`; });
 function applyCfg(key){
   st.cfg = CFGS[key];
@@ -1686,8 +1972,8 @@ bindRange('play', v => { st.playback = Math.pow(10, -3 + 3 * v / 100); $('#playO
 bindRange('angle', v => { if (st.paused) st.theta = v; });
 $('#limiter').addEventListener('change', e => st.limiter = e.target.checked);
 $('#pauseBtn').addEventListener('click', () => setPaused(!st.paused));
-$('#soundBtn').addEventListener('click', () => {
-  if (!audio){ if (startAudio()) $('#soundBtn').textContent = 'Son : actif'; return; }
+$('#soundBtn').addEventListener('click', async () => {
+  if (!audio){ if (await startAudio()) $('#soundBtn').textContent = 'Son : actif'; return; }
   if (audio.ctx.state === 'running'){ audio.ctx.suspend(); $('#soundBtn').textContent = 'Son : coupé'; }
   else { audio.ctx.resume(); $('#soundBtn').textContent = 'Son : actif'; }
 });
@@ -2623,6 +2909,104 @@ document.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click'
 }));
 
 // ------------------------------------------------------------------
+// Circuit : plan, mini-carte, chrono
+// ------------------------------------------------------------------
+const trkBox = (() => { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (let i = 0; i < TRK.N; i++){ x0 = Math.min(x0, TRK.x[i]); x1 = Math.max(x1, TRK.x[i]); y0 = Math.min(y0, TRK.y[i]); y1 = Math.max(y1, TRK.y[i]); } return { x0, x1, y0, y1 }; })();
+function trkXf(w, h, pad){
+  const sc = Math.min((w - 2 * pad) / (trkBox.x1 - trkBox.x0), (h - 2 * pad) / (trkBox.y1 - trkBox.y0));
+  const ox = (w - (trkBox.x1 - trkBox.x0) * sc) / 2, oy = (h - (trkBox.y1 - trkBox.y0) * sc) / 2;
+  return [x => ox + (x - trkBox.x0) * sc, y => h - oy - (y - trkBox.y0) * sc, sc];
+}
+function tracePath(ctx, X, Y){ ctx.beginPath(); for (let i = 0; i <= TRK.N; i++){ const j = i % TRK.N; i ? ctx.lineTo(X(TRK.x[j]), Y(TRK.y[j])) : ctx.moveTo(X(TRK.x[j]), Y(TRK.y[j])); } ctx.closePath(); }
+let trackVisible = true;
+new IntersectionObserver(e => { trackVisible = e[0].isIntersecting; }).observe($('#circuitSec'));
+function drawTrack(){
+  if (!trackVisible) return;
+  const { ctx, w, h } = fitCanvas($('#trackMap'));
+  const [X, Y, sc] = trkXf(w, h, 40);
+  ctx.clearRect(0, 0, w, h);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  tracePath(ctx, X, Y); ctx.strokeStyle = '#2b3a30'; ctx.lineWidth = Math.max(10, 24 * sc); ctx.stroke();
+  tracePath(ctx, X, Y); ctx.strokeStyle = '#3a423d'; ctx.lineWidth = Math.max(8, 20 * sc); ctx.stroke();
+  // trace du tour en cours : vert à l'accélération, rouge au freinage
+  ctx.lineWidth = 3;
+  for (let b = 0; b < NB; b++){
+    if (circ.tAt[b] < 0 || !circ.ctl[b]) continue;
+    const i0 = Math.floor(b * BUCKET / TRK.ds) % TRK.N, i1 = Math.floor((b + 1) * BUCKET / TRK.ds) % TRK.N;
+    ctx.strokeStyle = circ.ctl[b] > 0 ? COL.ok : COL.red;
+    ctx.beginPath(); ctx.moveTo(X(TRK.x[i0]), Y(TRK.y[i0])); ctx.lineTo(X(TRK.x[i1]), Y(TRK.y[i1])); ctx.stroke();
+  }
+  // ligne de départ et secteurs
+  const tick = (s, col, wd) => { const i = trkIdx(s), a = TRK.hd[i] + Math.PI / 2, r = 16 * Math.max(sc, 0.6);
+    ctx.strokeStyle = col; ctx.lineWidth = wd; ctx.beginPath(); ctx.moveTo(X(TRK.x[i] + Math.cos(a) * r / sc), Y(TRK.y[i] + Math.sin(a) * r / sc)); ctx.lineTo(X(TRK.x[i] - Math.cos(a) * r / sc), Y(TRK.y[i] - Math.sin(a) * r / sc)); ctx.stroke(); };
+  tick(0, '#ffffff', 4); tick(TRK.L / 3, COL.muted, 2); tick(2 * TRK.L / 3, COL.muted, 2);
+  ctx.font = '600 12px "Barlow Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  TRK.corners.forEach(c => {
+    const i = c.i, sgn = Math.sign(TRK.k[i]) || 1, a = TRK.hd[i] - sgn * Math.PI / 2, r = 26 / sc;
+    ctx.fillStyle = COL.muted; ctx.fillText(c.name.slice(1), X(TRK.x[i] + Math.cos(a) * r), Y(TRK.y[i] + Math.sin(a) * r));
+  });
+  ctx.fillStyle = COL.fg; ctx.font = '500 11px "IBM Plex Mono", monospace';
+  const i0 = trkIdx(0); ctx.fillText('Départ', X(TRK.x[i0]), Y(TRK.y[i0]) + 22);
+  ctx.fillText('S2', X(TRK.x[trkIdx(TRK.L / 3)]), Y(TRK.y[trkIdx(TRK.L / 3)]) - 20);
+  ctx.fillText('S3', X(TRK.x[trkIdx(2 * TRK.L / 3)]), Y(TRK.y[trkIdx(2 * TRK.L / 3)]) - 20);
+  if (circ.on){
+    const i = trkIdx(circ.s);
+    ctx.fillStyle = circ.offT > 0 ? COL.red : COL.amber; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(X(TRK.x[i]), Y(TRK.y[i]), 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+}
+function drawMini(){
+  if (!circ.on) return;
+  const c = $('#miniMap'), ctx = c.getContext('2d'), w = c.width, h = c.height;
+  const [X, Y] = trkXf(w, h - 60, 16);
+  ctx.clearRect(0, 0, w, h);
+  ctx.lineJoin = 'round'; tracePath(ctx, X, Y); ctx.strokeStyle = '#59636e'; ctx.lineWidth = 6; ctx.stroke();
+  const i = trkIdx(circ.s);
+  ctx.fillStyle = circ.offT > 0 ? COL.red : COL.amber; ctx.beginPath(); ctx.arc(X(TRK.x[i]), Y(TRK.y[i]), 9, 0, Math.PI * 2); ctx.fill();
+  const lapT = circ.lapStart === null ? null : st.simT - circ.lapStart;
+  ctx.fillStyle = COL.fg; ctx.font = '700 40px "Barlow Condensed", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText(lapT === null ? 'Tour de sortie' : fmtLap(lapT), 14, h - 16);
+  const d = lapDelta();
+  if (d !== null){ ctx.fillStyle = d <= 0 ? COL.ok : COL.red; ctx.font = '700 28px "Barlow Condensed", sans-serif'; ctx.textAlign = 'right'; ctx.fillText(`${d > 0 ? '+' : ''}${d.toFixed(2).replace('.', ',')}`, w - 14, h - 18); }
+}
+function lapDelta(){
+  if (!circ.on || circ.lapStart === null || !circ.bestTAt) return null;
+  const b = Math.min(NB - 1, Math.floor(circ.s / BUCKET));
+  if (circ.bestTAt[b] < 0 || circ.tAt[b] < 0) return null;
+  return circ.tAt[b] - circ.bestTAt[b];
+}
+function circuitUI(){
+  const lapT = circ.on && circ.lapStart !== null ? st.simT - circ.lapStart : null;
+  setHTML('lapLbl', !circ.on ? 'Hors piste' : lapT === null ? 'Tour de sortie' : `Tour ${circ.lapN + 1}${circ.valid ? '' : ' · non valable'}`);
+  setHTML('lapNow', lapT === null ? '–' : fmtLap(lapT));
+  const d = lapDelta(), de = $('#lapDelta');
+  de.hidden = d === null;
+  if (d !== null){ de.textContent = `${d > 0 ? '+' : ''}${d.toFixed(2).replace('.', ',')} s`; de.className = 'delta ' + (d <= 0 ? 'neg' : 'pos'); }
+  const m = $('#circMsg'); m.hidden = !(circ.msgT > 0); if (circ.msgT > 0) m.textContent = circ.msg;
+  setHTML('lapBest', fmtLap(circ.best)); setHTML('lapLast', fmtLap(circ.last));
+  const sec = circ.sectors.map((t, i) => (i ? t - circ.sectors[i - 1] : t).toFixed(2).replace('.', ',')).join(' · ');
+  setHTML('lapSecs', sec || '–');
+  setHTML('latG', `${nf1.format(circ.lat)}<small>g</small>`);
+  setHTML('lapTop', circ.on ? `${nf.format(circ.topSpeed)}<small>km/h</small>` : '–');
+  setHTML('lapOffs', String(circ.offs));
+  const rows = circ.laps.map(l => `<tr class="${!l.valid ? 'inv' : l.t === circ.best ? 'best' : ''}"><td>${l.n}</td><td class="n">${fmtLap(l.t)}</td>${l.secs.map(x => `<td class="n">${x.toFixed(2).replace('.', ',')}</td>`).join('')}</tr>`).join('');
+  setHTML('lapRows', rows || '<tr><td colspan="5" class="hint">Aucun tour chronométré.</td></tr>');
+  // courbe de vitesse
+  if (!trackVisible) return;
+  const { ctx, w, h } = fitCanvas($('#speedTrace'));
+  const pad = { l: 30, r: 8, t: 8, b: 16 }, vmax = 300;
+  const X = b => pad.l + (w - pad.l - pad.r) * b / NB, Y = v => h - pad.b - (h - pad.t - pad.b) * v / vmax;
+  ctx.clearRect(0, 0, w, h);
+  ctx.font = '10px "IBM Plex Mono", monospace'; ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+  [0, 100, 200, 300].forEach(v => { ctx.strokeStyle = COL.line; ctx.beginPath(); ctx.moveTo(pad.l, Y(v)); ctx.lineTo(w - pad.r, Y(v)); ctx.stroke(); ctx.fillStyle = COL.muted; ctx.fillText(v, pad.l - 4, Y(v)); });
+  const line = (arr, col, lw, times) => { if (!arr) return; ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); let started = false;
+    for (let b = 0; b < NB; b++){ if (times && times[b] < 0){ started = false; continue; } const x = X(b), y = Y(arr[b]); if (!started){ ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y); } ctx.stroke(); };
+  line(circ.bestSpd, COL.dim, 1.5, circ.bestTAt);
+  line(circ.spd, COL.amber, 2, circ.tAt);
+  ctx.textAlign = 'left'; ctx.fillStyle = COL.muted; ctx.fillText('km/h · meilleur tour en gris', pad.l + 4, pad.t + 2);
+}
+
+// ------------------------------------------------------------------
 // Boucle
 // ------------------------------------------------------------------
 let last = performance.now(), uiT = 0, firingCyl = null;
@@ -2699,6 +3083,8 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 function frame(now){
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   updateEngine(dt);
+  circuitFrame(dt);
+  updateAudio();
   const th0 = st.theta;
   if (!st.paused) st.theta = (st.theta + st.rpm * st.playback / 60 * 360 * dt) % 720;
   let dA = st.theta - th0; if (dA < -360) dA += 720;
@@ -2719,9 +3105,9 @@ function frame(now){
   renderer.render(scene, camera);
   firingCyl = updateLabels();
   lpRender(dt);
-  drawTach(); drawChrono();
+  drawTach(); drawChrono(); drawTrack(); drawMini();
   uiT += dt;
-  if (uiT > 0.08){ uiT = 0; computeCycle(); updateUI(); drawCurve(); drawKin(); drawGears(); if (lpVisible){ drawPChart(); drawPV(); } updateAudio(); }
+  if (uiT > 0.08){ uiT = 0; computeCycle(); updateUI(); drawCurve(); drawKin(); drawGears(); circuitUI(); if (lpVisible){ drawPChart(); drawPV(); } }
   requestAnimationFrame(frame);
 }
 computeCycle();
