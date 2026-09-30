@@ -86,5 +86,5 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
 .eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 /* Titre du site : Saira 800 italique ; le M porte trois bandes inclinées comme la police */
 .brand{font-family:var(--f-brand);font-style:italic;font-weight:800;letter-spacing:.005em}
-.m-grad{background:linear-gradient(103deg,var(--m-light) 0 36%,var(--m-dark) 36% 66%,var(--m-red) 66% 100%);
+.m-grad{background:linear-gradient(103deg,var(--m-light) 0 30%,var(--m-dark) 42% 58%,var(--m-red) 70% 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;padding-right:.04em}
