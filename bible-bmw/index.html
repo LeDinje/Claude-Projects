@@ -3,16 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>La Bible BMW</title>
+<title>Bimmer Bible</title>
 <meta name="description" content="Moteurs, fonctionnement, pièces et références : l'encyclopédie des BMW, moteur par moteur.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/site.css">
 <style>
 .hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px;align-items:center;padding-block:48px 28px}
 .hero h1{font:700 clamp(46px,7vw,92px)/.9 var(--f-display);text-transform:uppercase;letter-spacing:.005em;margin:10px 0 18px;text-wrap:balance}
-.hero h1 b{color:var(--amber)}
+.hero h1 b{color:var(--m-light)}
+.brand-h1{display:flex;align-items:center;gap:18px}
+.brand-h1 svg{width:clamp(84px,11vw,132px);height:auto;flex:none;color:var(--fg)}
 .hero p{font-size:18px;line-height:1.55;color:#cdd3da;max-width:52ch;margin:0 0 20px}
 .hero-cta{display:flex;flex-wrap:wrap;gap:10px}
 .btn.lg{font-size:15px;padding:12px 16px}
@@ -38,7 +41,15 @@ a.rub:hover{border-color:var(--amber)}
 </head>
 <body>
 <header class="site-head"><div class="in">
-  <a class="logo" href="index.html">La Bible <b>BMW</b></a>
+  <a class="logo" href="index.html" aria-label="Bimmer Bible, accueil"><svg viewBox="0 0 128 128" aria-hidden="true" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert, trois rubans marque-page">
+  <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path stroke="#2aa6e0" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
+    <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
+  </g>
+  <path d="M56 104 h6 l-6 20 h-6 z" fill="#2aa6e0"/>
+  <path d="M64 104 h6 l-6 20 h-6 z" fill="#3b4fb0"/>
+  <path d="M72 104 h6 l-6 20 h-6 z" fill="#e3262d"/>
+</svg><span>Bimmer <b>Bible</b></span></a>
   <nav class="nav" aria-label="Rubriques">
     <a href="moteurs/index.html">Moteurs</a>
     <span>Modèles</span><span>Pièces</span><span>Entretien</span>
@@ -49,7 +60,15 @@ a.rub:hover{border-color:var(--amber)}
   <section class="hero">
     <div>
       <div class="eyebrow">Encyclopédie indépendante · moteur par moteur</div>
-      <h1>La Bible <b>BMW</b></h1>
+      <h1 class="brand-h1"><svg viewBox="0 0 128 128" aria-hidden="true" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert, trois rubans marque-page">
+  <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path stroke="#2aa6e0" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
+    <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
+  </g>
+  <path d="M56 104 h6 l-6 20 h-6 z" fill="#2aa6e0"/>
+  <path d="M64 104 h6 l-6 20 h-6 z" fill="#3b4fb0"/>
+  <path d="M72 104 h6 l-6 20 h-6 z" fill="#e3262d"/>
+</svg><span>Bimmer <b>Bible</b></span></h1>
       <p>Chaque moteur expliqué pièce par pièce : son architecture, son fonctionnement en 3D, ses points faibles et les références de ses pièces, avec leur source.</p>
       <div class="hero-cta">
         <a class="btn solid lg" href="moteurs/s65/index.html">Découvrir le V8 S65</a>
@@ -86,7 +105,7 @@ a.rub:hover{border-color:var(--amber)}
 </main>
 
 <footer class="site-foot"><div class="in">
-  <span>La Bible BMW · site indépendant, sans lien avec BMW AG. · <a href="identite.html">Propositions de nom et de logo</a></span>
+  <span>Bimmer Bible · site de passionnés, indépendant, sans lien avec BMW AG. · <a href="identite.html">Charte graphique</a></span>
   <span>Références pièces : toujours vérifier avec le numéro de châssis sur RealOEM avant de commander.</span>
 </div></footer>
 </body>

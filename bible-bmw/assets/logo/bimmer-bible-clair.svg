@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert, trois rubans marque-page">
   <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
     <path stroke="#2aa6e0" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
-    <path stroke="#efe6d2" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
+    <path stroke="#15181c" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
   </g>
   <path d="M56 104 h6 l-6 20 h-6 z" fill="#2aa6e0"/>
   <path d="M64 104 h6 l-6 20 h-6 z" fill="#3b4fb0"/>

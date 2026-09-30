@@ -3,198 +3,104 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Identité · propositions</title>
+<title>Charte graphique · Bimmer Bible</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/site.css">
 <style>
-:root{--paper:#f3efe6;--ink:#15181c}
-.id-head{padding-block:24px 8px}
-.id-head h1{font:700 clamp(38px,6vw,64px)/.92 var(--f-display);text-transform:uppercase;margin:8px 0 12px}
-.id-head p{color:#cdd3da;max-width:64ch;margin:0 0 10px}
-.props{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:18px}
-.prop{display:grid;gap:14px;align-content:start}
-.prop.reco{border-color:var(--amber)}
-.tag{font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--amber)}
-.stage-dark,.stage-light{border-radius:8px;display:flex;align-items:center;gap:16px;padding:18px}
-.stage-dark{background:var(--bg);color:#efe6d2;border:1px solid var(--line)}
-.stage-light{background:var(--paper);color:var(--ink)}
-.stage-dark svg{width:96px;height:96px;flex:none}
-.stage-light svg{width:40px;height:40px;flex:none}
-.word{font:700 38px/.95 var(--f-display);letter-spacing:.01em}
-.stage-light .word{font-size:24px}
-.word em{font-style:normal;color:var(--amber)}
-.favs{display:flex;gap:10px;align-items:center;font:500 11px var(--f-mono);color:var(--muted)}
-.favs svg{color:#efe6d2;background:var(--bg-2);border-radius:4px;padding:2px}
-.prop h2{margin:0;font:700 26px/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em}
-.prop p{margin:0;font-size:14.5px;color:#cdd3da}
-.prop ul{margin:0;padding-left:18px;font-size:14px;color:#cdd3da}
-.why{margin-top:28px}
+.ch-head{padding-block:24px 8px}
+.ch-head h1{font:700 clamp(38px,6vw,64px)/.92 var(--f-display);text-transform:uppercase;margin:8px 0 12px}
+.ch-head p{color:#cdd3da;max-width:64ch;margin:0}
+.boards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:18px}
+.board{border-radius:10px;display:flex;align-items:center;gap:22px;padding:28px}
+.board.dark{background:var(--bg);color:#efe6d2;border:1px solid var(--line)}
+.board.light{background:#f3efe6;color:#15181c}
+.board svg{width:120px;height:120px;flex:none}
+.word{font:700 50px/.92 var(--f-display);letter-spacing:.01em;text-transform:uppercase}
+.word b{color:var(--m-light)}
+.sizes{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;margin-top:14px}
+.sizes figure{margin:0;display:grid;justify-items:center;gap:6px;font:500 11px var(--f-mono);color:var(--muted)}
+.sizes svg{color:#efe6d2}
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.sw{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.sw i{display:block;height:64px}
+.sw div{padding:8px 10px;font-size:13px}
+.sw code{font:500 12px var(--f-mono);color:var(--muted)}
+.sec{font:600 13px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:34px 0 0}
 </style>
 </head>
 <body>
 <header class="site-head"><div class="in">
-  <a class="logo" href="index.html">La Bible <b>BMW</b></a>
+  <a class="logo" href="index.html" aria-label="Bimmer Bible, accueil"><svg viewBox="0 0 128 128" aria-hidden="true" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert, trois rubans marque-page">
+  <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path stroke="#2aa6e0" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
+    <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
+  </g>
+  <path d="M56 104 h6 l-6 20 h-6 z" fill="#2aa6e0"/>
+  <path d="M64 104 h6 l-6 20 h-6 z" fill="#3b4fb0"/>
+  <path d="M72 104 h6 l-6 20 h-6 z" fill="#e3262d"/>
+</svg><span>Bimmer <b>Bible</b></span></a>
   <nav class="nav" aria-label="Rubriques"><a href="moteurs/index.html">Moteurs</a><span>Modèles</span><span>Pièces</span><span>Entretien</span></nav>
 </div></header>
 <main class="wrap">
-  <div class="id-head">
-    <div class="eyebrow">Identité du site · propositions</div>
-    <h1>Un nom, un logo</h1>
-    <p>Trois pistes qui marient la bible et la BMW. Dans chaque logo, les trois bandes de course deviennent les trois rubans marque‑page d'une bible, en ambre, ivoire et cuivre : un clin d'œil au sport automobile, sans reprendre les couleurs ni le logo de BMW M.</p>
+  <div class="ch-head">
+    <div class="eyebrow">Identité du site</div>
+    <h1>Charte graphique</h1>
+    <p>Deux B dos à dos forment un livre ouvert : la bible des BMW. Les trois rubans marque‑page portent les couleurs du sport automobile BMW, bleu clair, bleu foncé et rouge.</p>
   </div>
-  <div class="props">
-    <article class="prop card reco">
-      <span class="tag">Ma recommandation</span>
-      <h2>La BiMWle</h2>
-      <div class="stage-dark"><svg viewBox="0 0 128 128" role="img" aria-label="La BiMWle : livre ouvert en forme de M et trois rubans marque-page">
-  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
-    <path d="M12 32 C32 25 52 29 64 43 L64 98 C52 87 32 83 12 88 Z"/>
-    <path d="M116 32 C96 25 76 29 64 43 L64 98 C76 87 96 83 116 88 Z"/>
-  </g>
-  <g stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".45">
-    <path d="M24 48 C36 46 46 48 54 54"/><path d="M24 60 C36 58 46 60 54 66"/>
-    <path d="M104 48 C92 46 82 48 74 54"/><path d="M104 60 C92 58 82 60 74 66"/>
-  </g>
-  <path d="M60 99 h8 l-9 26 h-8 z" fill="#f5a524"/>
-  <path d="M71 99 h8 l-9 26 h-8 z" fill="currentColor"/>
-  <path d="M82 99 h8 l-9 26 h-8 z" fill="#c0573d"/>
-</svg>
-<span class="word">La Bi<em>MW</em>le</span></div>
-      <div class="stage-light"><svg viewBox="0 0 128 128" role="img" aria-label="La BiMWle : livre ouvert en forme de M et trois rubans marque-page">
-  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
-    <path d="M12 32 C32 25 52 29 64 43 L64 98 C52 87 32 83 12 88 Z"/>
-    <path d="M116 32 C96 25 76 29 64 43 L64 98 C76 87 96 83 116 88 Z"/>
-  </g>
-  <g stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".45">
-    <path d="M24 48 C36 46 46 48 54 54"/><path d="M24 60 C36 58 46 60 54 66"/>
-    <path d="M104 48 C92 46 82 48 74 54"/><path d="M104 60 C92 58 82 60 74 66"/>
-  </g>
-  <path d="M60 99 h8 l-9 26 h-8 z" fill="#f5a524"/>
-  <path d="M71 99 h8 l-9 26 h-8 z" fill="currentColor"/>
-  <path d="M82 99 h8 l-9 26 h-8 z" fill="#c0573d"/>
-</svg>
-<span class="word">La Bi<em>MW</em>le</span></div>
-      <div class="favs"><svg width="32" height="32" viewBox="0 0 128 128" role="img" aria-label="La BiMWle : livre ouvert en forme de M et trois rubans marque-page">
-  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
-    <path d="M12 32 C32 25 52 29 64 43 L64 98 C52 87 32 83 12 88 Z"/>
-    <path d="M116 32 C96 25 76 29 64 43 L64 98 C76 87 96 83 116 88 Z"/>
-  </g>
-  <g stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".45">
-    <path d="M24 48 C36 46 46 48 54 54"/><path d="M24 60 C36 58 46 60 54 66"/>
-    <path d="M104 48 C92 46 82 48 74 54"/><path d="M104 60 C92 58 82 60 74 66"/>
-  </g>
-  <path d="M60 99 h8 l-9 26 h-8 z" fill="#f5a524"/>
-  <path d="M71 99 h8 l-9 26 h-8 z" fill="currentColor"/>
-  <path d="M82 99 h8 l-9 26 h-8 z" fill="#c0573d"/>
-</svg>
- <svg width="16" height="16" viewBox="0 0 128 128" role="img" aria-label="La BiMWle : livre ouvert en forme de M et trois rubans marque-page">
-  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
-    <path d="M12 32 C32 25 52 29 64 43 L64 98 C52 87 32 83 12 88 Z"/>
-    <path d="M116 32 C96 25 76 29 64 43 L64 98 C76 87 96 83 116 88 Z"/>
-  </g>
-  <g stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".45">
-    <path d="M24 48 C36 46 46 48 54 54"/><path d="M24 60 C36 58 46 60 54 66"/>
-    <path d="M104 48 C92 46 82 48 74 54"/><path d="M104 60 C92 58 82 60 74 66"/>
-  </g>
-  <path d="M60 99 h8 l-9 26 h-8 z" fill="#f5a524"/>
-  <path d="M71 99 h8 l-9 26 h-8 z" fill="currentColor"/>
-  <path d="M82 99 h8 l-9 26 h-8 z" fill="#c0573d"/>
-</svg>
- <span>icône d'onglet, 32 et 16 px</span></div>
-      <p>On lit « la bible » au premier coup d'œil, puis on voit le « MW » en ambre. Le livre ouvert dessine un M, et les rubans font office de bandes de course.</p>
-      <ul><li>Le jeu de mots est immédiat et reste français.</li><li>Fonctionne en toute petite taille : le livre et les rubans restent lisibles.</li><li>À l'oral, il faut l'épeler une fois.</li></ul>
-    </article>
-    <article class="prop card">
-      <span class="tag">Piste internationale</span>
-      <h2>Bimmer Bible</h2>
-      <div class="stage-dark"><svg viewBox="0 0 128 128" role="img" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert">
+  <div class="boards">
+    <div class="board dark"><svg viewBox="0 0 128 128" role="img" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert, trois rubans marque-page">
   <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
-    <path stroke="#f5a524" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
+    <path stroke="#2aa6e0" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
     <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
   </g>
-  <path d="M56 104 h6 l-6 20 h-6 z" fill="#f5a524"/>
-  <path d="M64 104 h6 l-6 20 h-6 z" fill="currentColor"/>
-  <path d="M72 104 h6 l-6 20 h-6 z" fill="#c0573d"/>
-</svg>
-<span class="word">Bimmer <em>Bible</em></span></div>
-      <div class="stage-light"><svg viewBox="0 0 128 128" role="img" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert">
+  <path d="M56 104 h6 l-6 20 h-6 z" fill="#2aa6e0"/>
+  <path d="M64 104 h6 l-6 20 h-6 z" fill="#3b4fb0"/>
+  <path d="M72 104 h6 l-6 20 h-6 z" fill="#e3262d"/>
+</svg><span class="word">Bimmer<br><b>Bible</b></span></div>
+    <div class="board light"><svg viewBox="0 0 128 128" role="img" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert, trois rubans marque-page">
   <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
-    <path stroke="#f5a524" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
+    <path stroke="#2aa6e0" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
     <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
   </g>
-  <path d="M56 104 h6 l-6 20 h-6 z" fill="#f5a524"/>
-  <path d="M64 104 h6 l-6 20 h-6 z" fill="currentColor"/>
-  <path d="M72 104 h6 l-6 20 h-6 z" fill="#c0573d"/>
-</svg>
-<span class="word">Bimmer <em>Bible</em></span></div>
-      <div class="favs"><svg width="32" height="32" viewBox="0 0 128 128" role="img" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert">
-  <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
-    <path stroke="#f5a524" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
-    <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
-  </g>
-  <path d="M56 104 h6 l-6 20 h-6 z" fill="#f5a524"/>
-  <path d="M64 104 h6 l-6 20 h-6 z" fill="currentColor"/>
-  <path d="M72 104 h6 l-6 20 h-6 z" fill="#c0573d"/>
-</svg>
- <svg width="16" height="16" viewBox="0 0 128 128" role="img" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert">
-  <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
-    <path stroke="#f5a524" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
-    <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
-  </g>
-  <path d="M56 104 h6 l-6 20 h-6 z" fill="#f5a524"/>
-  <path d="M64 104 h6 l-6 20 h-6 z" fill="currentColor"/>
-  <path d="M72 104 h6 l-6 20 h-6 z" fill="#c0573d"/>
-</svg>
- <span>icône d'onglet, 32 et 16 px</span></div>
-      <p>« Bimmer » est le surnom des BMW chez les passionnés. Les deux B dos à dos forment un livre ouvert.</p>
-      <ul><li>Compris partout, pratique si le site s'ouvre à l'anglais.</li><li>Allitération facile à retenir.</li><li>Moins de jeu de mots en français.</li></ul>
-    </article>
-    <article class="prop card">
-      <span class="tag">Piste décalée</span>
-      <h2>L'Évangile de Munich</h2>
-      <div class="stage-dark"><svg viewBox="0 0 128 128" role="img" aria-label="L'Évangile de Munich : piston auréolé">
-  <ellipse cx="64" cy="18" rx="30" ry="7" fill="none" stroke="#f5a524" stroke-width="5"/>
-  <path d="M32 42 Q64 32 96 42 V66 L92 106 H36 L32 66 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>
-  <g stroke="currentColor" stroke-width="4"><path d="M32 52 H96"/><path d="M32 60 H96"/></g>
-  <circle cx="64" cy="84" r="9" fill="none" stroke="#c0573d" stroke-width="5"/>
-  <path d="M40 84 H55 M73 84 H88" stroke="#c0573d" stroke-width="5" stroke-linecap="round"/>
-</svg>
-<span class="word">L'Évangile <em>de Munich</em></span></div>
-      <div class="stage-light"><svg viewBox="0 0 128 128" role="img" aria-label="L'Évangile de Munich : piston auréolé">
-  <ellipse cx="64" cy="18" rx="30" ry="7" fill="none" stroke="#f5a524" stroke-width="5"/>
-  <path d="M32 42 Q64 32 96 42 V66 L92 106 H36 L32 66 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>
-  <g stroke="currentColor" stroke-width="4"><path d="M32 52 H96"/><path d="M32 60 H96"/></g>
-  <circle cx="64" cy="84" r="9" fill="none" stroke="#c0573d" stroke-width="5"/>
-  <path d="M40 84 H55 M73 84 H88" stroke="#c0573d" stroke-width="5" stroke-linecap="round"/>
-</svg>
-<span class="word">L'Évangile <em>de Munich</em></span></div>
-      <div class="favs"><svg width="32" height="32" viewBox="0 0 128 128" role="img" aria-label="L'Évangile de Munich : piston auréolé">
-  <ellipse cx="64" cy="18" rx="30" ry="7" fill="none" stroke="#f5a524" stroke-width="5"/>
-  <path d="M32 42 Q64 32 96 42 V66 L92 106 H36 L32 66 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>
-  <g stroke="currentColor" stroke-width="4"><path d="M32 52 H96"/><path d="M32 60 H96"/></g>
-  <circle cx="64" cy="84" r="9" fill="none" stroke="#c0573d" stroke-width="5"/>
-  <path d="M40 84 H55 M73 84 H88" stroke="#c0573d" stroke-width="5" stroke-linecap="round"/>
-</svg>
- <svg width="16" height="16" viewBox="0 0 128 128" role="img" aria-label="L'Évangile de Munich : piston auréolé">
-  <ellipse cx="64" cy="18" rx="30" ry="7" fill="none" stroke="#f5a524" stroke-width="5"/>
-  <path d="M32 42 Q64 32 96 42 V66 L92 106 H36 L32 66 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>
-  <g stroke="currentColor" stroke-width="4"><path d="M32 52 H96"/><path d="M32 60 H96"/></g>
-  <circle cx="64" cy="84" r="9" fill="none" stroke="#c0573d" stroke-width="5"/>
-  <path d="M40 84 H55 M73 84 H88" stroke="#c0573d" stroke-width="5" stroke-linecap="round"/>
-</svg>
- <span>icône d'onglet, 32 et 16 px</span></div>
-      <p>Munich est la ville de BMW. Le logo est un piston coiffé d'une auréole : la pièce sacrée du site.</p>
-      <ul><li>Le plus élégant, et sans « BMW » dans le nom.</li><li>Ton plein d'humour, qui marque les esprits.</li><li>Nom long, moins direct pour une recherche Google.</li></ul>
-    </article>
+  <path d="M56 104 h6 l-6 20 h-6 z" fill="#2aa6e0"/>
+  <path d="M64 104 h6 l-6 20 h-6 z" fill="#3b4fb0"/>
+  <path d="M72 104 h6 l-6 20 h-6 z" fill="#e3262d"/>
+</svg><span class="word">Bimmer<br><b>Bible</b></span></div>
   </div>
-  <section class="prose why">
-    <h2>Pourquoi pas le logo M Performance</h2>
-    <p>Le logo M et ses trois bandes bleu clair, bleu foncé et rouge sont des marques déposées de BMW. Sur un site public, les reprendre ferait croire à un site officiel et exposerait le site à une demande de retrait. Les rubans marque‑page gardent l'idée des bandes de course avec nos propres couleurs.</p>
-    <p>Pour la même raison, un nom sans « BMW » écrit en entier se protège mieux. Avant de réserver le nom de domaine, une recherche de marque sur la base de l'INPI permet de vérifier qu'il est libre.</p>
-  </section>
+  <div class="sec">Petites tailles</div>
+  <div class="sizes"><figure><svg viewBox="0 0 128 128" width="64" height="64" role="img" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert, trois rubans marque-page">
+  <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path stroke="#2aa6e0" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
+    <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
+  </g>
+  <path d="M56 104 h6 l-6 20 h-6 z" fill="#2aa6e0"/>
+  <path d="M64 104 h6 l-6 20 h-6 z" fill="#3b4fb0"/>
+  <path d="M72 104 h6 l-6 20 h-6 z" fill="#e3262d"/>
+</svg><figcaption>64 px</figcaption></figure><figure><svg viewBox="0 0 128 128" width="32" height="32" role="img" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert, trois rubans marque-page">
+  <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path stroke="#2aa6e0" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
+    <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
+  </g>
+  <path d="M56 104 h6 l-6 20 h-6 z" fill="#2aa6e0"/>
+  <path d="M64 104 h6 l-6 20 h-6 z" fill="#3b4fb0"/>
+  <path d="M72 104 h6 l-6 20 h-6 z" fill="#e3262d"/>
+</svg><figcaption>32 px · onglet</figcaption></figure><figure><svg viewBox="0 0 128 128" width="16" height="16" role="img" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert, trois rubans marque-page">
+  <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path stroke="#2aa6e0" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
+    <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
+  </g>
+  <path d="M56 104 h6 l-6 20 h-6 z" fill="#2aa6e0"/>
+  <path d="M64 104 h6 l-6 20 h-6 z" fill="#3b4fb0"/>
+  <path d="M72 104 h6 l-6 20 h-6 z" fill="#e3262d"/>
+</svg><figcaption>16 px</figcaption></figure></div>
+  <div class="sec">Couleurs du logo</div>
+  <div class="swatches"><div class="sw"><i style="background:#2aa6e0"></i><div>Bleu clair<br><code>#2aa6e0</code></div></div><div class="sw"><i style="background:#3b4fb0"></i><div>Bleu foncé<br><code>#3b4fb0</code></div></div><div class="sw"><i style="background:#e3262d"></i><div>Rouge<br><code>#e3262d</code></div></div><div class="sw"><i style="background:#efe6d2"></i><div>Ivoire, B gauche sur fond sombre<br><code>#efe6d2</code></div></div></div>
+  <div class="sec">Fichiers</div>
+  <p class="hint" style="font-size:14px;margin-top:10px">assets/logo/bimmer-bible.svg (fond sombre) · assets/logo/bimmer-bible-clair.svg (fond clair) · assets/logo/favicon.svg (icône d'onglet)</p>
 </main>
-<footer class="site-foot"><div class="in"><span>Propositions d'identité · rien n'est encore appliqué au site.</span></div></footer>
+<footer class="site-foot"><div class="in"><span>Bimmer Bible · site de passionnés, indépendant, sans lien avec BMW AG.</span></div></footer>
 </body>
 </html>

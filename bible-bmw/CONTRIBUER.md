@@ -1,4 +1,4 @@
-# Contribuer à La Bible BMW
+# Contribuer à Bimmer Bible
 
 Le site est entièrement statique : des pages HTML, une feuille de style commune et des fichiers de données en JavaScript. Pas de compilation. Pour le voir, ouvrez `index.html` dans un navigateur, ou servez le dossier avec n'importe quel serveur statique (par exemple `npx http-server bible-bmw`).
 

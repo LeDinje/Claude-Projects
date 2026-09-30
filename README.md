@@ -1,6 +1,6 @@
 # Claude Projects
 
-## `bible-bmw/` — La Bible BMW
+## `bible-bmw/` — Bimmer Bible
 
 Site encyclopédique statique sur les BMW, moteur par moteur. Ouvrir `bible-bmw/index.html` dans un navigateur (Three.js est chargé depuis jsDelivr).
 
