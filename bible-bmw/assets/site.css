@@ -83,3 +83,5 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
 .prose strong{color:var(--fg)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
 .eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+/* M du nom en dégradé bleu clair, bleu foncé, rouge */
+.m-grad{background:linear-gradient(100deg,var(--m-light) 0%,var(--m-light) 20%,var(--m-dark) 55%,var(--m-red) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;padding-inline:.02em}
