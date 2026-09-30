@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Bible BMW</title>
+<meta name="description" content="Moteurs, fonctionnement, pièces et références : l'encyclopédie des BMW, moteur par moteur.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px;align-items:center;padding-block:48px 28px}
+.hero h1{font:700 clamp(46px,7vw,92px)/.9 var(--f-display);text-transform:uppercase;letter-spacing:.005em;margin:10px 0 18px;text-wrap:balance}
+.hero h1 b{color:var(--amber)}
+.hero p{font-size:18px;line-height:1.55;color:#cdd3da;max-width:52ch;margin:0 0 20px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px}
+.btn.lg{font-size:15px;padding:12px 16px}
+.hero-card{display:grid;gap:10px;text-decoration:none;color:inherit;background:linear-gradient(160deg,#1b222b,#12161c);border:1px solid var(--line);border-radius:12px;padding:20px;transition:border-color .2s}
+.hero-card:hover{border-color:var(--amber)}
+.hero-card .code{font:700 88px/.85 var(--f-display);letter-spacing:.01em}
+.hero-card .code span{color:var(--amber)}
+.hero-card .meta{display:flex;flex-wrap:wrap;gap:6px 18px;font:500 13px var(--f-mono);color:var(--muted)}
+.hero-card .meta b{display:block;font:600 22px/1.1 var(--f-display);color:var(--fg)}
+.hero-card ul{margin:0;padding-left:18px;color:#cdd3da;font-size:14px}
+.rubriques{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:8px}
+.rub{display:grid;gap:6px;text-decoration:none;color:inherit}
+.rub h2{margin:0;font:700 26px/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em}
+.rub p{margin:0;font-size:14px;color:#cdd3da}
+.rub .state{font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
+a.rub:hover{border-color:var(--amber)}
+.rub.soon{opacity:.7}
+.sec-title{font:600 13px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:40px 0 12px}
+.method{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.method .card p{font-size:14px;color:#cdd3da;margin:8px 0 0}
+@media (max-width: 860px){ .hero{grid-template-columns:minmax(0,1fr);padding-block:28px 12px} }
+</style>
+</head>
+<body>
+<header class="site-head"><div class="in">
+  <a class="logo" href="index.html">La Bible <b>BMW</b></a>
+  <nav class="nav" aria-label="Rubriques">
+    <a href="moteurs/index.html">Moteurs</a>
+    <span>Modèles</span><span>Pièces</span><span>Entretien</span>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Encyclopédie indépendante · moteur par moteur</div>
+      <h1>La Bible <b>BMW</b></h1>
+      <p>Chaque moteur expliqué pièce par pièce : son architecture, son fonctionnement en 3D, ses points faibles et les références de ses pièces, avec leur source.</p>
+      <div class="hero-cta">
+        <a class="btn solid lg" href="moteurs/s65/index.html">Découvrir le V8 S65</a>
+        <a class="btn lg" href="moteurs/index.html">Tous les moteurs</a>
+      </div>
+    </div>
+    <a class="hero-card" href="moteurs/s65/index.html">
+      <span class="eyebrow">Première fiche complète</span>
+      <span class="code">S<span>65</span></span>
+      <span class="meta"><span><b>V8 4,0 l</b>atmosphérique</span><span><b>420 ch</b>à 8 300 tr/min</span><span><b>M3</b>E90 · E92 · E93</span></span>
+      <ul>
+        <li>Moteur animé en 3D et coupe d'un cylindre : air, essence, étincelle, flamme</li>
+        <li>Pièces classées comme le catalogue BMW, avec références et sources</li>
+        <li>Conduite avec la boîte DKG, compresseur, casse de bielle, circuit</li>
+      </ul>
+    </a>
+  </section>
+
+  <div class="sec-title">Rubriques</div>
+  <div class="rubriques">
+    <a class="rub card" href="moteurs/index.html"><span class="state" style="color:var(--ok)">En ligne</span><h2>Moteurs</h2><p>Catalogue des moteurs BMW et fiches détaillées. Le S65 ouvre la série.</p></a>
+    <div class="rub card soon"><span class="state" style="color:var(--muted)">À venir</span><h2>Modèles</h2><p>Chaque génération de châssis, ses moteurs, ses boîtes et ses versions.</p></div>
+    <div class="rub card soon"><span class="state" style="color:var(--muted)">À venir</span><h2>Pièces</h2><p>Recherche par référence BMW, équivalences et pièces communes entre modèles.</p></div>
+    <div class="rub card soon"><span class="state" style="color:var(--muted)">À venir</span><h2>Entretien</h2><p>Intervalles, fluides, couples de serrage et opérations courantes.</p></div>
+  </div>
+
+  <div class="sec-title">Comment les références sont vérifiées</div>
+  <div class="method">
+    <div class="card"><span class="chip-st st-verifiee">Vérifiée RealOEM</span><p>Contrôlée sur le diagramme RealOEM du bon groupe, avec un numéro de châssis. C'est l'objectif pour chaque pièce.</p></div>
+    <div class="card"><span class="chip-st st-recoupee">Recoupée</span><p>Numéro d'origine BMW retrouvé sur au moins deux fiches de revendeurs spécialisés. La source est citée.</p></div>
+    <div class="card"><span class="chip-st st-a-confirmer">À confirmer</span><p>Une seule source, ou une variante pas encore précisée. À contrôler avant toute commande.</p></div>
+    <div class="card"><span class="chip-st st-a-renseigner">À renseigner</span><p>Pièce listée, numéro encore à relever.</p></div>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="in">
+  <span>La Bible BMW · site indépendant, sans lien avec BMW AG.</span>
+  <span>Références pièces : toujours vérifier avec le numéro de châssis sur RealOEM avant de commander.</span>
+</div></footer>
+</body>
+</html>

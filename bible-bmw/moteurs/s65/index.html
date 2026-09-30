@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>V8 S65 · La Bible BMW</title>
+<meta name="description" content="Le V8 S65 de la BMW M3 E9x : fonctionnement en 3D, coupe d'un cylindre, pièces et références.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="stylesheet" href="s65.css">
+</head>
+<body>
+<header class="site-head"><div class="in">
+  <a class="logo" href="../../index.html">La Bible <b>BMW</b></a>
+  <nav class="nav" aria-label="Rubriques">
+    <a href="../index.html" aria-current="page">Moteurs</a>
+    <span>Modèles</span><span>Pièces</span><span>Entretien</span>
+  </nav>
+</div></header>
+
+<main class="wrap">
+<nav class="crumbs" aria-label="Fil d'Ariane"><a href="../../index.html">Accueil</a><span>›</span><a href="../index.html">Moteurs</a><span>›</span><span>S65</span></nav>
+<header class="top">
+  <div>
+    <div class="eyebrow">S65B40 · BMW M3 E90 / E92 / E93 · 2007-2013</div>
+    <h1>V8 <em>S65</em></h1>
+  </div>
+  <div class="specs" aria-label="Fiche technique">
+    <div><b>3 999 cm³</b>cylindrée</div>
+    <div><b>92 × 75,2</b>alésage × course (mm)</div>
+    <div><b id="specHp">420 ch</b><span id="specHpRpm">à 8 300 tr/min</span></div>
+    <div><b id="specNm">400 N·m</b><span id="specNmRpm">à 3 900 tr/min</span></div>
+    <div><b>8 400</b>zone rouge</div>
+  </div>
+</header>
+<div class="tabs" role="tablist" aria-label="Sections de la fiche">
+  <button class="tab" role="tab" id="t-presentation" aria-controls="tab-presentation" data-tab="presentation">Présentation</button>
+  <button class="tab" role="tab" id="t-fonctionnement" aria-controls="tab-fonctionnement" data-tab="fonctionnement">Fonctionnement 3D</button>
+  <button class="tab" role="tab" id="t-pieces" aria-controls="tab-pieces" data-tab="pieces">Pièces et références</button>
+  <button class="tab" role="tab" id="t-circuit" aria-controls="tab-circuit" data-tab="circuit">Circuit</button>
+</div>
+
+<section class="tabpanel" id="tab-presentation" role="tabpanel" aria-labelledby="t-presentation">
+<div class="pres-grid">
+  <div class="prose">
+    <p class="lede-big">Le S65 est le premier V8 d'une M3. Un 4 litres atmosphérique qui prend 8 400 tr/min, issu du V10 de la M5 E60, et l'un des derniers grands moteurs atmosphériques de BMW M.</p>
+
+    <h2>Origine</h2>
+    <p>Le S65 reprend l'architecture du V10 S85 de la M5 E60 et de la M6 : même alésage de 92 mm, même course de 75,2 mm, et donc la même cylindrée unitaire d'environ 500 cm³. Il a simplement deux cylindres de moins. Il a été monté sur les M3 E90 (berline), E92 (coupé) et E93 (cabriolet) de 2007 à 2013.</p>
+    <p>Une version 4,4 litres, le S65B44, a équipé la M3 GTS avec 450 ch.</p>
+
+    <h2>Architecture</h2>
+    <ul>
+      <li><strong>V8 à 90° à vilebrequin croisé :</strong> une combustion tous les 90° de vilebrequin, dans l'ordre 1‑5‑4‑8‑6‑3‑7‑2.</li>
+      <li><strong>Bloc et culasses en aluminium,</strong> quatre soupapes par cylindre, deux arbres à cames par banc.</li>
+      <li><strong>Distribution variable double VANOS</strong> sur l'admission et l'échappement.</li>
+      <li><strong>Huit papillons individuels,</strong> un par cylindre, commandés électriquement par deux actionneurs, un par banc.</li>
+      <li><strong>Injection indirecte :</strong> un injecteur par cylindre dans le conduit d'admission.</li>
+      <li><strong>Calculateur</strong> Siemens MSS60.</li>
+    </ul>
+    <p>L'onglet <a href="#fonctionnement" data-goto="fonctionnement">Fonctionnement 3D</a> montre tout cela en mouvement, jusqu'à la coupe d'un cylindre avec l'injection, l'étincelle et le front de flamme.</p>
+
+    <h2>Points de vigilance</h2>
+    <div class="watch">
+      <div class="card"><h3>Coussinets de bielle</h3><p>Le point faible le plus connu. Le jeu d'origine est serré et l'usure arrive tôt. Beaucoup de propriétaires font un remplacement préventif. Un coussinet usé finit par cogner, puis casse la bielle.</p><a href="#pieces" data-goto="pieces" data-piece="Coussinets de bielle">Voir les références</a></div>
+      <div class="card"><h3>Actionneurs de papillons</h3><p>Leurs engrenages internes s'usent. Le symptôme : un défaut moteur et un passage en mode dégradé.</p><a href="#pieces" data-goto="pieces" data-piece="Actionneur de papillons">Voir les références</a></div>
+      <div class="card"><h3>Huile</h3><p>BMW préconise une huile 10W-60 pour ce moteur, qui monte haut en régime et en température.</p><a href="#pieces" data-goto="pieces" data-piece="Kit filtre à huile">Filtre à huile</a></div>
+    </div>
+  </div>
+
+  <aside class="idcard card" aria-label="Carte d'identité du S65">
+    <h3>Carte d'identité</h3>
+    <dl>
+      <dt>Code</dt><dd>S65B40</dd>
+      <dt>Architecture</dt><dd>V8 à 90°, 32 soupapes</dd>
+      <dt>Cylindrée</dt><dd>3 999 cm³</dd>
+      <dt>Alésage × course</dt><dd>92 × 75,2 mm</dd>
+      <dt>Rapport volumétrique</dt><dd>12,0 : 1</dd>
+      <dt>Puissance</dt><dd>420 ch (309 kW) à 8 300 tr/min</dd>
+      <dt>Couple</dt><dd>400 N·m à 3 900 tr/min</dd>
+      <dt>Régime maxi</dt><dd>8 400 tr/min</dd>
+      <dt>Ordre d'allumage</dt><dd>1‑5‑4‑8‑6‑3‑7‑2</dd>
+      <dt>Distribution</dt><dd>Double VANOS</dd>
+      <dt>Alimentation</dt><dd>8 papillons, injection indirecte</dd>
+      <dt>Modèles</dt><dd>M3 E90, E92, E93</dd>
+      <dt>Production</dt><dd>2007-2013</dd>
+      <dt>Dérivé</dt><dd>S65B44 · 4,4 l · M3 GTS</dd>
+    </dl>
+  </aside>
+</div>
+</section>
+
+<section class="tabpanel" id="tab-fonctionnement" role="tabpanel" aria-labelledby="t-fonctionnement" hidden>
+<div id="slotFonct">
+<section class="stage">
+  <div class="viewport" id="viewport">
+    <canvas id="gl" aria-label="Vue 3D du moteur : faites glisser pour tourner, molette pour zoomer"></canvas>
+    <div id="labels"></div>
+    <canvas id="tach" width="352" height="352" aria-hidden="true"></canvas>
+    <div class="hud" aria-live="off">
+      <div class="unit">Régime moteur</div>
+      <div class="big" id="hudRpm">0</div>
+      <div class="row"><span id="hudHp">0<small>ch</small></span><span id="hudNm">0<small>N·m</small></span></div>
+      <div class="row"><span class="gearchip" id="hudGear">P</span><span id="hudKmh">0<small>km/h</small></span><span id="hudBoost" hidden></span></div>
+    </div>
+    <canvas id="miniMap" width="380" height="300" aria-hidden="true"></canvas>
+    <div class="playbadge">Lecture <b id="badgePlay">×1/50</b> · vilebrequin <b id="badgeAngle">0°</b></div>
+    <div class="viewbar">
+      <button class="btn" data-view="iso">3/4</button>
+      <button class="btn" data-view="front">Face</button>
+      <button class="btn" data-view="side">Côté</button>
+      <button class="btn" data-view="top">Dessus</button>
+      <button class="btn" id="pauseBtn">Pause</button>
+      <button class="btn" id="soundBtn">Son : coupé</button>
+    </div>
+    <div id="flash"></div>
+    <div class="alert" id="alert" hidden role="alertdialog" aria-labelledby="alertTitle">
+      <h3 id="alertTitle">Bielle rompue</h3>
+      <p id="alertText"></p>
+      <dl id="alertData"></dl>
+      <div class="btns">
+        <button class="btn solid" id="alertReset">Monter un moteur neuf</button>
+        <button class="btn" id="alertClose">Regarder les dégâts</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="panel" aria-label="Commandes du moteur">
+    <div class="grp">
+      <h2>Conduite · boîte DKG 7 rapports</h2>
+      <div class="gate" role="group" aria-label="Sélecteur de vitesses">
+        <button class="gbtn" data-sel="P">P</button>
+        <button class="gbtn" data-sel="R">R</button>
+        <button class="gbtn" data-sel="N">N</button>
+        <button class="gbtn" data-sel="D">D</button>
+        <button class="gbtn" data-sel="S">S</button>
+        <button class="gbtn" data-sel="M">M</button>
+      </div>
+      <div class="paddles">
+        <button class="btn" id="shiftDown" aria-label="Palette gauche, rapport inférieur">− Palette</button>
+        <div class="gear-now"><b id="gearBig">P</b><span id="gearSub">Parking</span></div>
+        <button class="btn" id="shiftUp" aria-label="Palette droite, rapport supérieur">Palette +</button>
+      </div>
+      <div class="gear-msg" id="gearMsg" aria-live="polite"></div>
+      <div class="gear-msg" id="limitMsg" style="color:#ff8a80"></div>
+      <div class="pedals">
+        <div class="pedal-col">
+          <input type="range" id="pedal" min="0" max="100" step="1" value="0" aria-label="Pression sur la pédale d'accélérateur">
+          <span>Accélérateur</span>
+        </div>
+        <div class="pedal-info">
+          <div class="ctl">
+            <div class="head"><label for="pedal">Pédale</label><output id="pedalOut">0<small>%</small></output></div>
+            <div class="minibar"><i id="pedalBar"></i></div>
+            <div class="head"><span>Papillons</span><output id="thrOut">0<small>%</small></output></div>
+            <div class="minibar"><i id="thrBar" style="background:var(--air)"></i></div>
+          </div>
+          <div class="row2">
+            <button class="btn" id="pedal0">Lever le pied</button>
+            <button class="btn" id="pedal100">Plancher</button>
+          </div>
+          <button class="btn brake" id="brakeBtn">Maintenir pour freiner</button>
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k">Vitesse</div><div class="v" id="roKmh">0<small>km/h</small></div></div>
+        <div class="ro"><div class="k">Embrayage</div><div class="v" id="roClutch">Ouvert</div></div>
+        <div class="ro"><div class="k">Accélération</div><div class="v" id="roAccel">0<small>g</small></div></div>
+        <div class="ro"><div class="k">0 à 100 km/h</div><div class="v" id="ro0100">–</div></div>
+      </div>
+      <canvas id="gears" aria-label="Régime en fonction de la vitesse pour chaque rapport"></canvas>
+      <label class="switch"><input type="checkbox" id="limiter" checked> Limiteur à 8 400 tr/min</label>
+      <div class="hint">Clavier : ↑ / ↓ pour doser la pédale, espace pour freiner, + / − pour les palettes.</div>
+    </div>
+
+    <div class="grp">
+      <h2>Préparation</h2>
+      <div class="ctl">
+        <label for="cfg">Configuration moteur</label>
+        <select id="cfg">
+          <option value="stock">S65 d'origine · 420 ch</option>
+          <option value="ess">Compresseur ESS VT2‑625 · 625 ch</option>
+        </select>
+        <div class="hint" id="cfgHint"></div>
+      </div>
+      <div class="ctl">
+        <div class="head"><label for="hp">Réglage de puissance</label><output id="hpOut">420<small>ch</small></output></div>
+        <input type="range" id="hp" min="250" max="800" step="10" value="420">
+        <div class="hint">Au‑delà de la puissance prévue par la configuration, la pression dans les cylindres monte et les bielles encaissent plus de compression. Les injecteurs peuvent aussi saturer.</div>
+      </div>
+      <div class="ctl">
+        <label for="vmaxSel">Vitesse maxi</label>
+        <select id="vmaxSel">
+          <option value="250">Bridée à 250 km/h (d'origine)</option>
+          <option value="305">Bridée à 305 km/h</option>
+          <option value="0">Débridée</option>
+        </select>
+      </div>
+      <canvas id="curve" aria-label="Courbes de couple et de puissance"></canvas>
+    </div>
+
+    <div class="grp">
+      <h2>Lecture</h2>
+      <div class="ctl">
+        <div class="head"><label for="play">Ralenti de l'animation</label><output id="playOut">×1/50</output></div>
+        <input type="range" id="play" min="0" max="100" step="any" value="43.37">
+        <div class="hint">À 8 000 tr/min, le vilebrequin fait 133 tours par seconde : l'animation est ralentie pour qu'on puisse suivre les pistons. Les chiffres restent ceux du régime réel.</div>
+      </div>
+      <div class="ctl">
+        <div class="head"><label for="angle">Angle du vilebrequin (en pause)</label><output id="angleOut">0<small>°</small></output></div>
+        <input type="range" id="angle" min="0" max="719" step="1" value="0" disabled>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Affichage</h2>
+      <div class="seg" role="group" aria-label="Préréglages d'affichage">
+        <button class="btn" data-preset="full">Complet</button>
+        <button class="btn on" data-preset="xray">Écorché</button>
+        <button class="btn" data-preset="skeleton">Squelette</button>
+      </div>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" data-layer="block" checked>Bloc</label>
+        <label class="chip"><input type="checkbox" data-layer="heads" checked>Culasses</label>
+        <label class="chip"><input type="checkbox" data-layer="valvetrain" checked>Distribution</label>
+        <label class="chip"><input type="checkbox" data-layer="manifolds" checked>Admission / échappement</label>
+        <label class="chip"><input type="checkbox" data-layer="liners" checked>Chemises</label>
+        <label class="chip"><input type="checkbox" data-layer="gas" checked>Gaz</label>
+        <label class="chip"><input type="checkbox" data-layer="flow" checked>Flux air / essence</label>
+        <label class="chip"><input type="checkbox" data-layer="pistons" checked>Pistons</label>
+        <label class="chip"><input type="checkbox" data-layer="rods" checked>Bielles</label>
+        <label class="chip"><input type="checkbox" data-layer="crank" checked>Vilebrequin</label>
+        <label class="chip"><input type="checkbox" data-layer="labels" checked>Étiquettes</label>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Sollicitation des bielles</h2>
+      <div class="meter">
+        <div class="head"><span>Charge / limite <span class="pill" id="stressPill">OK</span></span><b id="stressVal">0 %</b></div>
+        <div class="bar"><i id="stressBar"></i><span class="tick" style="left:85%"></span></div>
+      </div>
+      <div class="meter">
+        <div class="head"><span>Fatigue accumulée</span><b id="fatVal">0 %</b></div>
+        <div class="bar"><i id="fatBar"></i></div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k">Traction au PMH échappement</div><div class="v" id="roTens">0<small>kN</small></div></div>
+        <div class="ro"><div class="k">Compression à la combustion</div><div class="v" id="roComp">0<small>kN</small></div></div>
+        <div class="ro"><div class="k">Pression max cylindre</div><div class="v" id="roPmax">0<small>bar</small></div></div>
+        <div class="ro"><div class="k">Accélération piston au PMH</div><div class="v" id="roAcc">0<small>g</small></div></div>
+        <div class="ro"><div class="k">Vitesse moyenne piston</div><div class="v" id="roVp">0<small>m/s</small></div></div>
+        <div class="ro"><div class="k">Cylindre en combustion</div><div class="v" id="roFire">–</div></div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Casse</h2>
+      <div class="row2">
+        <label for="breakCyl" class="hint" style="font-size:13px">Bielle</label>
+        <select id="breakCyl">
+          <option value="rand">au hasard</option>
+          <option value="1">n° 1</option><option value="2">n° 2</option><option value="3">n° 3</option><option value="4">n° 4</option>
+          <option value="5">n° 5</option><option value="6">n° 6</option><option value="7">n° 7</option><option value="8">n° 8</option>
+        </select>
+        <button class="btn danger" id="breakBtn">Casser la bielle</button>
+      </div>
+      <button class="btn danger" id="moneyBtn">Forcer un rétrogradage raté</button>
+      <button class="btn" id="resetBtn">Monter un moteur neuf</button>
+      <div class="hint">La bielle peut aussi céder seule : au point mort sans limiteur, pied au plancher au-delà de 10 000 tr/min ; en roulant vite, en forçant le passage en 2<sup>e</sup> que la DKG refuse normalement ; ou en poussant la puissance vers 650 ch et plus.</div>
+    </div>
+  </aside>
+</section>
+</div>
+<section class="block" id="loupeSec" aria-labelledby="loupeTitle">
+  <div class="block-head">
+    <h2 id="loupeTitle">Au cœur du cylindre n° <span id="lpTitleCyl">1</span></h2>
+    <div class="legend">
+      <span style="--c:var(--air)">Air</span>
+      <span style="--c:var(--fuel)">Essence</span>
+      <span style="--c:var(--mix)">Mélange</span>
+      <span style="--c:var(--amber)">Flamme</span>
+      <span style="--c:var(--burnt)">Gaz brûlés</span>
+    </div>
+  </div>
+  <div class="loupe-grid">
+    <div class="loupe-view" id="loupeView">
+      <canvas id="loupe" aria-label="Coupe 3D d'un cylindre : faites glisser pour tourner, molette pour zoomer"></canvas>
+      <div id="lpLabels"></div>
+      <div class="lp-hud">
+        <div class="lp-angle" id="lpCylLbl">Cylindre n° 1 · banc A</div>
+        <div class="lp-phase" id="lpPhase">Admission</div>
+        <div class="lp-angle" id="lpAngle"></div>
+        <div class="lp-desc" id="lpDesc"></div>
+        <div class="lp-events">
+          <span class="ev" id="evInj">Injection</span>
+          <span class="ev" id="evIn">Admission ouverte</span>
+          <span class="ev" id="evEx">Échappement ouvert</span>
+          <span class="ev" id="evDwell">Bobine en charge</span>
+          <span class="ev" id="evSpark">Étincelle</span>
+        </div>
+      </div>
+      <div class="lp-cams" role="group" aria-label="Cadrage de la coupe">
+        <button class="btn" data-lpview="all">Ensemble</button>
+        <button class="btn" data-lpview="chamber">Chambre</button>
+        <button class="btn" data-lpview="plug">Bougie</button>
+        <button class="btn" data-lpview="intake">Injecteur</button>
+        <button class="btn" data-lpview="valves">Distribution</button>
+      </div>
+      <div class="lp-steps" role="group" aria-label="Aller à une étape du cycle">
+        <button class="btn" data-jump="inj">Injection</button>
+        <button class="btn" data-jump="intake">Admission</button>
+        <button class="btn" data-jump="comp">Compression</button>
+        <button class="btn" data-jump="spark">Étincelle</button>
+        <button class="btn" data-jump="burn">Combustion</button>
+        <button class="btn" data-jump="exp">Détente</button>
+        <button class="btn" data-jump="exh">Échappement</button>
+        <button class="btn" data-step="2">+2°</button>
+        <button class="btn" data-step="10">+10°</button>
+        <button class="btn" id="lpPlay">Pause</button>
+      </div>
+      <div class="lp-hint" id="lpHint" hidden></div>
+    </div>
+    <aside class="loupe-side">
+      <div class="row2">
+        <label for="lpCyl" class="hint" style="font-size:13px">Cylindre suivi</label>
+        <select id="lpCyl">
+          <option value="1">n° 1</option><option value="2">n° 2</option><option value="3">n° 3</option><option value="4">n° 4</option>
+          <option value="5">n° 5</option><option value="6">n° 6</option><option value="7">n° 7</option><option value="8">n° 8</option>
+        </select>
+        <label class="switch"><input type="checkbox" id="lpLabelsOn" checked> Étiquettes</label>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k">Pression cylindre</div><div class="v" id="lpP">–</div></div>
+        <div class="ro"><div class="k">Température des gaz</div><div class="v" id="lpT">–</div></div>
+        <div class="ro"><div class="k">Volume</div><div class="v" id="lpV">–</div></div>
+        <div class="ro"><div class="k">Mélange brûlé</div><div class="v" id="lpXb">–</div></div>
+        <div class="ro"><div class="k">Levée adm. / éch.</div><div class="v" id="lpLift">–</div></div>
+        <div class="ro"><div class="k">Pression d'admission</div><div class="v" id="lpPman">–</div></div>
+      </div>
+      <h3>Essence et allumage</h3>
+      <div class="readouts">
+        <div class="ro"><div class="k">Air aspiré par cycle</div><div class="v" id="lpAir">–</div></div>
+        <div class="ro"><div class="k">Essence injectée</div><div class="v" id="lpFuel">–</div></div>
+        <div class="ro"><div class="k">Richesse</div><div class="v" id="lpLambda">–</div></div>
+        <div class="ro"><div class="k">Temps d'injection</div><div class="v" id="lpInj">–</div></div>
+        <div class="ro"><div class="k">Avance à l'allumage</div><div class="v" id="lpAdv">–</div></div>
+        <div class="ro"><div class="k">Charge de la bobine</div><div class="v" id="lpDwell">–</div></div>
+      </div>
+      <div><span class="pill" id="lpInjPill">Injecteurs OK</span></div>
+      <h3>Pression au fil du cycle</h3>
+      <canvas id="pchart" aria-label="Pression dans le cylindre sur 720 degrés avec les événements du cycle"></canvas>
+      <h3>Diagramme pression / volume</h3>
+      <canvas id="pvchart" aria-label="Diagramme pression volume en échelle logarithmique"></canvas>
+    </aside>
+  </div>
+</section>
+
+<section class="block" aria-labelledby="chronoTitle">
+  <div class="block-head">
+    <h2 id="chronoTitle">Chronogramme · ordre d'allumage 1‑5‑4‑8‑6‑3‑7‑2</h2>
+    <div class="legend">
+      <span style="--c:var(--air)">Admission</span>
+      <span style="--c:var(--comp)">Compression</span>
+      <span style="--c:var(--amber)">Combustion / détente</span>
+      <span style="--c:var(--exh)">Échappement</span>
+      <span style="--c:var(--fuel)">Injection</span>
+      <span style="--c:#e6f4ff">Étincelle</span>
+    </div>
+  </div>
+  <div class="canvas-scroll"><canvas id="chrono" aria-label="Cycle à quatre temps des huit cylindres sur 720 degrés"></canvas></div>
+</section>
+
+<article class="prose explain">
+  <h2><span class="num">1</span>Ce que vous regardez</h2>
+  <p>Le S65 est un V8 à 90° de 4 litres, conçu pour tourner haut : 420 ch à 8 300 tr/min sans turbo. Les cylindres 1 à 4 forment un banc, les cylindres 5 à 8 l'autre. Chaque paire de bielles face à face partage le même maneton du vilebrequin, ce qui explique le léger décalage des deux bancs le long de l'axe.</p>
+  <p>Le vilebrequin est <strong>croisé</strong> : ses quatre manetons sont décalés de 90° les uns des autres. Il y a une combustion tous les 90° de rotation, dans l'ordre <strong>1‑5‑4‑8‑6‑3‑7‑2</strong>. Dans la vue 3D, la couleur du gaz dans chaque cylindre indique le temps en cours, et l'étiquette du cylindre qui brûle passe en orange.</p>
+  <p>Chaque cylindre a quatre soupapes commandées par deux arbres à cames (admission côté intérieur du V, échappement côté extérieur). Les arbres tournent deux fois moins vite que le vilebrequin, puisqu'un cycle complet dure deux tours.</p>
+
+  <h2><span class="num">2</span>De la pédale à l'étincelle</h2>
+  <p><strong>La pédale ne commande pas directement les papillons.</strong> Elle envoie une demande au calculateur, qui ouvre les huit papillons individuels en conséquence. Au ralenti, il les entrouvre pour tenir 800 tr/min. Au limiteur, pendant un passage de rapport ou à 250 km/h, il coupe l'essence. Les deux jauges du pupitre montrent cet écart entre pédale et papillons.</p>
+  <p><strong>La boîte DKG</strong> est une boîte à double embrayage à 7 rapports. Pendant qu'un rapport transmet le couple, le suivant est déjà engagé sur l'autre embrayage : le passage dure une fraction de seconde. En D, elle passe les rapports tôt quand on appuie peu et tard quand on appuie fort. En S, elle garde des régimes plus hauts. En M, elle obéit aux palettes, mais elle refuse un rétrogradage qui ferait dépasser la zone rouge.</p>
+  <p><strong>L'air</strong> traverse la boîte à air et le filtre, entre dans une trompette, passe un papillon puis descend le conduit d'admission jusqu'aux deux soupapes. <strong>L'essence</strong> est injectée dans ce conduit, sur le dos de la soupape d'admission encore fermée. La soupape chaude aide les gouttelettes à s'évaporer. À l'ouverture, l'air les entraîne dans le cylindre, où le tourbillon de remplissage (le <em>tumble</em>) mélange le tout.</p>
+  <p><strong>L'allumage</strong> commence avant l'étincelle : la bobine crayon se charge pendant environ 3 ms. Puis elle libère plusieurs dizaines de milliers de volts. Un arc jaillit entre les électrodes quelques dizaines de degrés avant le point mort haut. La flamme met du temps à traverser la chambre : on l'allume en avance pour que la pression soit maximale juste après le point mort haut. Dans la coupe, le front de flamme grandit à partir de la bougie selon une loi de Wiebe, un modèle classique de la fraction de mélange brûlée.</p>
+
+  <h2><span class="num">3</span>Le système bielle‑manivelle</h2>
+  <p>Le piston ne descend pas à vitesse constante. Sa position dépend du rayon de manivelle <em>r</em> (la moitié de la course, 37,6 mm) et de la longueur de bielle <em>l</em> :</p>
+  <div class="formula">x(θ) = r·cos θ + √(l² − r²·sin² θ)<br>a(θ) ≈ r·ω²·(cos θ + λ·cos 2θ)    avec λ = r / l ≈ 0,27</div>
+  <p>Le terme en <em>cos 2θ</em> rend l'accélération plus forte au point mort haut qu'au point mort bas. La courbe ci‑dessous suit le cylindre 1 au régime actuel de la simulation.</p>
+  <figure class="figure" style="margin-inline:0">
+    <canvas id="kin" aria-label="Position, vitesse et accélération du piston 1"></canvas>
+    <figcaption id="kinCap">Position, vitesse et accélération du piston n° 1 sur un tour.</figcaption>
+  </figure>
+
+  <h2><span class="num">4</span>Pourquoi une bielle casse</h2>
+  <p><strong>En traction, au point mort haut d'échappement.</strong> À la fin de l'échappement, le piston arrive en haut sans pression de gaz pour le freiner. Toute la masse en mouvement alternatif tire sur la bielle :</p>
+  <div class="formula">F = m · r · ω² · (1 + λ)</div>
+  <p>La force croît avec le carré du régime : 10 % de tours en plus, c'est 21 % d'effort en plus. Au régime maxi du S65, chaque bielle encaisse environ 25 kN, soit le poids de deux voitures et demie, à chaque cycle, 70 fois par seconde.</p>
+  <p><strong>En compression, à la combustion.</strong> Quelques degrés après le point mort haut, la pression des gaz dépasse 90 bar sur un piston de 66 cm² : environ 60 kN. Une préparation qui augmente fortement le couple augmente cette pression, et la bielle finit par flamber.</p>
+  <p><strong>La fatigue et les coussinets.</strong> Une bielle casse rarement au premier coup de trop. Les pics de charge répétés font progresser des micro‑fissures. Sur le S65, les coussinets de bielle sont réputés comme le point faible : un coussinet usé laisse du jeu, la tête de bielle est martelée à chaque point mort haut, puis grippe ou se rompt. Libérée, la bielle est projetée par le vilebrequin contre le carter et le perce.</p>
+
+  <h2><span class="num">5</span>Hypothèses du modèle</h2>
+  <p>Les cotes principales sont celles du moteur. Les masses, les pressions et les limites de rupture sont des estimations choisies pour que les ordres de grandeur soient réalistes. Ce n'est pas un calcul de dimensionnement.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Grandeur</th><th>Valeur</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>Alésage × course</td><td class="n">92 × 75,2 mm</td><td>Constructeur</td></tr>
+      <tr><td>Entraxe de bielle</td><td class="n">140 mm</td><td>Estimation</td></tr>
+      <tr><td>Masse alternative (piston + ⅓ bielle)</td><td class="n">0,69 kg</td><td>Estimation</td></tr>
+      <tr><td>Pression max à 400 N·m</td><td class="n">≈ 100 bar</td><td>Ordre de grandeur, moteur atmosphérique</td></tr>
+      <tr><td>Limite en traction de la bielle</td><td class="n">40 kN</td><td>Choix du modèle</td></tr>
+      <tr><td>Limite en compression de la bielle</td><td class="n">95 kN</td><td>Choix du modèle</td></tr>
+      <tr><td>Début de la fatigue</td><td class="n">85 % de la limite</td><td>Choix du modèle</td></tr>
+      <tr><td>Rapports DKG (1 à 7) · pont</td><td class="n">4,78 · 3,06 · 2,15 · 1,68 · 1,39 · 1,20 · 1,00 · 3,15</td><td>Constructeur</td></tr>
+      <tr><td>Masse, pneus arrière</td><td class="n">1 655 kg · 265/40 R18</td><td>Constructeur</td></tr>
+      <tr><td>Adhérence maxi (antipatinage)</td><td class="n">≈ 11,5 kN au sol</td><td>Estimation</td></tr>
+      <tr><td>Débit d'un injecteur</td><td class="n">4,2 mg/ms · 6,3 avec le kit</td><td>Estimation</td></tr>
+      <tr><td>Kit compresseur (type ESS VT2‑625)</td><td class="n">≈ 0,55 bar à 8 300 tr/min · 625 ch</td><td>Estimation calée sur la puissance annoncée</td></tr>
+      <tr><td>Vitesse maxi d'origine</td><td class="n">250 km/h, bridée électroniquement</td><td>Constructeur</td></tr>
+      <tr><td>Adhérence en virage · au freinage</td><td class="n">1,05 g · 1,1 g (cercle d'adhérence)</td><td>Estimation, pneus sport</td></tr>
+      <tr><td>Circuit</td><td class="n">Tracé fictif</td><td>Choix du modèle</td></tr>
+      <tr><td>Son</td><td class="n">Synthèse : impulsions dans l'ordre 1‑5‑4‑8‑6‑3‑7‑2, un échappement par banc, souffle des trompettes</td><td>Modèle, pas un enregistrement</td></tr>
+      <tr><td>Fin d'injection</td><td class="n">10° avant l'ouverture de l'admission</td><td>Choix du modèle</td></tr>
+      <tr><td>Richesse</td><td class="n">λ = 1 ; 0,87 pied au plancher</td><td>Ordre de grandeur</td></tr>
+      <tr><td>Avance à l'allumage</td><td class="n">8 à 36°, réduite en charge</td><td>Estimation</td></tr>
+      <tr><td>Combustion</td><td class="n">Wiebe (a = 5, m = 2), 40 à 56°</td><td>Modèle classique</td></tr>
+      <tr><td>Rapport volumétrique · polytropique</td><td class="n">12 : 1 · 1,33</td><td>Constructeur · estimation</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Rotation, angles de distribution et ordre d'allumage sont cohérents entre eux : chaque piston est au point mort haut exactement quand son cylindre s'allume dans le chronogramme.</p>
+</article>
+</section>
+
+<section class="tabpanel" id="tab-pieces" role="tabpanel" aria-labelledby="t-pieces" hidden>
+<div class="parts-top">
+  <div class="prose">
+    <h2 style="margin-top:0">Pièces et références</h2>
+    <p>Les pièces du S65 classées comme dans le catalogue BMW (groupe 11 Moteur, 12 Électricité moteur, 13 Alimentation…). Cliquez sur « Situer en 3D » pour voir où la pièce se trouve dans le moteur.</p>
+  </div>
+  <div class="st-legend" id="stLegend"></div>
+</div>
+<div class="notice">
+  <strong>Aucune référence n'est encore vérifiée sur RealOEM.</strong> RealOEM n'était pas accessible depuis l'outil qui a constitué cette première base. Les numéros viennent de fiches « pièce d'origine » de revendeurs spécialisés, et chaque source est citée. Avant de commander, vérifiez toujours la référence avec votre numéro de châssis. Le lien RealOEM de chaque référence ouvre la recherche correspondante.
+</div>
+<div class="parts-grid">
+  <div class="parts-list">
+    <div class="parts-filters">
+      <input type="search" id="pSearch" placeholder="Pièce ou numéro (ex. 11427837997)" aria-label="Chercher une pièce ou une référence">
+      <select id="pGroup" aria-label="Groupe"></select>
+      <select id="pStatut" aria-label="Statut">
+        <option value="">Tous les statuts</option>
+        <option value="verifiee">Vérifiée RealOEM</option>
+        <option value="recoupee">Recoupée</option>
+        <option value="a-confirmer">À confirmer</option>
+        <option value="a-renseigner">À renseigner</option>
+      </select>
+    </div>
+    <div id="pList"></div>
+  </div>
+  <div class="parts-viewer">
+    <div id="viewerSlot"></div>
+    <div class="viewer-cap" id="viewerCap">Choisissez une pièce pour la situer dans le moteur.</div>
+  </div>
+</div>
+</section>
+
+<section class="tabpanel" id="tab-circuit" role="tabpanel" aria-labelledby="t-circuit" hidden>
+<div id="slotCircuit"></div>
+<section class="block" id="circuitSec" aria-labelledby="circuitTitle">
+  <div class="block-head">
+    <h2 id="circuitTitle">Mode circuit</h2>
+    <div class="legend"><span style="--c:var(--ok)">Accélération</span><span style="--c:var(--red)">Freinage</span><span style="--c:var(--muted)">Piste fictive · <b id="trkLen"></b></span></div>
+  </div>
+  <div class="circ-grid">
+    <div class="circ-map">
+      <canvas id="trackMap" aria-label="Plan du circuit avec la position de la voiture"></canvas>
+      <div class="circ-over">
+        <span class="unit" style="font:500 11px var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase" id="lapLbl">Tour en cours</span>
+        <span class="lap-now" id="lapNow">–</span>
+        <span class="delta" id="lapDelta" hidden></span>
+      </div>
+      <div class="circ-msg" id="circMsg" hidden></div>
+    </div>
+    <aside class="circ-side">
+      <div class="row2">
+        <button class="btn solid" id="circStart">Aller en piste</button>
+        <button class="btn" id="circStop">Quitter la piste</button>
+        <label class="switch"><input type="checkbox" id="circAuto"> Pilote automatique</label>
+      </div>
+      <div class="drive-btns">
+        <button class="btn big gas" id="gasHold">Gaz</button>
+        <button class="btn big brake" id="brakeHold">Frein</button>
+      </div>
+      <div class="hint">En piste, la direction est automatique : vous gérez les gaz, le freinage et les rapports. Clavier : ↑ gaz, ↓ ou espace frein (maintenir), + / − palettes. Trop vite dans un virage, c'est la sortie de piste et le tour ne compte pas.</div>
+      <div class="readouts">
+        <div class="ro"><div class="k">Meilleur tour</div><div class="v" id="lapBest">–</div></div>
+        <div class="ro"><div class="k">Dernier tour</div><div class="v" id="lapLast">–</div></div>
+        <div class="ro"><div class="k">Secteurs (tour en cours)</div><div class="v" id="lapSecs" style="font-size:16px">–</div></div>
+        <div class="ro"><div class="k">Accélération latérale</div><div class="v" id="latG">0<small>g</small></div></div>
+        <div class="ro"><div class="k">Vitesse de pointe</div><div class="v" id="lapTop">–</div></div>
+        <div class="ro"><div class="k">Sorties de piste</div><div class="v" id="lapOffs">0</div></div>
+      </div>
+      <canvas id="speedTrace" aria-label="Vitesse le long du tour : tour en cours et meilleur tour"></canvas>
+      <div class="tbl-wrap" style="margin:0"><table class="laps"><thead><tr><th>Tour</th><th>Temps</th><th>S1</th><th>S2</th><th>S3</th></tr></thead><tbody id="lapRows"><tr><td colspan="5" class="hint">Aucun tour chronométré.</td></tr></tbody></table></div>
+    </aside>
+  </div>
+</section>
+</section>
+</main>
+
+<footer class="site-foot"><div class="in">
+  <span>La Bible BMW · site indépendant, sans lien avec BMW AG.</span>
+  <span>Références pièces : toujours vérifier avec le numéro de châssis sur RealOEM avant de commander.</span>
+</div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="../../data/pieces-s65.js"></script>
+<script src="s65.js"></script>
+</body>
+</html>

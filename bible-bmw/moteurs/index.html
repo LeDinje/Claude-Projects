@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moteurs · La Bible BMW</title>
+<meta name="description" content="Catalogue des moteurs BMW : M, série, atmosphériques et turbo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+.cat-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px 24px;padding-block:18px 8px}
+.cat-head h1{font:700 clamp(40px,6vw,68px)/.9 var(--f-display);text-transform:uppercase;margin:8px 0 0}
+.cat-head p{margin:8px 0 0;color:#cdd3da;max-width:60ch}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.filters .seg{display:flex;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px}
+.fbtn{appearance:none;border:0;background:none;color:var(--muted);font:500 13px var(--f-body);padding:7px 10px;border-radius:5px;cursor:pointer}
+.fbtn[aria-pressed="true"]{background:var(--bg-2);color:var(--fg)}
+.fbtn:focus-visible{outline:2px solid var(--air)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.eng{display:grid;gap:10px;align-content:start;text-decoration:none;color:inherit}
+a.eng:hover{border-color:var(--amber)}
+.eng .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.eng .code{font:700 52px/.85 var(--f-display);letter-spacing:.01em}
+.eng.m .code{color:var(--fg)}
+.eng .fam{font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.eng dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:13.5px}
+.eng dt{color:var(--muted)} .eng dd{margin:0}
+.eng .state{font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
+.eng .state.on{color:var(--amber)} .eng .state.off{color:var(--dim)}
+.eng.soon{opacity:.72}
+</style>
+</head>
+<body>
+<header class="site-head"><div class="in">
+  <a class="logo" href="../index.html">La Bible <b>BMW</b></a>
+  <nav class="nav" aria-label="Rubriques">
+    <a href="index.html" aria-current="page">Moteurs</a>
+    <span>Modèles</span><span>Pièces</span><span>Entretien</span>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <nav class="crumbs" aria-label="Fil d'Ariane"><a href="../index.html">Accueil</a><span>›</span><span>Moteurs</span></nav>
+  <div class="cat-head">
+    <div>
+      <div class="eyebrow">Catalogue</div>
+      <h1>Les moteurs</h1>
+      <p>Les moteurs BMW rangés par famille. Les fiches complètes arrivent une par une, en commençant par le S65.</p>
+    </div>
+    <div class="hint" id="count"></div>
+  </div>
+  <div class="filters" role="group" aria-label="Filtres">
+    <div class="seg" data-f="famille">
+      <button class="fbtn" data-v="" aria-pressed="true">Tous</button><button class="fbtn" data-v="M" aria-pressed="false">BMW M</button><button class="fbtn" data-v="Série" aria-pressed="false">Série</button>
+    </div>
+    <div class="seg" data-f="archi">
+      <button class="fbtn" data-v="" aria-pressed="true">Toutes architectures</button><button class="fbtn" data-v="4" aria-pressed="false">4 cyl.</button><button class="fbtn" data-v="6" aria-pressed="false">6 cyl.</button><button class="fbtn" data-v="8" aria-pressed="false">V8</button><button class="fbtn" data-v="10" aria-pressed="false">V10</button>
+    </div>
+    <div class="seg" data-f="aspi">
+      <button class="fbtn" data-v="" aria-pressed="true">Atmo et turbo</button><button class="fbtn" data-v="atmo" aria-pressed="false">Atmosphérique</button><button class="fbtn" data-v="turbo" aria-pressed="false">Suralimenté</button>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer class="site-foot"><div class="in">
+  <span>La Bible BMW · site indépendant, sans lien avec BMW AG.</span>
+  <span>Une erreur, un moteur à ajouter ? Voir CONTRIBUER.md dans le dépôt.</span>
+</div></footer>
+
+<script src="../data/moteurs.js"></script>
+<script>
+(() => {
+  const M = (window.BIBLE && window.BIBLE.moteurs) || [];
+  const f = { famille: '', archi: '', aspi: '' };
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function render(){
+    const list = M.filter(m => (!f.famille || m.famille === f.famille) && (!f.archi || String(m.cyl) === f.archi)
+      && (!f.aspi || (f.aspi === 'atmo' ? m.aspiration === 'Atmosphérique' : m.aspiration !== 'Atmosphérique')));
+    list.sort((a, b) => (b.fiche ? 1 : 0) - (a.fiche ? 1 : 0));
+    document.getElementById('grid').innerHTML = list.map(m => {
+      const inner = `<div class="top"><span class="code">${esc(m.code)}</span><span class="fam">${m.famille === 'M' ? 'BMW M' : 'Série'}</span></div>
+        <dl><dt>Architecture</dt><dd>${esc(m.archi)}</dd><dt>Cylindrée</dt><dd>${esc(m.cylindree)}</dd><dt>Alimentation</dt><dd>${esc(m.aspiration)}</dd>
+        <dt>Modèles</dt><dd>${esc(m.modeles)}</dd><dt>Période</dt><dd>${esc(m.periode)}</dd></dl>
+        <span class="state ${m.fiche ? 'on' : 'off'}">${m.fiche ? 'Fiche complète →' : 'Fiche à venir'}</span>`;
+      return m.fiche ? `<a class="eng card ${m.famille === 'M' ? 'm' : ''}" href="${m.fiche}">${inner}</a>` : `<div class="eng card soon">${inner}</div>`;
+    }).join('') || '<p class="hint">Aucun moteur ne correspond à ces filtres.</p>';
+    document.getElementById('count').textContent = `${list.length} moteur${list.length > 1 ? 's' : ''} · ${M.filter(m => m.fiche).length} fiche complète`;
+  }
+  document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e => {
+    const b = e.target.closest('.fbtn'); if (!b) return;
+    seg.querySelectorAll('.fbtn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    f[seg.dataset.f] = b.dataset.v; render();
+  }));
+  render();
+})();
+</script>
+</body>
+</html>

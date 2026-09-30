@@ -1,639 +1,4 @@
-<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Anatomie du V8 S65</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<style>
-/* Layout: plein écran 3D + pupitre d'instruments à droite, puis chronogramme et article sur une colonne */
-:root{
-  --bg:#0e1115; --bg-2:#141920; --panel:#171c23; --line:#28303a; --line-2:#343e4a;
-  --fg:#e6e9ed; --muted:#8c96a3; --dim:#5d6773;
-  --amber:#f5a524; --air:#5cb4e8; --comp:#a58cf0; --exh:#9aa1a9; --red:#ef4444; --ok:#4fd18b;
-  --fuel:#ffd34d; --mix:#6fd3b0; --burnt:#c0573d;
-  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
-  --f-body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
-  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  color-scheme:dark;
-}
-*{box-sizing:border-box}
-html,body{background:var(--bg);color:var(--fg)}
-body{margin:0;font:15px/1.55 var(--f-body);padding-inline:16px;padding-block:0 48px}
-a{color:var(--air)}
-.wrap{max-width:1440px;margin-inline:auto}
-
-/* En-tête */
-.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 32px;padding-block:22px 16px}
-.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-h1{font:700 clamp(34px,5vw,56px)/.95 var(--f-display);letter-spacing:.01em;margin:8px 0 0;text-transform:uppercase;text-wrap:balance}
-h1 em{font-style:normal;color:var(--amber)}
-.specs{display:flex;flex-wrap:wrap;gap:6px 20px;font:500 13px/1.3 var(--f-mono);color:var(--muted)}
-.specs b{display:block;font:600 22px/1.1 var(--f-display);color:var(--fg);letter-spacing:.02em}
-
-/* Scène */
-.stage{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px}
-.viewport{position:relative;min-height:560px;height:min(78vh,780px);border:1px solid var(--line);border-radius:10px;overflow:hidden;
-  background:radial-gradient(120% 90% at 50% 35%,#1d242d 0%,#12161c 55%,#0b0d10 100%)}
-#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.lbl{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font:500 11px/1 var(--f-mono);color:var(--fg);white-space:nowrap;
-  padding:3px 6px;border-radius:4px;background:rgba(14,17,21,.72);border:1px solid var(--line-2)}
-.lbl.cyl{font:700 13px/1 var(--f-display);padding:3px 7px;letter-spacing:.04em}
-.lbl.cyl.fire{background:var(--amber);color:#1a1206;border-color:var(--amber)}
-.lbl.cyl.dead{background:var(--red);color:#fff;border-color:var(--red)}
-#tach{position:absolute;left:12px;top:12px;width:176px;height:176px;pointer-events:none}
-.hud{position:absolute;left:198px;top:18px;display:grid;gap:2px;pointer-events:none}
-.hud .big{font:600 44px/1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:.01em}
-.hud .unit{font:500 11px/1 var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
-.hud .row{display:flex;gap:16px;margin-top:6px;font:600 22px/1 var(--f-display);font-variant-numeric:tabular-nums}
-.hud .row small{font:500 11px var(--f-mono);color:var(--muted);margin-left:3px}
-.viewbar{position:absolute;right:10px;bottom:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
-.playbadge{position:absolute;right:12px;top:12px;font:500 12px/1 var(--f-mono);color:var(--muted);background:rgba(14,17,21,.72);
-  border:1px solid var(--line-2);border-radius:4px;padding:6px 8px;pointer-events:none}
-.playbadge b{color:var(--fg);font-weight:500}
-#flash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 55%,rgba(255,120,40,.55),rgba(239,68,68,.25) 40%,transparent 75%);opacity:0}
-#flash.on{animation:flash 1.2s ease-out}
-@keyframes flash{0%{opacity:1}100%{opacity:0}}
-.alert{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100% - 32px));background:rgba(20,12,12,.94);
-  border:1px solid var(--red);border-radius:10px;padding:16px 18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-.alert h3{margin:0 0 6px;font:700 26px/1 var(--f-display);text-transform:uppercase;color:#ff8a80;letter-spacing:.02em}
-.alert p{margin:0 0 10px;color:#e8d9d9;font-size:14px}
-.alert dl{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;margin:0 0 12px;font:13px var(--f-mono)}
-.alert dt{color:#b89a9a}.alert dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
-.alert .btns{display:flex;gap:8px;flex-wrap:wrap}
-
-/* Boutons */
-.btn{appearance:none;border:1px solid var(--line-2);background:var(--bg-2);color:var(--fg);font:500 13px/1 var(--f-body);padding:8px 11px;border-radius:6px;cursor:pointer}
-.btn:hover{border-color:var(--muted)}
-.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--air);outline-offset:2px}
-.btn.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
-.btn.danger{background:#3a1414;border-color:#7f2626;color:#ffb4ae}
-.btn.danger:hover{background:#4b1818;border-color:var(--red)}
-.btn.solid{background:var(--amber);color:#1b1305;border-color:var(--amber);font-weight:600}
-.viewbar .btn{background:rgba(20,25,32,.85);padding:7px 10px;font-size:12px}
-.viewbar .btn.on,.lp-steps .btn.on{background:var(--fg);color:var(--bg)}
-
-/* Pupitre */
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 16px 16px;overflow:auto;max-height:min(78vh,780px);min-height:560px}
-.grp{padding-block:14px;border-bottom:1px solid var(--line);display:grid;gap:12px}
-.grp:last-child{border-bottom:0}
-.grp h2{margin:0;font:600 13px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.ctl{display:grid;gap:6px}
-.ctl .head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.ctl label{font-weight:500;font-size:14px}
-.ctl output{font:600 20px/1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:.02em}
-.ctl output small{font:500 11px var(--f-mono);color:var(--muted);margin-left:3px}
-.ctl .hint{font-size:12px;color:var(--muted);line-height:1.4}
-input[type=range]{width:100%;accent-color:var(--amber);margin:0}
-input[type=range]:disabled{opacity:.35}
-.switch{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer}
-.switch input{width:18px;height:18px;accent-color:var(--amber);margin:0}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:999px;padding:5px 10px 5px 8px;font-size:13px;cursor:pointer;user-select:none}
-.chip input{margin:0;accent-color:var(--amber)}
-.chip:has(input:checked){border-color:var(--muted);background:var(--bg-2)}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
-.seg .btn{padding:8px 4px}
-.row2{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-select{background:var(--bg-2);color:var(--fg);border:1px solid var(--line-2);border-radius:6px;font:500 13px var(--f-body);padding:7px 8px}
-.readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
-.ro{min-width:0}
-.ro .k{font-size:11.5px;color:var(--muted);line-height:1.25}
-.ro .v{font:600 21px/1.1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:.01em}
-.ro .v small{font:500 11px var(--f-mono);color:var(--muted);margin-left:3px}
-.meter{display:grid;gap:5px}
-.meter .bar{height:8px;border-radius:4px;background:var(--bg-2);border:1px solid var(--line);overflow:hidden;position:relative}
-.meter .bar i{position:absolute;inset:0 auto 0 0;width:0;background:var(--ok);border-radius:3px}
-.meter .bar .tick{position:absolute;top:-1px;bottom:-1px;width:1px;background:var(--muted)}
-.meter .head{display:flex;justify-content:space-between;font-size:12.5px}
-.meter .head b{font:600 15px var(--f-display);font-variant-numeric:tabular-nums}
-.pill{display:inline-block;font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:999px;background:#18301f;color:var(--ok)}
-.pill.warn{background:#3a2a0d;color:var(--amber)}
-.pill.crit{background:#3d1414;color:#ff8a80}
-#curve{width:100%;height:150px;display:block}
-
-/* Chronogramme */
-.block{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
-.block-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 20px;margin-bottom:8px}
-.block-head h2{margin:0;font:600 22px/1.1 var(--f-display);text-transform:uppercase;letter-spacing:.03em}
-.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
-.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;background:var(--c)}
-.canvas-scroll{overflow-x:auto}
-#chrono{width:100%;min-width:560px;height:250px;display:block}
-
-/* Article */
-article{max-width:760px;margin:40px auto 0}
-article h2{font:700 34px/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em;margin:48px 0 14px;text-wrap:balance}
-article h2 .num{color:var(--amber);margin-right:10px}
-article p{margin:0 0 14px;color:#cdd3da;max-width:65ch}
-article strong{color:var(--fg)}
-.formula{font:500 15px/1.6 var(--f-mono);background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0 0 14px;overflow-x:auto;color:var(--fg)}
-.figure{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:6px 0 18px}
-.figure figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
-#kin{width:100%;height:230px;display:block}
-.tbl-wrap{overflow-x:auto;margin:0 0 14px}
-table{border-collapse:collapse;width:100%;font-size:14px}
-th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
-th{font:500 12px var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
-td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
-.note{font-size:13px;color:var(--muted)}
-
-/* Conduite */
-.gate{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:4px}
-.gbtn{appearance:none;border:0;background:transparent;color:var(--muted);font:700 20px/1 var(--f-display);padding:8px 0;border-radius:5px;cursor:pointer}
-.gbtn:hover{color:var(--fg);background:var(--bg-2)}
-.gbtn.on{background:var(--amber);color:#1b1305}
-.gbtn:focus-visible{outline:2px solid var(--air);outline-offset:1px}
-.paddles{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
-.gear-now{text-align:center;min-width:76px}
-.gear-now b{display:block;font:700 34px/1 var(--f-display);font-variant-numeric:tabular-nums}
-.gear-now span{font:500 11px var(--f-mono);color:var(--muted);letter-spacing:.04em}
-.gear-msg{min-height:18px;font-size:12.5px;color:var(--amber)}
-.pedals{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:stretch}
-.pedal-col{display:grid;justify-items:center;gap:6px;font:500 11px var(--f-mono);color:var(--muted);background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:10px 8px}
-#pedal{writing-mode:vertical-lr;direction:rtl;width:36px;height:150px;margin:0;accent-color:var(--amber)}
-.pedal-info{display:grid;gap:10px;align-content:start}
-.minibar{height:8px;border-radius:4px;background:var(--bg-2);border:1px solid var(--line);overflow:hidden;position:relative;margin-bottom:4px}
-.minibar i{position:absolute;inset:0 auto 0 0;width:0;background:var(--amber)}
-.btn.brake{border-color:#7f2626;color:#ffb4ae}
-.btn.brake.on{background:#7f2626;color:#fff}
-#gears{width:100%;height:140px;display:block}
-.gearchip{font:700 18px/1 var(--f-display);background:var(--fg);color:var(--bg);border-radius:4px;padding:3px 8px}
-
-/* Circuit */
-.circ-grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:12px}
-.circ-map{position:relative;min-height:420px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:radial-gradient(120% 100% at 50% 40%,#18241c 0%,#101612 70%,#0b0f0c 100%)}
-#trackMap{position:absolute;inset:0;width:100%;height:100%;display:block}
-.circ-over{position:absolute;left:14px;top:12px;display:grid;gap:4px;pointer-events:none}
-.lap-now{font:700 44px/1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:.01em}
-.delta{font:600 18px/1 var(--f-display);font-variant-numeric:tabular-nums;padding:3px 8px;border-radius:4px;justify-self:start}
-.delta.neg{background:#153a24;color:var(--ok)} .delta.pos{background:#3d1414;color:#ff8a80}
-.circ-msg{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);max-width:calc(100% - 28px);background:rgba(14,17,21,.88);border:1px solid var(--line-2);
-  border-radius:8px;padding:8px 12px;font-size:14px;text-align:center;pointer-events:none}
-.circ-side{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:12px;align-content:start}
-.drive-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.btn.big{font:700 22px/1 var(--f-display);text-transform:uppercase;letter-spacing:.04em;padding:18px 0;touch-action:none;user-select:none}
-.btn.gas{border-color:#2f6b45;color:var(--ok)} .btn.gas.on{background:#2f6b45;color:#fff}
-.laps{width:100%;font-size:13px}
-.laps td,.laps th{padding:4px 6px}
-.laps tr.best td{color:var(--ok)} .laps tr.inv td{color:var(--dim);text-decoration:line-through}
-#speedTrace{width:100%;height:130px;display:block}
-#miniMap{position:absolute;right:12px;top:44px;width:190px;height:150px;pointer-events:none;display:none;background:rgba(14,17,21,.72);border:1px solid var(--line-2);border-radius:6px}
-body.in-circuit #miniMap{display:block}
-
-/* Coupe du cylindre */
-.loupe-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px}
-.loupe-view{position:relative;height:min(76vh,720px);min-height:520px;border:1px solid var(--line);border-radius:10px;overflow:hidden;
-  background:radial-gradient(110% 90% at 40% 40%,#1b222b 0%,#11151a 60%,#0a0c0f 100%)}
-#loupe{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#lpLabels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-#lpLabels .lbl{font-size:10.5px;padding:2px 5px}
-.lp-hud{position:absolute;left:14px;top:12px;max-width:min(340px,calc(100% - 28px));pointer-events:none;display:grid;gap:4px;
-  background:rgba(14,17,21,.78);border:1px solid var(--line-2);border-radius:8px;padding:10px 12px}
-.lp-phase{font:700 26px/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em}
-.lp-angle{font:500 12px var(--f-mono);color:var(--muted)}
-.lp-desc{font-size:13px;line-height:1.4;color:#cdd3da}
-.lp-events{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
-.ev{font:600 10.5px/1 var(--f-mono);letter-spacing:.04em;text-transform:uppercase;padding:4px 6px;border-radius:4px;border:1px solid var(--line-2);color:var(--dim)}
-.ev.on{color:#10151b;border-color:transparent}
-#evInj.on{background:var(--fuel)} #evIn.on{background:var(--air)} #evEx.on{background:var(--exh)} #evDwell.on{background:var(--comp)} #evSpark.on{background:#dff1ff}
-.lp-cams{position:absolute;right:10px;top:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:50%}
-.lp-steps{position:absolute;left:10px;right:10px;bottom:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.lp-cams .btn,.lp-steps .btn{background:rgba(20,25,32,.88);padding:7px 9px;font-size:12px}
-.lp-hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(20,16,8,.92);border:1px solid var(--amber);color:var(--fg);
-  padding:10px 14px;border-radius:8px;font-size:13.5px;pointer-events:none;text-align:center;max-width:80%}
-.loupe-side{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:12px;align-content:start;overflow:auto;max-height:min(76vh,720px)}
-.loupe-side h3{margin:0;font:600 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-#pchart{width:100%;height:170px;display:block}
-#pvchart{width:100%;height:170px;display:block}
-
-@media (max-width: 980px){
-  .circ-grid{grid-template-columns:minmax(0,1fr)}
-  .loupe-grid{grid-template-columns:minmax(0,1fr)}
-  .loupe-view{height:70vh;min-height:460px}
-  .loupe-side{max-height:none}
-  .lp-cams,.lp-steps{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;left:10px;right:10px}
-  .lp-cams{max-width:none;top:auto;bottom:54px}
-  .lp-cams .btn,.lp-steps .btn{flex:none}
-  .stage{grid-template-columns:minmax(0,1fr)}
-  .viewport{height:62vh;min-height:420px}
-  .panel{max-height:none;min-height:0}
-}
-@media (max-width: 560px){
-  #tach{width:120px;height:120px;left:8px;top:8px}
-  .hud{left:136px;top:12px}
-  .hud .big{font-size:32px}
-  .hud .row{font-size:17px;gap:10px}
-  .playbadge{display:none}
-  .lp-hud{left:8px;top:8px;padding:8px 10px}
-  .lp-desc,.lp-events{display:none}
-  .lp-phase{font-size:20px}
-}
-@media (prefers-reduced-motion: reduce){ #flash.on{animation:none} }
-</style>
-</head>
-<body>
-<div class="wrap">
-
-<header class="top">
-  <div>
-    <div class="eyebrow">V8 atmosphérique · 90° · vilebrequin croisé · 8 papillons</div>
-    <h1>Anatomie du V8 <em>S65</em></h1>
-  </div>
-  <div class="specs" aria-label="Fiche technique">
-    <div><b>3 999 cm³</b>cylindrée</div>
-    <div><b>92 × 75,2</b>alésage × course (mm)</div>
-    <div><b id="specHp">420 ch</b><span id="specHpRpm">à 8 300 tr/min</span></div>
-    <div><b id="specNm">400 N·m</b><span id="specNmRpm">à 3 900 tr/min</span></div>
-    <div><b>8 400</b>zone rouge</div>
-  </div>
-</header>
-
-<section class="stage">
-  <div class="viewport" id="viewport">
-    <canvas id="gl" aria-label="Vue 3D du moteur : faites glisser pour tourner, molette pour zoomer"></canvas>
-    <div id="labels"></div>
-    <canvas id="tach" width="352" height="352" aria-hidden="true"></canvas>
-    <div class="hud" aria-live="off">
-      <div class="unit">Régime moteur</div>
-      <div class="big" id="hudRpm">0</div>
-      <div class="row"><span id="hudHp">0<small>ch</small></span><span id="hudNm">0<small>N·m</small></span></div>
-      <div class="row"><span class="gearchip" id="hudGear">P</span><span id="hudKmh">0<small>km/h</small></span><span id="hudBoost" hidden></span></div>
-    </div>
-    <canvas id="miniMap" width="380" height="300" aria-hidden="true"></canvas>
-    <div class="playbadge">Lecture <b id="badgePlay">×1/50</b> · vilebrequin <b id="badgeAngle">0°</b></div>
-    <div class="viewbar">
-      <button class="btn" data-view="iso">3/4</button>
-      <button class="btn" data-view="front">Face</button>
-      <button class="btn" data-view="side">Côté</button>
-      <button class="btn" data-view="top">Dessus</button>
-      <button class="btn" id="pauseBtn">Pause</button>
-      <button class="btn" id="soundBtn">Son : coupé</button>
-    </div>
-    <div id="flash"></div>
-    <div class="alert" id="alert" hidden role="alertdialog" aria-labelledby="alertTitle">
-      <h3 id="alertTitle">Bielle rompue</h3>
-      <p id="alertText"></p>
-      <dl id="alertData"></dl>
-      <div class="btns">
-        <button class="btn solid" id="alertReset">Monter un moteur neuf</button>
-        <button class="btn" id="alertClose">Regarder les dégâts</button>
-      </div>
-    </div>
-  </div>
-
-  <aside class="panel" aria-label="Commandes du moteur">
-    <div class="grp">
-      <h2>Conduite · boîte DKG 7 rapports</h2>
-      <div class="gate" role="group" aria-label="Sélecteur de vitesses">
-        <button class="gbtn" data-sel="P">P</button>
-        <button class="gbtn" data-sel="R">R</button>
-        <button class="gbtn" data-sel="N">N</button>
-        <button class="gbtn" data-sel="D">D</button>
-        <button class="gbtn" data-sel="S">S</button>
-        <button class="gbtn" data-sel="M">M</button>
-      </div>
-      <div class="paddles">
-        <button class="btn" id="shiftDown" aria-label="Palette gauche, rapport inférieur">− Palette</button>
-        <div class="gear-now"><b id="gearBig">P</b><span id="gearSub">Parking</span></div>
-        <button class="btn" id="shiftUp" aria-label="Palette droite, rapport supérieur">Palette +</button>
-      </div>
-      <div class="gear-msg" id="gearMsg" aria-live="polite"></div>
-      <div class="gear-msg" id="limitMsg" style="color:#ff8a80"></div>
-      <div class="pedals">
-        <div class="pedal-col">
-          <input type="range" id="pedal" min="0" max="100" step="1" value="0" aria-label="Pression sur la pédale d'accélérateur">
-          <span>Accélérateur</span>
-        </div>
-        <div class="pedal-info">
-          <div class="ctl">
-            <div class="head"><label for="pedal">Pédale</label><output id="pedalOut">0<small>%</small></output></div>
-            <div class="minibar"><i id="pedalBar"></i></div>
-            <div class="head"><span>Papillons</span><output id="thrOut">0<small>%</small></output></div>
-            <div class="minibar"><i id="thrBar" style="background:var(--air)"></i></div>
-          </div>
-          <div class="row2">
-            <button class="btn" id="pedal0">Lever le pied</button>
-            <button class="btn" id="pedal100">Plancher</button>
-          </div>
-          <button class="btn brake" id="brakeBtn">Maintenir pour freiner</button>
-        </div>
-      </div>
-      <div class="readouts">
-        <div class="ro"><div class="k">Vitesse</div><div class="v" id="roKmh">0<small>km/h</small></div></div>
-        <div class="ro"><div class="k">Embrayage</div><div class="v" id="roClutch">Ouvert</div></div>
-        <div class="ro"><div class="k">Accélération</div><div class="v" id="roAccel">0<small>g</small></div></div>
-        <div class="ro"><div class="k">0 à 100 km/h</div><div class="v" id="ro0100">–</div></div>
-      </div>
-      <canvas id="gears" aria-label="Régime en fonction de la vitesse pour chaque rapport"></canvas>
-      <label class="switch"><input type="checkbox" id="limiter" checked> Limiteur à 8 400 tr/min</label>
-      <div class="hint">Clavier : ↑ / ↓ pour doser la pédale, espace pour freiner, + / − pour les palettes.</div>
-    </div>
-
-    <div class="grp">
-      <h2>Préparation</h2>
-      <div class="ctl">
-        <label for="cfg">Configuration moteur</label>
-        <select id="cfg">
-          <option value="stock">S65 d'origine · 420 ch</option>
-          <option value="ess">Compresseur ESS VT2‑625 · 625 ch</option>
-        </select>
-        <div class="hint" id="cfgHint"></div>
-      </div>
-      <div class="ctl">
-        <div class="head"><label for="hp">Réglage de puissance</label><output id="hpOut">420<small>ch</small></output></div>
-        <input type="range" id="hp" min="250" max="800" step="10" value="420">
-        <div class="hint">Au‑delà de la puissance prévue par la configuration, la pression dans les cylindres monte et les bielles encaissent plus de compression. Les injecteurs peuvent aussi saturer.</div>
-      </div>
-      <div class="ctl">
-        <label for="vmaxSel">Vitesse maxi</label>
-        <select id="vmaxSel">
-          <option value="250">Bridée à 250 km/h (d'origine)</option>
-          <option value="305">Bridée à 305 km/h</option>
-          <option value="0">Débridée</option>
-        </select>
-      </div>
-      <canvas id="curve" aria-label="Courbes de couple et de puissance"></canvas>
-    </div>
-
-    <div class="grp">
-      <h2>Lecture</h2>
-      <div class="ctl">
-        <div class="head"><label for="play">Ralenti de l'animation</label><output id="playOut">×1/50</output></div>
-        <input type="range" id="play" min="0" max="100" step="any" value="43.37">
-        <div class="hint">À 8 000 tr/min, le vilebrequin fait 133 tours par seconde : l'animation est ralentie pour qu'on puisse suivre les pistons. Les chiffres restent ceux du régime réel.</div>
-      </div>
-      <div class="ctl">
-        <div class="head"><label for="angle">Angle du vilebrequin (en pause)</label><output id="angleOut">0<small>°</small></output></div>
-        <input type="range" id="angle" min="0" max="719" step="1" value="0" disabled>
-      </div>
-    </div>
-
-    <div class="grp">
-      <h2>Affichage</h2>
-      <div class="seg" role="group" aria-label="Préréglages d'affichage">
-        <button class="btn" data-preset="full">Complet</button>
-        <button class="btn on" data-preset="xray">Écorché</button>
-        <button class="btn" data-preset="skeleton">Squelette</button>
-      </div>
-      <div class="chips">
-        <label class="chip"><input type="checkbox" data-layer="block" checked>Bloc</label>
-        <label class="chip"><input type="checkbox" data-layer="heads" checked>Culasses</label>
-        <label class="chip"><input type="checkbox" data-layer="valvetrain" checked>Distribution</label>
-        <label class="chip"><input type="checkbox" data-layer="manifolds" checked>Admission / échappement</label>
-        <label class="chip"><input type="checkbox" data-layer="liners" checked>Chemises</label>
-        <label class="chip"><input type="checkbox" data-layer="gas" checked>Gaz</label>
-        <label class="chip"><input type="checkbox" data-layer="flow" checked>Flux air / essence</label>
-        <label class="chip"><input type="checkbox" data-layer="pistons" checked>Pistons</label>
-        <label class="chip"><input type="checkbox" data-layer="rods" checked>Bielles</label>
-        <label class="chip"><input type="checkbox" data-layer="crank" checked>Vilebrequin</label>
-        <label class="chip"><input type="checkbox" data-layer="labels" checked>Étiquettes</label>
-      </div>
-    </div>
-
-    <div class="grp">
-      <h2>Sollicitation des bielles</h2>
-      <div class="meter">
-        <div class="head"><span>Charge / limite <span class="pill" id="stressPill">OK</span></span><b id="stressVal">0 %</b></div>
-        <div class="bar"><i id="stressBar"></i><span class="tick" style="left:85%"></span></div>
-      </div>
-      <div class="meter">
-        <div class="head"><span>Fatigue accumulée</span><b id="fatVal">0 %</b></div>
-        <div class="bar"><i id="fatBar"></i></div>
-      </div>
-      <div class="readouts">
-        <div class="ro"><div class="k">Traction au PMH échappement</div><div class="v" id="roTens">0<small>kN</small></div></div>
-        <div class="ro"><div class="k">Compression à la combustion</div><div class="v" id="roComp">0<small>kN</small></div></div>
-        <div class="ro"><div class="k">Pression max cylindre</div><div class="v" id="roPmax">0<small>bar</small></div></div>
-        <div class="ro"><div class="k">Accélération piston au PMH</div><div class="v" id="roAcc">0<small>g</small></div></div>
-        <div class="ro"><div class="k">Vitesse moyenne piston</div><div class="v" id="roVp">0<small>m/s</small></div></div>
-        <div class="ro"><div class="k">Cylindre en combustion</div><div class="v" id="roFire">–</div></div>
-      </div>
-    </div>
-
-    <div class="grp">
-      <h2>Casse</h2>
-      <div class="row2">
-        <label for="breakCyl" class="hint" style="font-size:13px">Bielle</label>
-        <select id="breakCyl">
-          <option value="rand">au hasard</option>
-          <option value="1">n° 1</option><option value="2">n° 2</option><option value="3">n° 3</option><option value="4">n° 4</option>
-          <option value="5">n° 5</option><option value="6">n° 6</option><option value="7">n° 7</option><option value="8">n° 8</option>
-        </select>
-        <button class="btn danger" id="breakBtn">Casser la bielle</button>
-      </div>
-      <button class="btn danger" id="moneyBtn">Forcer un rétrogradage raté</button>
-      <button class="btn" id="resetBtn">Monter un moteur neuf</button>
-      <div class="hint">La bielle peut aussi céder seule : au point mort sans limiteur, pied au plancher au-delà de 10 000 tr/min ; en roulant vite, en forçant le passage en 2<sup>e</sup> que la DKG refuse normalement ; ou en poussant la puissance vers 650 ch et plus.</div>
-    </div>
-  </aside>
-</section>
-
-<section class="block" id="circuitSec" aria-labelledby="circuitTitle">
-  <div class="block-head">
-    <h2 id="circuitTitle">Mode circuit</h2>
-    <div class="legend"><span style="--c:var(--ok)">Accélération</span><span style="--c:var(--red)">Freinage</span><span style="--c:var(--muted)">Piste fictive · <b id="trkLen"></b></span></div>
-  </div>
-  <div class="circ-grid">
-    <div class="circ-map">
-      <canvas id="trackMap" aria-label="Plan du circuit avec la position de la voiture"></canvas>
-      <div class="circ-over">
-        <span class="unit" style="font:500 11px var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase" id="lapLbl">Tour en cours</span>
-        <span class="lap-now" id="lapNow">–</span>
-        <span class="delta" id="lapDelta" hidden></span>
-      </div>
-      <div class="circ-msg" id="circMsg" hidden></div>
-    </div>
-    <aside class="circ-side">
-      <div class="row2">
-        <button class="btn solid" id="circStart">Aller en piste</button>
-        <button class="btn" id="circStop">Quitter la piste</button>
-        <label class="switch"><input type="checkbox" id="circAuto"> Pilote automatique</label>
-      </div>
-      <div class="drive-btns">
-        <button class="btn big gas" id="gasHold">Gaz</button>
-        <button class="btn big brake" id="brakeHold">Frein</button>
-      </div>
-      <div class="hint">En piste, la direction est automatique : vous gérez les gaz, le freinage et les rapports. Clavier : ↑ gaz, ↓ ou espace frein (maintenir), + / − palettes. Trop vite dans un virage, c'est la sortie de piste et le tour ne compte pas.</div>
-      <div class="readouts">
-        <div class="ro"><div class="k">Meilleur tour</div><div class="v" id="lapBest">–</div></div>
-        <div class="ro"><div class="k">Dernier tour</div><div class="v" id="lapLast">–</div></div>
-        <div class="ro"><div class="k">Secteurs (tour en cours)</div><div class="v" id="lapSecs" style="font-size:16px">–</div></div>
-        <div class="ro"><div class="k">Accélération latérale</div><div class="v" id="latG">0<small>g</small></div></div>
-        <div class="ro"><div class="k">Vitesse de pointe</div><div class="v" id="lapTop">–</div></div>
-        <div class="ro"><div class="k">Sorties de piste</div><div class="v" id="lapOffs">0</div></div>
-      </div>
-      <canvas id="speedTrace" aria-label="Vitesse le long du tour : tour en cours et meilleur tour"></canvas>
-      <div class="tbl-wrap" style="margin:0"><table class="laps"><thead><tr><th>Tour</th><th>Temps</th><th>S1</th><th>S2</th><th>S3</th></tr></thead><tbody id="lapRows"><tr><td colspan="5" class="hint">Aucun tour chronométré.</td></tr></tbody></table></div>
-    </aside>
-  </div>
-</section>
-
-<section class="block" id="loupeSec" aria-labelledby="loupeTitle">
-  <div class="block-head">
-    <h2 id="loupeTitle">Au cœur du cylindre n° <span id="lpTitleCyl">1</span></h2>
-    <div class="legend">
-      <span style="--c:var(--air)">Air</span>
-      <span style="--c:var(--fuel)">Essence</span>
-      <span style="--c:var(--mix)">Mélange</span>
-      <span style="--c:var(--amber)">Flamme</span>
-      <span style="--c:var(--burnt)">Gaz brûlés</span>
-    </div>
-  </div>
-  <div class="loupe-grid">
-    <div class="loupe-view" id="loupeView">
-      <canvas id="loupe" aria-label="Coupe 3D d'un cylindre : faites glisser pour tourner, molette pour zoomer"></canvas>
-      <div id="lpLabels"></div>
-      <div class="lp-hud">
-        <div class="lp-angle" id="lpCylLbl">Cylindre n° 1 · banc A</div>
-        <div class="lp-phase" id="lpPhase">Admission</div>
-        <div class="lp-angle" id="lpAngle"></div>
-        <div class="lp-desc" id="lpDesc"></div>
-        <div class="lp-events">
-          <span class="ev" id="evInj">Injection</span>
-          <span class="ev" id="evIn">Admission ouverte</span>
-          <span class="ev" id="evEx">Échappement ouvert</span>
-          <span class="ev" id="evDwell">Bobine en charge</span>
-          <span class="ev" id="evSpark">Étincelle</span>
-        </div>
-      </div>
-      <div class="lp-cams" role="group" aria-label="Cadrage de la coupe">
-        <button class="btn" data-lpview="all">Ensemble</button>
-        <button class="btn" data-lpview="chamber">Chambre</button>
-        <button class="btn" data-lpview="plug">Bougie</button>
-        <button class="btn" data-lpview="intake">Injecteur</button>
-        <button class="btn" data-lpview="valves">Distribution</button>
-      </div>
-      <div class="lp-steps" role="group" aria-label="Aller à une étape du cycle">
-        <button class="btn" data-jump="inj">Injection</button>
-        <button class="btn" data-jump="intake">Admission</button>
-        <button class="btn" data-jump="comp">Compression</button>
-        <button class="btn" data-jump="spark">Étincelle</button>
-        <button class="btn" data-jump="burn">Combustion</button>
-        <button class="btn" data-jump="exp">Détente</button>
-        <button class="btn" data-jump="exh">Échappement</button>
-        <button class="btn" data-step="2">+2°</button>
-        <button class="btn" data-step="10">+10°</button>
-        <button class="btn" id="lpPlay">Pause</button>
-      </div>
-      <div class="lp-hint" id="lpHint" hidden></div>
-    </div>
-    <aside class="loupe-side">
-      <div class="row2">
-        <label for="lpCyl" class="hint" style="font-size:13px">Cylindre suivi</label>
-        <select id="lpCyl">
-          <option value="1">n° 1</option><option value="2">n° 2</option><option value="3">n° 3</option><option value="4">n° 4</option>
-          <option value="5">n° 5</option><option value="6">n° 6</option><option value="7">n° 7</option><option value="8">n° 8</option>
-        </select>
-        <label class="switch"><input type="checkbox" id="lpLabelsOn" checked> Étiquettes</label>
-      </div>
-      <div class="readouts">
-        <div class="ro"><div class="k">Pression cylindre</div><div class="v" id="lpP">–</div></div>
-        <div class="ro"><div class="k">Température des gaz</div><div class="v" id="lpT">–</div></div>
-        <div class="ro"><div class="k">Volume</div><div class="v" id="lpV">–</div></div>
-        <div class="ro"><div class="k">Mélange brûlé</div><div class="v" id="lpXb">–</div></div>
-        <div class="ro"><div class="k">Levée adm. / éch.</div><div class="v" id="lpLift">–</div></div>
-        <div class="ro"><div class="k">Pression d'admission</div><div class="v" id="lpPman">–</div></div>
-      </div>
-      <h3>Essence et allumage</h3>
-      <div class="readouts">
-        <div class="ro"><div class="k">Air aspiré par cycle</div><div class="v" id="lpAir">–</div></div>
-        <div class="ro"><div class="k">Essence injectée</div><div class="v" id="lpFuel">–</div></div>
-        <div class="ro"><div class="k">Richesse</div><div class="v" id="lpLambda">–</div></div>
-        <div class="ro"><div class="k">Temps d'injection</div><div class="v" id="lpInj">–</div></div>
-        <div class="ro"><div class="k">Avance à l'allumage</div><div class="v" id="lpAdv">–</div></div>
-        <div class="ro"><div class="k">Charge de la bobine</div><div class="v" id="lpDwell">–</div></div>
-      </div>
-      <div><span class="pill" id="lpInjPill">Injecteurs OK</span></div>
-      <h3>Pression au fil du cycle</h3>
-      <canvas id="pchart" aria-label="Pression dans le cylindre sur 720 degrés avec les événements du cycle"></canvas>
-      <h3>Diagramme pression / volume</h3>
-      <canvas id="pvchart" aria-label="Diagramme pression volume en échelle logarithmique"></canvas>
-    </aside>
-  </div>
-</section>
-
-<section class="block" aria-labelledby="chronoTitle">
-  <div class="block-head">
-    <h2 id="chronoTitle">Chronogramme · ordre d'allumage 1‑5‑4‑8‑6‑3‑7‑2</h2>
-    <div class="legend">
-      <span style="--c:var(--air)">Admission</span>
-      <span style="--c:var(--comp)">Compression</span>
-      <span style="--c:var(--amber)">Combustion / détente</span>
-      <span style="--c:var(--exh)">Échappement</span>
-      <span style="--c:var(--fuel)">Injection</span>
-      <span style="--c:#e6f4ff">Étincelle</span>
-    </div>
-  </div>
-  <div class="canvas-scroll"><canvas id="chrono" aria-label="Cycle à quatre temps des huit cylindres sur 720 degrés"></canvas></div>
-</section>
-
-<article>
-  <h2><span class="num">1</span>Ce que vous regardez</h2>
-  <p>Le S65 est un V8 à 90° de 4 litres, conçu pour tourner haut : 420 ch à 8 300 tr/min sans turbo. Les cylindres 1 à 4 forment un banc, les cylindres 5 à 8 l'autre. Chaque paire de bielles face à face partage le même maneton du vilebrequin, ce qui explique le léger décalage des deux bancs le long de l'axe.</p>
-  <p>Le vilebrequin est <strong>croisé</strong> : ses quatre manetons sont décalés de 90° les uns des autres. Il y a une combustion tous les 90° de rotation, dans l'ordre <strong>1‑5‑4‑8‑6‑3‑7‑2</strong>. Dans la vue 3D, la couleur du gaz dans chaque cylindre indique le temps en cours, et l'étiquette du cylindre qui brûle passe en orange.</p>
-  <p>Chaque cylindre a quatre soupapes commandées par deux arbres à cames (admission côté intérieur du V, échappement côté extérieur). Les arbres tournent deux fois moins vite que le vilebrequin, puisqu'un cycle complet dure deux tours.</p>
-
-  <h2><span class="num">2</span>De la pédale à l'étincelle</h2>
-  <p><strong>La pédale ne commande pas directement les papillons.</strong> Elle envoie une demande au calculateur, qui ouvre les huit papillons individuels en conséquence. Au ralenti, il les entrouvre pour tenir 800 tr/min. Au limiteur, pendant un passage de rapport ou à 250 km/h, il coupe l'essence. Les deux jauges du pupitre montrent cet écart entre pédale et papillons.</p>
-  <p><strong>La boîte DKG</strong> est une boîte à double embrayage à 7 rapports. Pendant qu'un rapport transmet le couple, le suivant est déjà engagé sur l'autre embrayage : le passage dure une fraction de seconde. En D, elle passe les rapports tôt quand on appuie peu et tard quand on appuie fort. En S, elle garde des régimes plus hauts. En M, elle obéit aux palettes, mais elle refuse un rétrogradage qui ferait dépasser la zone rouge.</p>
-  <p><strong>L'air</strong> traverse la boîte à air et le filtre, entre dans une trompette, passe un papillon puis descend le conduit d'admission jusqu'aux deux soupapes. <strong>L'essence</strong> est injectée dans ce conduit, sur le dos de la soupape d'admission encore fermée. La soupape chaude aide les gouttelettes à s'évaporer. À l'ouverture, l'air les entraîne dans le cylindre, où le tourbillon de remplissage (le <em>tumble</em>) mélange le tout.</p>
-  <p><strong>L'allumage</strong> commence avant l'étincelle : la bobine crayon se charge pendant environ 3 ms. Puis elle libère plusieurs dizaines de milliers de volts. Un arc jaillit entre les électrodes quelques dizaines de degrés avant le point mort haut. La flamme met du temps à traverser la chambre : on l'allume en avance pour que la pression soit maximale juste après le point mort haut. Dans la coupe, le front de flamme grandit à partir de la bougie selon une loi de Wiebe, un modèle classique de la fraction de mélange brûlée.</p>
-
-  <h2><span class="num">3</span>Le système bielle‑manivelle</h2>
-  <p>Le piston ne descend pas à vitesse constante. Sa position dépend du rayon de manivelle <em>r</em> (la moitié de la course, 37,6 mm) et de la longueur de bielle <em>l</em> :</p>
-  <div class="formula">x(θ) = r·cos θ + √(l² − r²·sin² θ)<br>a(θ) ≈ r·ω²·(cos θ + λ·cos 2θ)    avec λ = r / l ≈ 0,27</div>
-  <p>Le terme en <em>cos 2θ</em> rend l'accélération plus forte au point mort haut qu'au point mort bas. La courbe ci‑dessous suit le cylindre 1 au régime actuel de la simulation.</p>
-  <figure class="figure" style="margin-inline:0">
-    <canvas id="kin" aria-label="Position, vitesse et accélération du piston 1"></canvas>
-    <figcaption id="kinCap">Position, vitesse et accélération du piston n° 1 sur un tour.</figcaption>
-  </figure>
-
-  <h2><span class="num">4</span>Pourquoi une bielle casse</h2>
-  <p><strong>En traction, au point mort haut d'échappement.</strong> À la fin de l'échappement, le piston arrive en haut sans pression de gaz pour le freiner. Toute la masse en mouvement alternatif tire sur la bielle :</p>
-  <div class="formula">F = m · r · ω² · (1 + λ)</div>
-  <p>La force croît avec le carré du régime : 10 % de tours en plus, c'est 21 % d'effort en plus. Au régime maxi du S65, chaque bielle encaisse environ 25 kN, soit le poids de deux voitures et demie, à chaque cycle, 70 fois par seconde.</p>
-  <p><strong>En compression, à la combustion.</strong> Quelques degrés après le point mort haut, la pression des gaz dépasse 90 bar sur un piston de 66 cm² : environ 60 kN. Une préparation qui augmente fortement le couple augmente cette pression, et la bielle finit par flamber.</p>
-  <p><strong>La fatigue et les coussinets.</strong> Une bielle casse rarement au premier coup de trop. Les pics de charge répétés font progresser des micro‑fissures. Sur le S65, les coussinets de bielle sont réputés comme le point faible : un coussinet usé laisse du jeu, la tête de bielle est martelée à chaque point mort haut, puis grippe ou se rompt. Libérée, la bielle est projetée par le vilebrequin contre le carter et le perce.</p>
-
-  <h2><span class="num">5</span>Hypothèses du modèle</h2>
-  <p>Les cotes principales sont celles du moteur. Les masses, les pressions et les limites de rupture sont des estimations choisies pour que les ordres de grandeur soient réalistes. Ce n'est pas un calcul de dimensionnement.</p>
-  <div class="tbl-wrap"><table>
-    <thead><tr><th>Grandeur</th><th>Valeur</th><th>Source</th></tr></thead>
-    <tbody>
-      <tr><td>Alésage × course</td><td class="n">92 × 75,2 mm</td><td>Constructeur</td></tr>
-      <tr><td>Entraxe de bielle</td><td class="n">140 mm</td><td>Estimation</td></tr>
-      <tr><td>Masse alternative (piston + ⅓ bielle)</td><td class="n">0,69 kg</td><td>Estimation</td></tr>
-      <tr><td>Pression max à 400 N·m</td><td class="n">≈ 100 bar</td><td>Ordre de grandeur, moteur atmosphérique</td></tr>
-      <tr><td>Limite en traction de la bielle</td><td class="n">40 kN</td><td>Choix du modèle</td></tr>
-      <tr><td>Limite en compression de la bielle</td><td class="n">95 kN</td><td>Choix du modèle</td></tr>
-      <tr><td>Début de la fatigue</td><td class="n">85 % de la limite</td><td>Choix du modèle</td></tr>
-      <tr><td>Rapports DKG (1 à 7) · pont</td><td class="n">4,78 · 3,06 · 2,15 · 1,68 · 1,39 · 1,20 · 1,00 · 3,15</td><td>Constructeur</td></tr>
-      <tr><td>Masse, pneus arrière</td><td class="n">1 655 kg · 265/40 R18</td><td>Constructeur</td></tr>
-      <tr><td>Adhérence maxi (antipatinage)</td><td class="n">≈ 11,5 kN au sol</td><td>Estimation</td></tr>
-      <tr><td>Débit d'un injecteur</td><td class="n">4,2 mg/ms · 6,3 avec le kit</td><td>Estimation</td></tr>
-      <tr><td>Kit compresseur (type ESS VT2‑625)</td><td class="n">≈ 0,55 bar à 8 300 tr/min · 625 ch</td><td>Estimation calée sur la puissance annoncée</td></tr>
-      <tr><td>Vitesse maxi d'origine</td><td class="n">250 km/h, bridée électroniquement</td><td>Constructeur</td></tr>
-      <tr><td>Adhérence en virage · au freinage</td><td class="n">1,05 g · 1,1 g (cercle d'adhérence)</td><td>Estimation, pneus sport</td></tr>
-      <tr><td>Circuit</td><td class="n">Tracé fictif</td><td>Choix du modèle</td></tr>
-      <tr><td>Son</td><td class="n">Synthèse : impulsions dans l'ordre 1‑5‑4‑8‑6‑3‑7‑2, un échappement par banc, souffle des trompettes</td><td>Modèle, pas un enregistrement</td></tr>
-      <tr><td>Fin d'injection</td><td class="n">10° avant l'ouverture de l'admission</td><td>Choix du modèle</td></tr>
-      <tr><td>Richesse</td><td class="n">λ = 1 ; 0,87 pied au plancher</td><td>Ordre de grandeur</td></tr>
-      <tr><td>Avance à l'allumage</td><td class="n">8 à 36°, réduite en charge</td><td>Estimation</td></tr>
-      <tr><td>Combustion</td><td class="n">Wiebe (a = 5, m = 2), 40 à 56°</td><td>Modèle classique</td></tr>
-      <tr><td>Rapport volumétrique · polytropique</td><td class="n">12 : 1 · 1,33</td><td>Constructeur · estimation</td></tr>
-    </tbody>
-  </table></div>
-  <p class="note">Rotation, angles de distribution et ordre d'allumage sont cohérents entre eux : chaque piston est au point mort haut exactement quand son cylindre s'allume dans le chronogramme.</p>
-</article>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
-<script>
+// Fiche S65 : simulation 3D, coupe du cylindre, conduite, circuit et pièces
 (() => {
 'use strict';
 const $ = s => document.querySelector(s);
@@ -3102,17 +2467,132 @@ function frame(now){
   controls.update();
   if (st.shake > 0 && !reduceMotion){ st.shake = Math.max(0, st.shake - dt * 1.6); const k = st.shake * st.shake * 0.12; engine.position.set(rv(k), rv(k), rv(k)); }
   else engine.position.set(0, 0, 0);
-  renderer.render(scene, camera);
-  firingCyl = updateLabels();
+  const shown = viewport.offsetParent !== null;
+  if (shown) renderer.render(scene, camera);
+  firingCyl = shown ? updateLabels() : firingCyl;
+  if (hl) hl.mats.forEach(m => { m.emissiveIntensity = 0.22 + 0.18 * Math.sin(now / 180); });
   lpRender(dt);
-  drawTach(); drawChrono(); drawTrack(); drawMini();
+  if (shown) drawTach();
+  drawChrono(); drawTrack(); drawMini();
   uiT += dt;
   if (uiT > 0.08){ uiT = 0; computeCycle(); updateUI(); drawCurve(); drawKin(); drawGears(); circuitUI(); if (lpVisible){ drawPChart(); drawPV(); } }
   requestAnimationFrame(frame);
 }
+
+// ------------------------------------------------------------------
+// Onglets de la fiche
+// ------------------------------------------------------------------
+const TABS = ['presentation', 'fonctionnement', 'pieces', 'circuit'];
+const stageEl = document.querySelector('.stage');
+function showTab(t, fromHash){
+  if (!TABS.includes(t)) t = 'presentation';
+  TABS.forEach(k => {
+    $('#tab-' + k).hidden = k !== t;
+    const b = $('#t-' + k); b.setAttribute('aria-selected', String(k === t)); b.tabIndex = k === t ? 0 : -1;
+  });
+  if (t === 'circuit') $('#slotCircuit').appendChild(stageEl);
+  else if (stageEl.parentElement !== $('#slotFonct')) $('#slotFonct').appendChild(stageEl);
+  if (t === 'pieces') $('#viewerSlot').appendChild(viewport);
+  else { if (viewport.parentElement !== stageEl) stageEl.prepend(viewport); clearIsolation(); }
+  if (!fromHash){ try { history.replaceState(null, '', '#' + t); } catch (e) {} }
+}
+document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+$('.tabs').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  const cur = TABS.findIndex(k => $('#t-' + k).getAttribute('aria-selected') === 'true');
+  const nxt = TABS[(cur + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length];
+  showTab(nxt); $('#t-' + nxt).focus();
+});
+document.querySelectorAll('[data-goto]').forEach(a => a.addEventListener('click', e => {
+  e.preventDefault(); showTab(a.dataset.goto);
+  if (a.dataset.piece){ const i = PARTS.pieces.findIndex(x => x.nom === a.dataset.piece); if (i >= 0) selectPart(i, true); }
+  window.scrollTo({ top: $('.tabs').getBoundingClientRect().top + window.scrollY - 70 });
+}));
+window.addEventListener('hashchange', () => showTab(location.hash.slice(1), true));
+
+// ------------------------------------------------------------------
+// Pièces et références
+// ------------------------------------------------------------------
+const PARTS = (window.BIBLE && window.BIBLE.pieces && window.BIBLE.pieces.s65) || { groupes: [], pieces: [] };
+const ST_LABEL = { verifiee: 'Vérifiée RealOEM', recoupee: 'Recoupée', 'a-confirmer': 'À confirmer', 'a-renseigner': 'À renseigner' };
+const fmtRef = r => r.length === 11 ? `${r.slice(0, 2)} ${r.slice(2, 4)} ${r.slice(4, 5)} ${r.slice(5, 8)} ${r.slice(8)}` : r;
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const VIS = {
+  rods:       { layers: ['rods', 'crank', 'pistons'], mats: ['forged'], lieu: 'entre le vilebrequin et les pistons' },
+  crank:      { layers: ['crank', 'rods'], mats: ['steel'], lieu: 'au fond du carter, sous les deux bancs' },
+  pistons:    { layers: ['pistons', 'rods', 'liners'], mats: ['alu'], lieu: 'dans les cylindres' },
+  heads:      { layers: ['heads', 'valvetrain', 'pistons'], mats: ['head', 'cover', 'plug'], lieu: 'sur les culasses, au sommet de chaque banc' },
+  valvetrain: { layers: ['valvetrain', 'heads'], mats: ['cam', 'valve'], lieu: 'dans les culasses' },
+  manifolds:  { layers: ['manifolds', 'heads'], mats: ['injector', 'rail', 'itb'], lieu: "sur les conduits d'admission, dans le V" },
+  block:      { layers: ['block', 'crank', 'pistons'], mats: ['block'], lieu: 'sur le bloc moteur' },
+};
+(() => {
+  const counts = {}; PARTS.pieces.forEach(p => counts[p.statut] = (counts[p.statut] || 0) + 1);
+  $('#stLegend').innerHTML = Object.keys(ST_LABEL).map(k => `<span class="chip-st st-${k}">${ST_LABEL[k]} · ${counts[k] || 0}</span>`).join('');
+  $('#pGroup').innerHTML = '<option value="">Tous les groupes</option>' + PARTS.groupes.map(g => `<option value="${g.id}">${g.id} · ${esc(g.nom)}</option>`).join('');
+})();
+let selPart = -1;
+function renderParts(){
+  const q = $('#pSearch').value.trim().toLowerCase().replace(/\s+/g, ''), g = $('#pGroup').value, stt = $('#pStatut').value;
+  let html = '', lastSub = '';
+  PARTS.pieces.forEach((p, i) => {
+    if (g && p.groupe !== g) return;
+    if (stt && p.statut !== stt) return;
+    if (q && !(p.nom.toLowerCase().replace(/\s+/g, '').includes(q) || p.refs.some(r => r.ref.includes(q)) || p.sousGroupe.toLowerCase().replace(/\s+/g, '').includes(q))) return;
+    const sub = `${p.groupe} · ${p.sousGroupe}`;
+    if (sub !== lastSub){ html += `<div class="pgroup">${esc(sub)}</div>`; lastSub = sub; }
+    const refs = p.refs.length ? p.refs.map(r => `<div class="refrow"><span class="refno">${fmtRef(r.ref)}</span><span class="refrole">${esc(r.role || '')}</span>
+        <button class="btn mini" data-copy="${r.ref}">Copier</button>
+        <a class="btn mini" href="https://www.realoem.com/bmw/enUS/partxref?q=${r.ref}" target="_blank" rel="noopener">RealOEM ↗</a></div>`).join('')
+      : '<div class="empty">Référence à relever sur RealOEM.</div>';
+    const src = p.sources.length ? `<details><summary>Sources (${p.sources.length})</summary><ul>${p.sources.map(x => `<li><a href="${x.url}" target="_blank" rel="noopener">${esc(x.nom)}</a></li>`).join('')}</ul></details>` : '';
+    html += `<article class="part${i === selPart ? ' sel' : ''}" data-i="${i}">
+      <div class="part-h"><h3>${esc(p.nom)}</h3><span class="qte">${p.qte ? 'Qté ' + esc(p.qte) : ''}</span><span class="chip-st st-${p.statut}">${ST_LABEL[p.statut]}</span></div>
+      <div class="refs">${refs}</div>
+      ${p.note ? `<p class="note">${esc(p.note)}</p>` : ''}
+      <div class="row2">${p.vis ? `<button class="btn mini" data-show="${i}">Situer en 3D</button>` : ''}${src}</div>
+    </article>`;
+  });
+  $('#pList').innerHTML = html || '<p class="hint">Aucune pièce ne correspond à cette recherche.</p>';
+}
+['input', 'change'].forEach(ev => { $('#pSearch').addEventListener(ev, renderParts); });
+$('#pGroup').addEventListener('change', renderParts); $('#pStatut').addEventListener('change', renderParts);
+$('#pList').addEventListener('click', e => {
+  const c = e.target.closest('[data-copy]');
+  if (c){
+    const ref = c.dataset.copy;
+    const done = () => { c.textContent = 'Copiée'; setTimeout(() => c.textContent = 'Copier', 1500); };
+    try { navigator.clipboard.writeText(ref).then(done, () => { c.textContent = ref; }); } catch (err) { c.textContent = ref; }
+    return;
+  }
+  const sb = e.target.closest('[data-show]'); if (sb) selectPart(+sb.dataset.show);
+});
+let savedLayers = null, hl = null;
+function selectPart(i, scroll){
+  selPart = i; const p = PARTS.pieces[i]; const v = VIS[p.vis];
+  renderParts();
+  if (!v) return;
+  if (!savedLayers){ savedLayers = {}; document.querySelectorAll('input[data-layer]').forEach(cb => savedLayers[cb.dataset.layer] = cb.checked); }
+  document.querySelector('[data-preset=xray]').click();
+  document.querySelectorAll('input[data-layer]').forEach(cb => {
+    const k = cb.dataset.layer; cb.checked = k === 'labels' || k === 'block' || v.layers.includes(k); cb.dispatchEvent(new Event('change'));
+  });
+  if (hl) hl.mats.forEach(m => { m.emissive.setHex(0x000000); m.emissiveIntensity = 1; });
+  hl = { mats: v.mats.map(k => M[k]).filter(Boolean) };
+  hl.mats.forEach(m => m.emissive.setHex(0xf5a524));
+  $('#viewerCap').innerHTML = `<b>${esc(p.nom)}</b> · ${v.lieu}. Qté ${esc(p.qte || '–')}.`;
+  if (scroll){ const el = document.querySelector(`.part[data-i="${i}"]`); if (el) el.scrollIntoView({ block: 'center' }); }
+}
+function clearIsolation(){
+  if (hl){ hl.mats.forEach(m => { m.emissive.setHex(0x000000); m.emissiveIntensity = 1; }); hl = null; }
+  if (savedLayers){
+    document.querySelectorAll('input[data-layer]').forEach(cb => { cb.checked = !!savedLayers[cb.dataset.layer]; cb.dispatchEvent(new Event('change')); });
+    savedLayers = null;
+  }
+}
+renderParts();
+showTab(location.hash.slice(1), true);
+
 computeCycle();
 requestAnimationFrame(frame);
 })();
-</script>
-</body>
-</html>
