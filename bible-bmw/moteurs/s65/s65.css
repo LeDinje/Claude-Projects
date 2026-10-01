@@ -239,3 +239,5 @@ body.in-circuit #miniMap{display:block}
   .parts-filters input{grid-column:1 / -1}
 }
 #viewerSlot #tach,#viewerSlot .hud,#viewerSlot .playbadge,#viewerSlot #miniMap{display:none !important}
+.fullcodes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.fullcodes span{font:500 14px/1 var(--f-mono);letter-spacing:.03em;color:var(--m-light);background:rgba(42,166,224,.1);border:1px solid rgba(42,166,224,.28);border-radius:4px;padding:6px 8px}
