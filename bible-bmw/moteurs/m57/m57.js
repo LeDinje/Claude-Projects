@@ -534,8 +534,11 @@ const CAR = { m: 1660, r: 0.316, fd: 2.47, eta: 0.9, cdA: 0.29 * 2.2, crr: 0.012
 const NG = CAR.ratios.length - 1;
 const SEL_NAMES = { P: 'Parking', R: 'Marche arrière', N: 'Point mort', D: 'Drive', S: 'Sport', M: 'Manuel' };
 Object.assign(st, { sel: 'P', gear: 1, v: 0, pedal: 0, brake: false, conv: 'open', lock: false, shiftT: 0, shiftUp: false, lastShift: 0,
-  accel: 0, simT: 0, t0: null, t0100: null, spin: false, limCut: false, vCut: false, dfco: false, smoke: 1, teNet: 0 });
+  accel: 0, rFrom: 0, loadF: 0, loadReq: 0, simT: 0, t0: null, t0100: null, spin: false, limCut: false, vCut: false, dfco: false, smoke: 1, teNet: 0 });
 const ratioOf = g => (st.sel === 'R' ? CAR.rev : CAR.ratios[g]) * CAR.fd;
+const SHIFT_T = 0.35;
+// pendant un passage, le rapport effectif glisse progressivement de l'ancien au nouveau (phase d'inertie)
+const effRatio = () => { if (st.shiftT <= 0) return ratioOf(st.gear); const t = 1 - st.shiftT / SHIFT_T, k = t * t * (3 - 2 * t); return st.rFrom + (ratioOf(st.gear) - st.rFrom) * k; };
 const rpmAt = (g, v) => Math.abs(v) / CAR.r * 60 / (2 * Math.PI) * ratioOf(g);
 const RPM_PER_RAD = 60 / (2 * Math.PI);
 const KC = 500 / (CAR.stall * CAR.stall);     // convertisseur : couple absorbé ∝ régime², ≈ 500 N·m au calage
@@ -543,32 +546,39 @@ function stepVehicle(h){
   const sel = st.sel;
   const coupled = sel === 'D' || sel === 'S' || sel === 'M' || sel === 'R';
   const sport = sel === 'S' || sel === 'M';
-  const map = Math.pow(st.pedal, sport ? 0.85 : 1.1);
+  const map = Math.pow(st.pedal, sport ? 0.75 : 0.85);
   // gestion moteur : régulateur de ralenti, régime maxi, vitesse maxi, coupure en décélération
   const idleGov = clamp(0.12 + (CAR.idle - st.rpm) * 0.004, 0, 0.45);
-  if (st.rpm > SPEC.redline) st.limCut = true; else if (st.rpm < SPEC.redline - 150) st.limCut = false;
+  if (st.rpm > SPEC.redline + 120) st.limCut = true; else if (st.rpm < SPEC.redline - 100) st.limCut = false;
   st.vCut = st.v > CAR.vmax;
   st.dfco = map < 0.01 && st.rpm > 1100;
   st.fuelOn = !st.limCut && !st.vCut && !st.dfco;
-  st.load = st.fuelOn ? Math.min(Math.max(map, idleGov), st.smoke) * (st.shiftT > 0 ? 0.6 : 1) : 0;
+  // pédale = demande de couple ; le calculateur la réduit à l'approche du régime maxi.
+  // Sans charge (P, N), il vise un régime selon la pédale : 10 % stabilise le moteur vers 1 500 tr/min
+  const rpmCap = coupled ? 1e9 : 1000 + 3900 * Math.pow(map, 0.8);
+  const req = Math.min(1, idleGov + map * clamp((rpmCap - st.rpm) / 500, 0, 1) * clamp((SPEC.redline - st.rpm) / 250, 0, 1));
+  st.loadReq = st.fuelOn ? req : 0;
+  // filtre d'agrément : le couple suit la demande progressivement, plus vite à la baisse
+  st.loadF += (st.loadReq - st.loadF) * (1 - Math.exp(-h / (st.loadReq > st.loadF ? 0.22 : 0.1)));
+  st.load = st.fuelOn ? Math.min(st.loadF, st.smoke) * (st.shiftT > 0 && st.shiftUp ? 0.8 : 1) : 0;
   const Te = st.load * (fullTorque(st.rpm) + friction(st.rpm)) - friction(st.rpm);
   st.teNet = Te;
   const dir = sel === 'R' ? -1 : 1;
-  const ratio = coupled ? ratioOf(st.gear) : 0;
+  const ratio = coupled ? effRatio() : 0;
   const rpmW = coupled ? Math.max(0, st.v * dir) / CAR.r * RPM_PER_RAD * ratio : 0;
   let Fdrive = 0;
   st.spin = false;
   if (coupled){
     const sr = rpmW / Math.max(st.rpm, 1);
     // embrayage de pontage : se ferme quand la turbine rattrape le moteur, s'ouvre près du ralenti
-    if (!st.lock && sr > 0.86 && rpmW > 1050 && st.shiftT <= 0) st.lock = true;
+    if (!st.lock && sr > 0.86 && rpmW > 1050) st.lock = true;
     else if (st.lock && rpmW < 900) st.lock = false;
     if (st.lock){
       st.conv = 'lock';
       Fdrive = Te * ratio * CAR.eta / CAR.r;
     } else {
       st.conv = 'slip';
-      const Tp = KC * st.rpm * st.rpm * Math.max(0, 1 - sr * sr);
+      const Tp = KC * st.rpm * st.rpm * (1 - sr * sr);     // négatif quand les roues entraînent le moteur (frein moteur)
       const mult = 1 + 0.8 * clamp(1 - sr, 0, 1);       // multiplication de couple du convertisseur
       st.rpm += (Te - Tp) / CAR.Ie * h * RPM_PER_RAD;
       Fdrive = Tp * mult * ratio * CAR.eta / CAR.r;
@@ -589,14 +599,14 @@ function stepVehicle(h){
   st.v = nv;
   if (st.lock){
     const target = Math.max(0, st.v * dir) / CAR.r * RPM_PER_RAD * ratio;
-    st.rpm += (target - st.rpm) * Math.min(1, h * 30);
+    st.rpm += (target - st.rpm) * Math.min(1, h * 12);   // pas de saut : le régime rejoint celui des roues en douceur
   }
   st.rpm = clamp(st.rpm, 450, 5200);
   if (st.shiftT > 0) st.shiftT -= h;
 }
 function shiftTo(g){
   if (g === st.gear) return;
-  st.shiftUp = g > st.gear; st.gear = g; st.shiftT = 0.3; st.lastShift = st.simT; st.lock = false;
+  st.rFrom = effRatio(); st.shiftUp = g > st.gear; st.gear = g; st.shiftT = SHIFT_T; st.lastShift = st.simT;
 }
 let msgTimer = 0;
 function msg(t){ $('#gearMsg').textContent = t; clearTimeout(msgTimer); if (t) msgTimer = setTimeout(() => $('#gearMsg').textContent = '', 4000); }
@@ -643,10 +653,11 @@ let vPrev = 0;
 function updateEngine(dt){
   // turbo : la pression suit la demande avec un temps de réponse ; elle limite le gazole (limite de fumée)
   const full = st.ver.boost * spool(st.rpm);
-  st.boostTgt = st.fuelOn ? full * (0.06 + 0.94 * Math.pow(Math.min(1, Math.max(st.pedal, st.load)), 0.9)) : 0.02 * full;
+  // sans charge (P, N) peu de gaz d'échappement : le turbo reste presque sans pression
+  st.boostTgt = st.fuelOn ? full * (0.04 + 0.96 * Math.pow(clamp(st.load, 0, 1), 0.9)) : 0.02 * full;
   const tau = st.boostTgt > st.boost ? 0.45 + 0.6 * (1 - spool(st.rpm)) : 0.35;
   st.boost += (st.boostTgt - st.boost) * (1 - Math.exp(-dt / tau));
-  st.smoke = full > 0.05 ? clamp(0.42 + 0.58 * (1 + st.boost) / (1 + full), 0, 1) : 1;
+  st.smoke = clamp(0.3 + 0.7 * (1 + st.boost) / (1 + Math.max(full, 0.05)), 0, 1);
   const n = 4;
   for (let i = 0; i < n; i++) stepVehicle(dt / n);
   autoShift();
@@ -852,7 +863,7 @@ class DieselSynth {
           const A = (0.3 + 0.7 * this.load) * this.amp[k] * (0.92 + Math.random() * 0.16);
           this.pA = A; this.nEnv = A * 0.3;
           this.kEnv = (0.35 + 0.65 * (1 - this.load)) * (this.cold ? 1.7 : 1) * Math.min(1, 0.35 + 1400 / Math.max(this.rpm, 700)) * (0.85 + Math.random() * 0.3);
-        } else { this.pA = 0.06; this.nEnv = 0.015; }
+        } else { const A = (0.2 + 0.1 * Math.min(1, this.rpm / 3000)) * this.amp[k]; this.pA = A; this.nEnv = A * 0.25; this.kEnv = 0; }
       }
       let x = 0;
       if (this.pT < this.pLen){ x = this.pA * Math.sin(Math.PI * this.pT / this.pLen); this.pT++; }
@@ -861,7 +872,7 @@ class DieselSynth {
       let y = 0; for (let k = 0; k < this.res.length; k++) y += this.svf(this.res[k], exc) * this.res[k].g;
       this.thump += (exc - this.thump) * 0.02;
       let s = y * 0.8 + this.thump * 2.6;
-      this.lp += (s - this.lp) * (0.05 + 0.12 * this.load);
+      this.lp += (s - this.lp) * (0.08 + 0.1 * this.load + 0.04 * Math.min(1, this.rpm / 4000));
       s = this.lp;
       // claquement : bruit très bref filtré dans les aigus
       const kn = (Math.random() * 2 - 1) * this.kEnv; this.kEnv *= kDecay;
