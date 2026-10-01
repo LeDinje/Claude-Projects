@@ -12,7 +12,7 @@ Site encyclopédique statique sur les BMW, moteur par moteur. Ouvrir `bible-bmw/
   - *Circuit* : piste fictive chronométrée.
 - **Fiche 6 cylindres diesel M57** (330d, 530d, 535d…), en onglets :
   - *Présentation* : origine, générations et versions, carte d'identité, points de vigilance (volets de turbulence, EGR, turbo) ;
-  - *Fonctionnement 3D* : moteur animé avec turbo à géométrie variable, rampe commune et échangeur, quatre versions (184 à 286 ch), démarrage à froid, coupe d'un cylindre (air, pré-injection et injection, auto-inflammation, flamme de diffusion dans le bol du piston), son diesel synthétisé ;
+  - *Fonctionnement 3D* : conduite avec boîte automatique 6 rapports (sélecteur, palettes, pédale, frein, 0 à 100 km/h), moteur animé avec turbo à géométrie variable, rampe commune et échangeur, quatre versions (184 à 286 ch), démarrage à froid, coupe d'un cylindre (air, pré-injection et injection, auto-inflammation, flamme de diffusion dans le bol du piston), son diesel synthétisé ;
   - *Pièces et références* : comme pour le S65.
 
 Voir `bible-bmw/CONTRIBUER.md` pour ajouter des moteurs et des références.

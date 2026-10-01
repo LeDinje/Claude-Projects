@@ -46,7 +46,7 @@ const VERS = {
     hint: "Version biturbo : un petit turbo pour les bas régimes et un gros turbo en série, qui prend le relais. 286 ch et 580 N·m. La simulation montre un seul turbo." },
 };
 const st = {
-  targetRpm: 1800, rpm: 800, pedal: 0.4, load: 0, cold: false, ver: VERS.tu2,
+  rpm: 800, pedal: 0, load: 0, cold: false, ver: VERS.tu2,
   playback: 1/50, paused: false, theta: 0, torque: 0, power: 0, pmax: 0,
   boost: 0, boostTgt: 0, fuelOn: true, cut: false, turboRpm: 0,
 };
@@ -526,20 +526,139 @@ function pose(theta){
 }
 
 // ------------------------------------------------------------------
-// Régime, charge, turbo
+// Voiture, boîte automatique 6 rapports à convertisseur, turbo
 // ------------------------------------------------------------------
+// 330d E90 : rapports de la ZF 6HP, pont et masse estimés
+const CAR = { m: 1660, r: 0.316, fd: 2.47, eta: 0.9, cdA: 0.29 * 2.2, crr: 0.012,
+  ratios: [0, 4.171, 2.340, 1.521, 1.143, 0.867, 0.691], rev: 3.403, Ie: 0.25, vmax: 250 / 3.6, grip: 12000, idle: 800, stall: 2300 };
+const NG = CAR.ratios.length - 1;
+const SEL_NAMES = { P: 'Parking', R: 'Marche arrière', N: 'Point mort', D: 'Drive', S: 'Sport', M: 'Manuel' };
+Object.assign(st, { sel: 'P', gear: 1, v: 0, pedal: 0, brake: false, conv: 'open', lock: false, shiftT: 0, shiftUp: false, lastShift: 0,
+  accel: 0, simT: 0, t0: null, t0100: null, spin: false, limCut: false, vCut: false, dfco: false, smoke: 1, teNet: 0 });
+const ratioOf = g => (st.sel === 'R' ? CAR.rev : CAR.ratios[g]) * CAR.fd;
+const rpmAt = (g, v) => Math.abs(v) / CAR.r * 60 / (2 * Math.PI) * ratioOf(g);
+const RPM_PER_RAD = 60 / (2 * Math.PI);
+const KC = 500 / (CAR.stall * CAR.stall);     // convertisseur : couple absorbé ∝ régime², ≈ 500 N·m au calage
+function stepVehicle(h){
+  const sel = st.sel;
+  const coupled = sel === 'D' || sel === 'S' || sel === 'M' || sel === 'R';
+  const sport = sel === 'S' || sel === 'M';
+  const map = Math.pow(st.pedal, sport ? 0.85 : 1.1);
+  // gestion moteur : régulateur de ralenti, régime maxi, vitesse maxi, coupure en décélération
+  const idleGov = clamp(0.12 + (CAR.idle - st.rpm) * 0.004, 0, 0.45);
+  if (st.rpm > SPEC.redline) st.limCut = true; else if (st.rpm < SPEC.redline - 150) st.limCut = false;
+  st.vCut = st.v > CAR.vmax;
+  st.dfco = map < 0.01 && st.rpm > 1100;
+  st.fuelOn = !st.limCut && !st.vCut && !st.dfco;
+  st.load = st.fuelOn ? Math.min(Math.max(map, idleGov), st.smoke) * (st.shiftT > 0 ? 0.6 : 1) : 0;
+  const Te = st.load * (fullTorque(st.rpm) + friction(st.rpm)) - friction(st.rpm);
+  st.teNet = Te;
+  const dir = sel === 'R' ? -1 : 1;
+  const ratio = coupled ? ratioOf(st.gear) : 0;
+  const rpmW = coupled ? Math.max(0, st.v * dir) / CAR.r * RPM_PER_RAD * ratio : 0;
+  let Fdrive = 0;
+  st.spin = false;
+  if (coupled){
+    const sr = rpmW / Math.max(st.rpm, 1);
+    // embrayage de pontage : se ferme quand la turbine rattrape le moteur, s'ouvre près du ralenti
+    if (!st.lock && sr > 0.86 && rpmW > 1050 && st.shiftT <= 0) st.lock = true;
+    else if (st.lock && rpmW < 900) st.lock = false;
+    if (st.lock){
+      st.conv = 'lock';
+      Fdrive = Te * ratio * CAR.eta / CAR.r;
+    } else {
+      st.conv = 'slip';
+      const Tp = KC * st.rpm * st.rpm * Math.max(0, 1 - sr * sr);
+      const mult = 1 + 0.8 * clamp(1 - sr, 0, 1);       // multiplication de couple du convertisseur
+      st.rpm += (Te - Tp) / CAR.Ie * h * RPM_PER_RAD;
+      Fdrive = Tp * mult * ratio * CAR.eta / CAR.r;
+    }
+    if (Fdrive > CAR.grip){ Fdrive = CAR.grip; st.spin = true; }
+    Fdrive *= dir;
+  } else {
+    st.conv = 'open'; st.lock = false;
+    st.rpm += Te / CAR.Ie * h * RPM_PER_RAD;
+  }
+  const v = st.v, sg = Math.sign(v);
+  const Fres = Math.abs(v) > 0.02 ? sg * (0.5 * 1.2 * CAR.cdA * v * v + CAR.crr * CAR.m * 9.81) : 0;
+  const Fb = (st.brake ? CAR.m * 9.81 : 0) + (sel === 'P' ? 3 * CAR.m * 9.81 : 0);
+  const mEff = CAR.m + (st.lock ? CAR.Ie * Math.pow(ratio / CAR.r, 2) : 0);
+  let nv = v + (Fdrive - Fres) / mEff * h;
+  if (Fb > 0){ const dv = Fb / CAR.m * h; nv = Math.abs(nv) <= dv ? 0 : nv - Math.sign(nv) * dv; }
+  if (Math.abs(nv) < 0.01 && Math.abs(Fdrive) < CAR.crr * CAR.m * 9.81) nv = 0;
+  st.v = nv;
+  if (st.lock){
+    const target = Math.max(0, st.v * dir) / CAR.r * RPM_PER_RAD * ratio;
+    st.rpm += (target - st.rpm) * Math.min(1, h * 30);
+  }
+  st.rpm = clamp(st.rpm, 450, 5200);
+  if (st.shiftT > 0) st.shiftT -= h;
+}
+function shiftTo(g){
+  if (g === st.gear) return;
+  st.shiftUp = g > st.gear; st.gear = g; st.shiftT = 0.3; st.lastShift = st.simT; st.lock = false;
+}
+let msgTimer = 0;
+function msg(t){ $('#gearMsg').textContent = t; clearTimeout(msgTimer); if (t) msgTimer = setTimeout(() => $('#gearMsg').textContent = '', 4000); }
+function autoShift(){
+  if (!['D', 'S', 'M'].includes(st.sel)) return;
+  const since = (st.simT - st.lastShift) * 1000, p = st.pedal;
+  if (st.v < 2 && st.gear > 1 && st.rpm < 1300){ shiftTo(1); return; }
+  if (st.sel === 'M'){ if (st.gear > 1 && rpmAt(st.gear, st.v) < 900 && since > 600) shiftTo(st.gear - 1); return; }
+  // un diesel passe tôt : il a son couple dès 1 750 tr/min
+  const up = st.sel === 'D' ? 1700 + Math.pow(p, 1.3) * (4400 - 1700) : 2600 + p * (4550 - 2600);
+  const down = st.sel === 'D' ? 1150 + p * 1700 : 1700 + p * 2000;
+  const wheelRpm = rpmAt(st.gear, st.v);
+  if (st.gear < NG && wheelRpm > up && since > 700) shiftTo(st.gear + 1);
+  else if (st.gear > 1 && since > 700){
+    const lower = rpmAt(st.gear - 1, st.v);
+    if ((wheelRpm < down || (p > 0.93 && lower < 4000)) && lower < up - 200) shiftTo(st.gear - 1);
+  }
+}
+function selectGear(sel){
+  const kmh = st.v * 3.6;
+  if (sel === 'P' && Math.abs(kmh) > 2){ msg('Arrêtez la voiture avant de passer en P.'); return; }
+  if (sel === 'R' && kmh > 2){ msg('Arrêtez la voiture avant de passer la marche arrière.'); return; }
+  if ((sel === 'D' || sel === 'S' || sel === 'M') && kmh < -2){ msg('Arrêtez la voiture avant de repartir en avant.'); return; }
+  const prev = st.sel; st.sel = sel;
+  if ((sel === 'D' || sel === 'S') || (sel === 'M' && !['D', 'S'].includes(prev))){
+    let g = 1; while (g < NG && rpmAt(g, st.v) > (sel === 'D' ? 2200 : 3200)) g++;
+    if (sel !== 'M' || !['D', 'S'].includes(prev)) st.gear = g;
+  }
+  if (sel === 'R') st.gear = 1;
+  st.lock = false;
+  msg('');
+}
+function paddle(d){
+  if (st.sel === 'D' || st.sel === 'S') selectGear('M');
+  if (st.sel !== 'M'){ msg('Les palettes fonctionnent en D, S ou M.'); return; }
+  const g = st.gear + d; if (g < 1 || g > NG) return;
+  if (d < 0){
+    const r = rpmAt(g, st.v);
+    if (r > SPEC.redline - 200){ msg(`Rétrogradage refusé : le moteur monterait à ${nf.format(r)} tr/min.`); return; }
+  }
+  shiftTo(g); msg('');
+}
+let vPrev = 0;
 function updateEngine(dt){
-  st.rpm += (st.targetRpm - st.rpm) * (1 - Math.exp(-dt * 2.5));
-  const coast = st.pedal < 0.01 && st.rpm > 1100;
-  st.fuelOn = !coast;
-  st.cut = coast;
+  // turbo : la pression suit la demande avec un temps de réponse ; elle limite le gazole (limite de fumée)
   const full = st.ver.boost * spool(st.rpm);
-  st.boostTgt = st.fuelOn ? full * (0.06 + 0.94 * Math.pow(st.pedal, 0.9)) : 0.02 * full;
+  st.boostTgt = st.fuelOn ? full * (0.06 + 0.94 * Math.pow(Math.min(1, Math.max(st.pedal, st.load)), 0.9)) : 0.02 * full;
   const tau = st.boostTgt > st.boost ? 0.45 + 0.6 * (1 - spool(st.rpm)) : 0.35;
   st.boost += (st.boostTgt - st.boost) * (1 - Math.exp(-dt / tau));
-  const smokeLim = full > 0.05 ? clamp(0.42 + 0.58 * (1 + st.boost) / (1 + full), 0, 1) : 1;
-  st.load = st.fuelOn ? Math.min(st.pedal, smokeLim) : 0;
-  st.torque = st.fuelOn ? st.load * fullTorque(st.rpm) : -friction(st.rpm);
+  st.smoke = full > 0.05 ? clamp(0.42 + 0.58 * (1 + st.boost) / (1 + full), 0, 1) : 1;
+  const n = 4;
+  for (let i = 0; i < n; i++) stepVehicle(dt / n);
+  autoShift();
+  st.accel += ((st.v - vPrev) / Math.max(dt, 1e-3) / 9.81 - st.accel) * Math.min(1, dt * 6); vPrev = st.v;
+  st.simT += dt;
+  const now = st.simT * 1000;
+  if (Math.abs(st.v) < 0.3){ st.t0 = null; }
+  else if (st.t0 === null && st.v > 0.3 && st.v < 2) st.t0 = now;
+  if (st.t0 > 0 && st.v >= 100 / 3.6){ st.t0100 = (now - st.t0) / 1000; st.t0 = -1; }
+  if (st.t0 === -1 && st.v < 0.3) st.t0 = null;
+  st.cut = !st.fuelOn;
+  st.torque = st.fuelOn ? Math.max(0, st.teNet) : st.teNet;
   st.power = st.torque * st.rpm / 9549 / 0.7355;
   st.turboRpm = 25000 + 175000 * Math.pow(clamp(st.boost / 1.9, 0, 1), 0.7) + 10000 * st.rpm / 4800;
 }
@@ -797,8 +916,20 @@ function updateAudio(){
 // ------------------------------------------------------------------
 const fmtPlay = f => f >= 0.999 ? '×1 (temps réel)' : '×1/' + nf.format(Math.round(1 / f));
 function bindRange(id, fn){ const el = $('#' + id); el.addEventListener('input', () => fn(+el.value)); fn(+el.value); }
-bindRange('rpm', v => { st.targetRpm = v; setHTML('rpmOut', `${nf.format(v)}<small>tr/min</small>`); });
-bindRange('load', v => { st.pedal = v / 100; setHTML('loadOut', `${v}<small>%</small>`); });
+bindRange('pedal', v => { st.pedal = v / 100; });
+const setPedal = v => { v = clamp(v, 0, 100); $('#pedal').value = v; st.pedal = v / 100; };
+$('#pedal0').addEventListener('click', () => setPedal(0));
+$('#pedal100').addEventListener('click', () => setPedal(100));
+const brakeBtn = $('#brakeBtn');
+const setBrake = on => { st.brake = on; brakeBtn.classList.toggle('on', on); };
+brakeBtn.addEventListener('pointerdown', e => { e.preventDefault(); brakeBtn.setPointerCapture(e.pointerId); setBrake(true); });
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => brakeBtn.addEventListener(ev, () => setBrake(false)));
+brakeBtn.addEventListener('keydown', e => { if (e.key === 'Enter') setBrake(true); });
+brakeBtn.addEventListener('keyup', e => { if (e.key === 'Enter') setBrake(false); });
+document.querySelectorAll('[data-sel]').forEach(b => b.addEventListener('click', () => selectGear(b.dataset.sel)));
+$('#shiftUp').addEventListener('click', () => paddle(1));
+$('#shiftDown').addEventListener('click', () => paddle(-1));
+$('#vmaxSel').addEventListener('change', e => { const v = +e.target.value; CAR.vmax = v ? v / 3.6 : Infinity; });
 $('#cold').addEventListener('change', e => { st.cold = e.target.checked; });
 function applyVer(k){
   st.ver = VERS[k];
@@ -824,10 +955,13 @@ $('#soundBtn').addEventListener('click', async () => {
 window.addEventListener('keydown', e => {
   const tag = (e.target.tagName || '').toLowerCase();
   if (tag === 'select' || (tag === 'input' && e.target.type !== 'checkbox')) return;
-  if (e.key === 'ArrowUp' || e.key === 'ArrowDown'){
-    e.preventDefault(); const el = $('#load'); el.value = clamp(+el.value + (e.key === 'ArrowUp' ? 10 : -10), 0, 100); el.dispatchEvent(new Event('input'));
-  }
+  if (e.key === 'ArrowUp'){ e.preventDefault(); setPedal(+$('#pedal').value + 10); }
+  else if (e.key === 'ArrowDown'){ e.preventDefault(); setPedal(+$('#pedal').value - 10); }
+  else if (e.key === ' ' && !e.repeat){ e.preventDefault(); setBrake(true); }
+  else if (e.key === '+' || e.key === '='){ paddle(1); }
+  else if (e.key === '-'){ paddle(-1); }
 });
+window.addEventListener('keyup', e => { if (e.key === ' ') setBrake(false); });
 document.querySelectorAll('input[data-layer]').forEach(cb => {
   const apply = () => { if (layers[cb.dataset.layer]) layers[cb.dataset.layer].visible = cb.checked; };
   cb.addEventListener('change', apply); apply();
@@ -1592,7 +1726,7 @@ function lpUI(){
   const d = a < 360 ? a : a - 720;
   $('#lpAngle').textContent = `Cycle ${nf.format(a)}° / 720 · ${Math.round(d) === 0 ? 'au PMH combustion' : nf.format(Math.abs(d)) + '° ' + (d < 0 ? 'avant' : 'après') + ' le PMH combustion'}`;
   let txt = desc(a);
-  if (!fuel && st.rpm > 1 && st.cut) txt += ' Pied levé au‑dessus du ralenti : le calculateur coupe l\'injection, rien ne brûle.';
+  if (!fuel && st.rpm > 1 && st.cut) txt += st.limCut ? ' Régime maxi : injection coupée.' : st.vCut ? ' Vitesse maxi : injection coupée.' : ' Pied levé au‑dessus du ralenti : le calculateur coupe l\'injection, rien ne brûle.';
   if (st.cold && (ph === 'comp' || ph === 'main' || ph === 'pilot')) txt += ' Moteur froid : la bougie de préchauffage chauffe la chambre et le délai d\'inflammation s\'allonge.';
   $('#lpDesc').textContent = txt;
   $('#lpHint').hidden = !lpFast;
@@ -1686,8 +1820,6 @@ function setPaused(p){
 $('#lpPlay').addEventListener('click', () => setPaused(!st.paused));
 document.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click', () => {
   const j = b.dataset.jump;
-  // si l'injection est coupée (pied levé), on remet un peu de charge pour montrer la combustion
-  if ((j === 'pilot' || j === 'main' || j === 'burn') && !fuelNow()){ const el = $('#load'); el.value = 40; el.dispatchEvent(new Event('input')); st.fuelOn = true; computeCycle(); }
   const tgt = { intake: 450, comp: 640, pilot: cyc.pSoi + 0.5, main: cyc.soi + Math.min(1, cyc.injDeg * 0.5),
     burn: (cyc.d0A + Math.max(4, cyc.injDeg * 0.6)) % 720, exp: 95, exh: 260 }[j];
   setPaused(true);
@@ -1709,7 +1841,22 @@ function updateUI(){
   setHTML('hudHp', `${nf.format(st.power)}<small>ch</small>`);
   setHTML('hudNm', `${nf.format(st.torque)}<small>N·m</small>`);
   setHTML('hudBoost', `+${nf2.format(st.boost)}<small>bar</small>`);
-  setHTML('hudRail', `${nf.format(cyc.prail)}<small>bar rail</small>`);
+  const kmh = Math.abs(st.v) * 3.6;
+  const gearTxt = st.sel === 'P' || st.sel === 'N' || st.sel === 'R' ? st.sel : st.sel + st.gear;
+  setHTML('gearBig', gearTxt); setHTML('hudGear', gearTxt);
+  setHTML('gearSub', ['D', 'S', 'M'].includes(st.sel) ? `${SEL_NAMES[st.sel]} · ${st.gear}${st.gear === 1 ? 're' : 'e'}` : SEL_NAMES[st.sel]);
+  document.querySelectorAll('[data-sel]').forEach(b => b.classList.toggle('on', b.dataset.sel === st.sel));
+  setHTML('hudKmh', `${nf.format(kmh)}<small>km/h</small>`);
+  setHTML('limitMsg', st.vCut && isFinite(CAR.vmax) ? `Bridage électronique à ${nf.format(CAR.vmax * 3.6)} km/h : le calculateur coupe l'injection.`
+    : st.limCut ? 'Régime maxi : le calculateur coupe l\'injection.' : '');
+  setHTML('roKmh', `${nf.format(kmh)}<small>km/h</small>`);
+  setHTML('roConv', st.conv === 'lock' ? 'Ponté' : st.conv === 'slip' ? (st.v < 0.5 && st.sel !== 'N' ? 'Glisse · calage' : 'Glisse') : 'Libre');
+  setHTML('roAccel', `${nf1.format(st.accel)}<small>g</small>`);
+  setHTML('ro0100', st.t0100 ? `${nf1.format(st.t0100)}<small>s</small>` : (st.t0 > 0 ? `${nf1.format((st.simT * 1000 - st.t0) / 1000)}<small>s…</small>` : '–'));
+  setHTML('pedalOut', `${Math.round(st.pedal * 100)}<small>%</small>`);
+  setHTML('fuelOut', `${Math.round(st.load * 100)}<small>%</small>`);
+  $('#pedalBar').style.width = st.pedal * 100 + '%';
+  $('#fuelBar').style.width = st.load * 100 + '%';
   setHTML('badgeAngle', `${Math.round(st.theta)}°`);
   setHTML('roBoost', `+${nf2.format(st.boost)}<small>bar</small>`);
   setHTML('roRail', `${nf.format(cyc.prail)}<small>bar</small>`);
@@ -1722,6 +1869,31 @@ function updateUI(){
   if (st.paused) $('#angle').value = Math.round(st.theta);
   setHTML('angleOut', `${Math.round(st.theta)}<small>°</small>`);
   lpUI();
+}
+function drawGears(){
+  const { ctx, w, h } = fitCanvas($('#gears'));
+  if (w < 30 || h < 30) return;
+  const pad = { l: 30, r: 8, t: 8, b: 18 }, vmax = 260, rmax = 5000;
+  const X = k => pad.l + (w - pad.l - pad.r) * k / vmax, Y = r => h - pad.b - (h - pad.t - pad.b) * r / rmax;
+  ctx.clearRect(0, 0, w, h);
+  ctx.font = '10px "IBM Plex Mono", monospace'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(239,68,68,.12)'; ctx.fillRect(pad.l, Y(rmax), w - pad.l - pad.r, Y(SPEC.redline) - Y(rmax));
+  ctx.strokeStyle = COL.line; ctx.lineWidth = 1; ctx.fillStyle = COL.muted; ctx.textAlign = 'right';
+  [0, 2000, 4000].forEach(r => { ctx.beginPath(); ctx.moveTo(pad.l, Y(r)); ctx.lineTo(w - pad.r, Y(r)); ctx.stroke(); ctx.fillText(r / 1000 + 'k', pad.l - 4, Y(r)); });
+  ctx.textAlign = 'center';
+  [0, 100, 200].forEach(k => ctx.fillText(k, X(k), h - 6));
+  const perKmh = g => CAR.ratios[g] * CAR.fd / CAR.r * 60 / (2 * Math.PI) / 3.6;
+  for (let g = 1; g <= NG; g++){
+    const cur = g === st.gear && ['D', 'S', 'M'].includes(st.sel);
+    ctx.strokeStyle = cur ? COL.amber : COL.dim; ctx.lineWidth = cur ? 2 : 1;
+    const kEnd = Math.min(vmax, rmax / perKmh(g));
+    ctx.beginPath(); ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(kEnd), Y(kEnd * perKmh(g))); ctx.stroke();
+    const kl = Math.min(vmax - 8, SPEC.redline / perKmh(g));
+    ctx.fillStyle = cur ? COL.amber : COL.muted; ctx.fillText(g, X(kl), Y(SPEC.redline) - 7);
+  }
+  if (isFinite(CAR.vmax)){ const xv = X(CAR.vmax * 3.6); ctx.strokeStyle = COL.muted; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(xv, pad.t); ctx.lineTo(xv, h - pad.b); ctx.stroke(); ctx.setLineDash([]); }
+  ctx.fillStyle = COL.fg; ctx.beginPath(); ctx.arc(X(Math.min(vmax, Math.abs(st.v) * 3.6)), Y(Math.min(rmax, st.rpm)), 4, 0, Math.PI * 2); ctx.fill();
+  ctx.textAlign = 'left'; ctx.fillStyle = COL.muted; ctx.fillText('tr/min · km/h', pad.l + 4, pad.t + 4);
 }
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let frameErr = 0;
@@ -1756,7 +1928,7 @@ function step(now){
   if (shown) drawTach();
   drawChrono();
   uiT += dt;
-  if (uiT > 0.08){ uiT = 0; computeCycle(); updateUI(); drawCurve(); if (lpVisible){ drawPChart(); drawPV(); } }
+  if (uiT > 0.08){ uiT = 0; computeCycle(); updateUI(); drawCurve(); drawGears(); if (lpVisible){ drawPChart(); drawPV(); } }
 }
 
 // ------------------------------------------------------------------

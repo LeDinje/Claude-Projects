@@ -123,7 +123,7 @@
       <div class="unit">Régime moteur</div>
       <div class="big" id="hudRpm">0</div>
       <div class="row"><span id="hudHp">0<small>ch</small></span><span id="hudNm">0<small>N·m</small></span></div>
-      <div class="row"><span id="hudBoost">0<small>bar</small></span><span id="hudRail">0<small>bar rail</small></span></div>
+      <div class="row"><span class="gearchip" id="hudGear">P</span><span id="hudKmh">0<small>km/h</small></span><span id="hudBoost">0<small>bar</small></span></div>
     </div>
     <div class="playbadge">Lecture <b id="badgePlay">×1/50</b> · vilebrequin <b id="badgeAngle">0°</b></div>
     <div class="viewbar">
@@ -138,17 +138,50 @@
 
   <aside class="panel" aria-label="Commandes du moteur">
     <div class="grp">
-      <h2>Régime et charge</h2>
-      <div class="ctl">
-        <div class="head"><label for="rpm">Régime</label><output id="rpmOut">1 800<small>tr/min</small></output></div>
-        <input type="range" id="rpm" min="750" max="4800" step="10" value="1800">
+      <h2>Conduite · boîte automatique 6 rapports</h2>
+      <div class="gate" role="group" aria-label="Sélecteur de vitesses">
+        <button class="gbtn" data-sel="P">P</button>
+        <button class="gbtn" data-sel="R">R</button>
+        <button class="gbtn" data-sel="N">N</button>
+        <button class="gbtn" data-sel="D">D</button>
+        <button class="gbtn" data-sel="S">S</button>
+        <button class="gbtn" data-sel="M">M</button>
       </div>
-      <div class="ctl">
-        <div class="head"><label for="load">Pédale d'accélérateur</label><output id="loadOut">40<small>%</small></output></div>
-        <input type="range" id="load" min="0" max="100" step="1" value="40">
-        <div class="hint">Sur un diesel, la pédale ne commande pas d'ouverture de papillon : elle fixe la quantité de gazole injectée. L'air entre toujours en grand.</div>
+      <div class="paddles">
+        <button class="btn" id="shiftDown" aria-label="Palette gauche, rapport inférieur">− Palette</button>
+        <div class="gear-now"><b id="gearBig">P</b><span id="gearSub">Parking</span></div>
+        <button class="btn" id="shiftUp" aria-label="Palette droite, rapport supérieur">Palette +</button>
       </div>
-      <label class="switch"><input type="checkbox" id="cold"> Démarrage à froid (préchauffage)</label>
+      <div class="gear-msg" id="gearMsg" aria-live="polite"></div>
+      <div class="gear-msg" id="limitMsg" style="color:#ff8a80"></div>
+      <div class="pedals">
+        <div class="pedal-col">
+          <input type="range" id="pedal" min="0" max="100" step="1" value="0" aria-label="Pression sur la pédale d'accélérateur">
+          <span>Accélérateur</span>
+        </div>
+        <div class="pedal-info">
+          <div class="ctl">
+            <div class="head"><label for="pedal">Pédale</label><output id="pedalOut">0<small>%</small></output></div>
+            <div class="minibar"><i id="pedalBar"></i></div>
+            <div class="head"><span>Débit de gazole</span><output id="fuelOut">0<small>%</small></output></div>
+            <div class="minibar"><i id="fuelBar" style="background:var(--fuel)"></i></div>
+          </div>
+          <div class="row2">
+            <button class="btn" id="pedal0">Lever le pied</button>
+            <button class="btn" id="pedal100">Plancher</button>
+          </div>
+          <button class="btn brake" id="brakeBtn">Maintenir pour freiner</button>
+        </div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k">Vitesse</div><div class="v" id="roKmh">0<small>km/h</small></div></div>
+        <div class="ro"><div class="k">Convertisseur</div><div class="v" id="roConv">Libre</div></div>
+        <div class="ro"><div class="k">Accélération</div><div class="v" id="roAccel">0<small>g</small></div></div>
+        <div class="ro"><div class="k">0 à 100 km/h</div><div class="v" id="ro0100">–</div></div>
+      </div>
+      <canvas id="gears" aria-label="Régime en fonction de la vitesse pour chaque rapport"></canvas>
+      <div class="hint">Sur un diesel, la pédale ne commande pas d'ouverture de papillon : elle fixe la quantité de gazole injectée, l'air entre toujours en grand. Au démarrage, le turbo met un instant à monter en pression : le calculateur limite le gazole pour ne pas fumer.</div>
+      <div class="hint">Clavier : ↑ / ↓ pour doser la pédale, espace pour freiner, + / − pour les palettes.</div>
     </div>
 
     <div class="grp">
@@ -163,6 +196,14 @@
         </select>
         <div class="hint" id="verHint"></div>
       </div>
+      <div class="ctl">
+        <label for="vmaxSel">Vitesse maxi</label>
+        <select id="vmaxSel">
+          <option value="250">Bridée à 250 km/h (d'origine)</option>
+          <option value="0">Débridée</option>
+        </select>
+      </div>
+      <label class="switch"><input type="checkbox" id="cold"> Démarrage à froid (préchauffage)</label>
       <canvas id="curve" aria-label="Courbes de couple et de puissance"></canvas>
     </div>
 
