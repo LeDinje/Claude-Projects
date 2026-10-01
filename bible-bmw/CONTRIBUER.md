@@ -52,4 +52,4 @@ Règles :
 
 ## Créer la fiche d'un nouveau moteur
 
-Copiez `moteurs/s65/` vers `moteurs/<code>/`, remplacez le contenu de l'onglet Présentation et créez `data/pieces-<code>.js`. La simulation 3D (`s65.js`) est propre au S65 : pour un autre moteur, on commencera par les onglets Présentation et Pièces, puis on adaptera la 3D (nombre de cylindres, angle du V, ordre d'allumage).
+Partez de la fiche la plus proche : `moteurs/s65/` pour un V essence, `moteurs/m57/` pour un 6 cylindres en ligne diesel. Copiez-la vers `moteurs/<code>/`, remplacez le contenu de l'onglet Présentation et créez `data/pieces-<code>.js`. Les styles communs sont dans `assets/fiche.css`. La simulation 3D (`s65.js`, `m57.js`) est propre à chaque moteur : adaptez les cotes (alésage, course, entraxe), le nombre de cylindres, l'ordre d'allumage, la distribution et le modèle de combustion. Pour que « Situer en 3D » fonctionne, chaque valeur de `vis` utilisée dans le fichier de pièces doit exister dans la table `VIS` du script.

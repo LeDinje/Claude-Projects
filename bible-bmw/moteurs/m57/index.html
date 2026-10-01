@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>6 cylindres M57 · Bimmer Bible</title>
+<meta name="description" content="Le 6 cylindres diesel M57 des 330d, 530d et 535d : fonctionnement en 3D, coupe d'un cylindre, pièces et références.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Saira:ital,wght@1,800&display=swap">
+<link rel="icon" href="../../assets/logo/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="stylesheet" href="../../assets/fiche.css">
+</head>
+<body>
+<header class="site-head"><div class="in">
+  <a class="logo" href="../../index.html" aria-label="Bimmer Bible, accueil"><svg viewBox="0 0 128 128" aria-hidden="true" aria-label="Bimmer Bible : deux B dos à dos formant un livre ouvert, trois rubans marque-page">
+  <g fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path stroke="#2aa6e0" d="M68 22 V100 M68 22 H86 C104 22 104 58 86 60 H68 M68 60 H90 C110 60 110 100 90 100 H68"/>
+    <path stroke="currentColor" d="M60 22 V100 M60 22 H42 C24 22 24 58 42 60 H60 M60 60 H38 C18 60 18 100 38 100 H60"/>
+  </g>
+  <path d="M56 104 h6 l-6 20 h-6 z" fill="#2aa6e0"/>
+  <path d="M64 104 h6 l-6 20 h-6 z" fill="#3b4fb0"/>
+  <path d="M72 104 h6 l-6 20 h-6 z" fill="#e3262d"/>
+</svg><span>Bi<span class="m-grad">m</span>mer <b>Bible</b></span></a>
+  <nav class="nav" aria-label="Rubriques">
+    <a href="../index.html" aria-current="page">Moteurs</a>
+    <span>Modèles</span><span>Pièces</span><span>Entretien</span>
+  </nav>
+</div></header>
+
+<main class="wrap">
+<nav class="crumbs" aria-label="Fil d'Ariane"><a href="../../index.html">Accueil</a><span>›</span><a href="../index.html">Moteurs</a><span>›</span><span>M57</span></nav>
+<header class="top">
+  <div>
+    <div class="eyebrow">6 cylindres en ligne diesel · 330d · 530d · 535d · X5 · 1998-2010</div>
+    <h1>6 cylindres <em>M57</em></h1>
+    <div class="fullcodes"><span>M57D25</span><span>M57D30</span><span>M57D30TÜ</span><span>M57D30TÜ2</span><span>M57D30 biturbo</span></div>
+  </div>
+  <div class="specs" aria-label="Fiche technique de la version choisie">
+    <div><b id="specCc">2 993 cm³</b>cylindrée</div>
+    <div><b id="specBs">84 × 90</b>alésage × course (mm)</div>
+    <div><b id="specHp">231 ch</b><span id="specHpRpm">à 4 000 tr/min</span></div>
+    <div><b id="specNm">500 N·m</b><span id="specNmRpm">de 1 750 à 3 000 tr/min</span></div>
+    <div><b id="specVer">TÜ2</b><span id="specVerTxt">330d E90</span></div>
+  </div>
+</header>
+<div class="tabs" role="tablist" aria-label="Sections de la fiche">
+  <button class="tab" role="tab" id="t-presentation" aria-controls="tab-presentation" data-tab="presentation">Présentation</button>
+  <button class="tab" role="tab" id="t-fonctionnement" aria-controls="tab-fonctionnement" data-tab="fonctionnement">Fonctionnement 3D</button>
+  <button class="tab" role="tab" id="t-pieces" aria-controls="tab-pieces" data-tab="pieces">Pièces et références</button>
+</div>
+
+<section class="tabpanel" id="tab-presentation" role="tabpanel" aria-labelledby="t-presentation">
+<div class="pres-grid">
+  <div class="prose">
+    <p class="lede-big">Le M57 est le 6 cylindres diesel qui a fait la réputation des BMW diesel : souple, coupleux, très endurant. On le trouve sous le capot des 330d, 530d, 535d, 730d, X3 et X5 de 1998 à 2010.</p>
+
+    <h2>Origine</h2>
+    <p>Le M57 succède en 1998 au M51, un 2,5 litres plus ancien. Il passe à l'injection directe à rampe commune, avec une pompe qui maintient le gazole sous très haute pression dans une rampe partagée par les six injecteurs. Il a connu trois générations : M57, M57TÜ (aussi appelé M57N) puis M57TÜ2 (M57N2). Chacune a gagné en puissance et en pression d'injection. La version biturbo des 535d et 335d est la plus puissante. Le N57 l'a remplacé à partir de 2008.</p>
+
+    <h2>Architecture</h2>
+    <ul>
+      <li><strong>6 cylindres en ligne :</strong> une combustion tous les 120° de vilebrequin, dans l'ordre 1‑5‑3‑6‑2‑4. C'est une architecture naturellement équilibrée, d'où sa douceur.</li>
+      <li><strong>Quatre soupapes par cylindre,</strong> deux arbres à cames en tête entraînés par chaîne.</li>
+      <li><strong>Injection directe à rampe commune Bosch :</strong> un injecteur au centre de chaque cylindre pulvérise le gazole dans un bol creusé dans le piston. Les injecteurs piézo de la génération TÜ2 permettent plusieurs injections par cycle.</li>
+      <li><strong>Turbo à géométrie variable :</strong> des ailettes orientables adaptent le débit des gaz sur la turbine. La version biturbo associe un petit turbo et un gros turbo en série.</li>
+      <li><strong>Pas de bougies d'allumage :</strong> le gazole s'enflamme tout seul dans l'air très chaud de fin de compression. Des bougies de préchauffage aident seulement au démarrage à froid.</li>
+      <li><strong>Volets de turbulence</strong> dans le collecteur d'admission pour faire tourner l'air dans le cylindre à bas régime.</li>
+    </ul>
+    <p>L'onglet <a href="#fonctionnement" data-goto="fonctionnement">Fonctionnement 3D</a> montre le moteur en mouvement et la coupe d'un cylindre : air, injection, auto‑inflammation.</p>
+
+    <h2>Les versions</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Version</th><th>Cylindrée</th><th>Puissance</th><th>Couple</th><th>Exemples</th></tr></thead>
+      <tbody>
+        <tr><td>M57D25</td><td class="n">2 497 cm³</td><td class="n">163 à 177 ch</td><td class="n">350 à 400 N·m</td><td>525d E39 et E60</td></tr>
+        <tr><td>M57D30 (1<sup>re</sup> génération)</td><td class="n">2 926 cm³</td><td class="n">184 à 193 ch</td><td class="n">390 à 410 N·m</td><td>330d E46, 530d E39, X5 3.0d E53</td></tr>
+        <tr><td>M57D30TÜ</td><td class="n">2 993 cm³</td><td class="n">204 à 218 ch</td><td class="n">410 à 500 N·m</td><td>330d E46 restylée, 530d E60</td></tr>
+        <tr><td>M57D30TÜ2</td><td class="n">2 993 cm³</td><td class="n">231 à 235 ch</td><td class="n">500 à 520 N·m</td><td>330d E90, 530d E60 restylée, X5 3.0d E70</td></tr>
+        <tr><td>M57D30 biturbo</td><td class="n">2 993 cm³</td><td class="n">272 à 286 ch</td><td class="n">560 à 580 N·m</td><td>535d E60, 335d E90, X5 3.5d E70</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Plages données par les sources consultées ; elles varient selon le modèle et l'année. Sources : <a href="https://www.enginecode.uk/bmw/m57d30-specs" target="_blank" rel="noopener">EngineCode</a>, <a href="https://specsnode.com/engine-detail.php?id=177" target="_blank" rel="noopener">SpecsNode</a>, <a href="https://www.bimmerarchive.org/m-code/m57d30t2.html" target="_blank" rel="noopener">BimmerArchive (M57D30T2)</a>.</p>
+
+    <h2>Points de vigilance</h2>
+    <div class="watch">
+      <div class="card"><h3>Volets de turbulence</h3><p>Le défaut le plus connu des M47 et M57 : un volet du collecteur d'admission casse et tombe dans le cylindre, ce qui peut détruire le moteur. La suie de l'EGR accélère leur usure.</p><a href="#pieces" data-goto="pieces" data-piece="Volets de turbulence">Voir la fiche pièce</a></div>
+      <div class="card"><h3>Vanne EGR et encrassement</h3><p>La recirculation des gaz d'échappement envoie de la suie dans l'admission. Le collecteur et les volets s'encrassent avec le temps.</p><a href="#pieces" data-goto="pieces" data-piece="Vanne EGR">Voir les références</a></div>
+      <div class="card"><h3>Turbo à géométrie variable</h3><p>Les ailettes mobiles peuvent gripper avec la suie, surtout sur une voiture qui ne roule qu'en ville. Symptôme : perte de puissance ou passage en mode dégradé.</p><a href="#pieces" data-goto="pieces" data-piece="Turbocompresseur">Voir les références</a></div>
+    </div>
+  </div>
+
+  <aside class="idcard card" aria-label="Carte d'identité du M57">
+    <h3>Carte d'identité</h3>
+    <dl>
+      <dt>Codes</dt><dd>M57D25, M57D30</dd>
+      <dt>Architecture</dt><dd>6 cylindres en ligne, 24 soupapes</dd>
+      <dt>Cylindrée</dt><dd>2 993 cm³ (2 926 cm³ en 1<sup>re</sup> génération)</dd>
+      <dt>Alésage × course</dt><dd>84 × 90 mm (84 × 88 mm en 1<sup>re</sup> génération)</dd>
+      <dt>Carburant</dt><dd>Gazole</dd>
+      <dt>Injection</dt><dd>Directe, rampe commune Bosch</dd>
+      <dt>Suralimentation</dt><dd>Turbo à géométrie variable, biturbo sur 535d et 335d</dd>
+      <dt>Distribution</dt><dd>Chaîne, 2 arbres à cames en tête</dd>
+      <dt>Ordre d'allumage</dt><dd>1‑5‑3‑6‑2‑4</dd>
+      <dt>Puissance</dt><dd>184 à 286 ch selon la version</dd>
+      <dt>Couple</dt><dd>390 à 580 N·m selon la version</dd>
+      <dt>Production</dt><dd>1998-2010</dd>
+      <dt>Successeur</dt><dd>N57</dd>
+    </dl>
+  </aside>
+</div>
+</section>
+
+<section class="tabpanel" id="tab-fonctionnement" role="tabpanel" aria-labelledby="t-fonctionnement" hidden>
+<div id="slotFonct">
+<section class="stage">
+  <div class="viewport" id="viewport">
+    <canvas id="gl" aria-label="Vue 3D du moteur : faites glisser pour tourner, molette pour zoomer"></canvas>
+    <div id="labels"></div>
+    <canvas id="tach" width="352" height="352" aria-hidden="true"></canvas>
+    <div class="hud" aria-live="off">
+      <div class="unit">Régime moteur</div>
+      <div class="big" id="hudRpm">0</div>
+      <div class="row"><span id="hudHp">0<small>ch</small></span><span id="hudNm">0<small>N·m</small></span></div>
+      <div class="row"><span id="hudBoost">0<small>bar</small></span><span id="hudRail">0<small>bar rail</small></span></div>
+    </div>
+    <div class="playbadge">Lecture <b id="badgePlay">×1/50</b> · vilebrequin <b id="badgeAngle">0°</b></div>
+    <div class="viewbar">
+      <button class="btn" data-view="iso">3/4</button>
+      <button class="btn" data-view="front">Face</button>
+      <button class="btn" data-view="side">Côté</button>
+      <button class="btn" data-view="top">Dessus</button>
+      <button class="btn" id="pauseBtn">Pause</button>
+      <button class="btn" id="soundBtn">Son : coupé</button>
+    </div>
+  </div>
+
+  <aside class="panel" aria-label="Commandes du moteur">
+    <div class="grp">
+      <h2>Régime et charge</h2>
+      <div class="ctl">
+        <div class="head"><label for="rpm">Régime</label><output id="rpmOut">1 800<small>tr/min</small></output></div>
+        <input type="range" id="rpm" min="750" max="4800" step="10" value="1800">
+      </div>
+      <div class="ctl">
+        <div class="head"><label for="load">Pédale d'accélérateur</label><output id="loadOut">40<small>%</small></output></div>
+        <input type="range" id="load" min="0" max="100" step="1" value="40">
+        <div class="hint">Sur un diesel, la pédale ne commande pas d'ouverture de papillon : elle fixe la quantité de gazole injectée. L'air entre toujours en grand.</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="cold"> Démarrage à froid (préchauffage)</label>
+    </div>
+
+    <div class="grp">
+      <h2>Version</h2>
+      <div class="ctl">
+        <label for="ver">Génération du moteur</label>
+        <select id="ver">
+          <option value="d30">M57D30 · 184 ch · 330d E46, 530d E39</option>
+          <option value="tu">M57D30TÜ · 218 ch · 530d E60</option>
+          <option value="tu2" selected>M57D30TÜ2 · 231 ch · 330d E90</option>
+          <option value="top">M57D30 biturbo · 286 ch · 335d, 535d</option>
+        </select>
+        <div class="hint" id="verHint"></div>
+      </div>
+      <canvas id="curve" aria-label="Courbes de couple et de puissance"></canvas>
+    </div>
+
+    <div class="grp">
+      <h2>Lecture</h2>
+      <div class="ctl">
+        <div class="head"><label for="play">Ralenti de l'animation</label><output id="playOut">×1/50</output></div>
+        <input type="range" id="play" min="0" max="100" step="any" value="43.37">
+        <div class="hint">À 4 000 tr/min, le vilebrequin fait 67 tours par seconde : l'animation est ralentie. Les chiffres restent ceux du régime réel.</div>
+      </div>
+      <div class="ctl">
+        <div class="head"><label for="angle">Angle du vilebrequin (en pause)</label><output id="angleOut">0<small>°</small></output></div>
+        <input type="range" id="angle" min="0" max="719" step="1" value="0" disabled>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Affichage</h2>
+      <div class="seg" role="group" aria-label="Préréglages d'affichage">
+        <button class="btn" data-preset="full">Complet</button>
+        <button class="btn on" data-preset="xray">Écorché</button>
+        <button class="btn" data-preset="skeleton">Squelette</button>
+      </div>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" data-layer="block" checked>Bloc</label>
+        <label class="chip"><input type="checkbox" data-layer="heads" checked>Culasse</label>
+        <label class="chip"><input type="checkbox" data-layer="valvetrain" checked>Distribution</label>
+        <label class="chip"><input type="checkbox" data-layer="manifolds" checked>Admission</label>
+        <label class="chip"><input type="checkbox" data-layer="turbo" checked>Échappement et turbo</label>
+        <label class="chip"><input type="checkbox" data-layer="rail" checked>Rampe et injecteurs</label>
+        <label class="chip"><input type="checkbox" data-layer="liners" checked>Chemises</label>
+        <label class="chip"><input type="checkbox" data-layer="gas" checked>Gaz</label>
+        <label class="chip"><input type="checkbox" data-layer="flow" checked>Flux air / gazole</label>
+        <label class="chip"><input type="checkbox" data-layer="pistons" checked>Pistons</label>
+        <label class="chip"><input type="checkbox" data-layer="rods" checked>Bielles</label>
+        <label class="chip"><input type="checkbox" data-layer="crank" checked>Vilebrequin</label>
+        <label class="chip"><input type="checkbox" data-layer="labels" checked>Étiquettes</label>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Mesures</h2>
+      <div class="readouts">
+        <div class="ro"><div class="k">Pression de suralimentation</div><div class="v" id="roBoost">0<small>bar</small></div></div>
+        <div class="ro"><div class="k">Pression dans la rampe</div><div class="v" id="roRail">0<small>bar</small></div></div>
+        <div class="ro"><div class="k">Gazole par injection</div><div class="v" id="roFuel">0<small>mg</small></div></div>
+        <div class="ro"><div class="k">Richesse</div><div class="v" id="roLambda">–</div></div>
+        <div class="ro"><div class="k">Pression max cylindre</div><div class="v" id="roPmax">0<small>bar</small></div></div>
+        <div class="ro"><div class="k">Cylindre en combustion</div><div class="v" id="roFire">–</div></div>
+        <div class="ro"><div class="k">Vitesse moyenne piston</div><div class="v" id="roVp">0<small>m/s</small></div></div>
+        <div class="ro"><div class="k">Turbo</div><div class="v" id="roTurbo">–</div></div>
+      </div>
+    </div>
+  </aside>
+</section>
+</div>
+
+<section class="block" id="loupeSec" aria-labelledby="loupeTitle">
+  <div class="block-head">
+    <h2 id="loupeTitle">Au cœur du cylindre n° <span id="lpTitleCyl">1</span></h2>
+    <div class="legend">
+      <span style="--c:var(--air)">Air</span>
+      <span style="--c:var(--fuel)">Gazole</span>
+      <span style="--c:var(--amber)">Flamme</span>
+      <span style="--c:var(--burnt)">Gaz brûlés</span>
+    </div>
+  </div>
+  <div class="loupe-grid">
+    <div class="loupe-view" id="loupeView">
+      <canvas id="loupe" aria-label="Coupe 3D d'un cylindre diesel : faites glisser pour tourner, molette pour zoomer"></canvas>
+      <div id="lpLabels"></div>
+      <div class="lp-hud">
+        <div class="lp-angle" id="lpCylLbl">Cylindre n° 1</div>
+        <div class="lp-phase" id="lpPhase">Admission</div>
+        <div class="lp-angle" id="lpAngle"></div>
+        <div class="lp-desc" id="lpDesc"></div>
+        <div class="lp-events">
+          <span class="ev" id="evIn">Admission ouverte</span>
+          <span class="ev" id="evEx">Échappement ouvert</span>
+          <span class="ev" id="evPilot">Pré‑injection</span>
+          <span class="ev" id="evInj">Injection</span>
+          <span class="ev" id="evGlow">Préchauffage</span>
+        </div>
+      </div>
+      <div class="lp-cams" role="group" aria-label="Cadrage de la coupe">
+        <button class="btn" data-lpview="all">Ensemble</button>
+        <button class="btn" data-lpview="chamber">Chambre</button>
+        <button class="btn" data-lpview="nozzle">Injecteur</button>
+        <button class="btn" data-lpview="glow">Préchauffage</button>
+        <button class="btn" data-lpview="valves">Distribution</button>
+      </div>
+      <div class="lp-steps" role="group" aria-label="Aller à une étape du cycle">
+        <button class="btn" data-jump="intake">Admission</button>
+        <button class="btn" data-jump="comp">Compression</button>
+        <button class="btn" data-jump="pilot">Pré‑injection</button>
+        <button class="btn" data-jump="main">Injection</button>
+        <button class="btn" data-jump="burn">Combustion</button>
+        <button class="btn" data-jump="exp">Détente</button>
+        <button class="btn" data-jump="exh">Échappement</button>
+        <button class="btn" data-step="2">+2°</button>
+        <button class="btn" data-step="10">+10°</button>
+        <button class="btn" id="lpPlay">Pause</button>
+      </div>
+      <div class="lp-hint" id="lpHint" hidden></div>
+    </div>
+    <aside class="loupe-side">
+      <div class="row2">
+        <label for="lpCyl" class="hint" style="font-size:13px">Cylindre suivi</label>
+        <select id="lpCyl">
+          <option value="1">n° 1</option><option value="2">n° 2</option><option value="3">n° 3</option>
+          <option value="4">n° 4</option><option value="5">n° 5</option><option value="6">n° 6</option>
+        </select>
+        <label class="switch"><input type="checkbox" id="lpLabelsOn" checked> Étiquettes</label>
+      </div>
+      <div class="readouts">
+        <div class="ro"><div class="k">Pression cylindre</div><div class="v" id="lpP">–</div></div>
+        <div class="ro"><div class="k">Température des gaz</div><div class="v" id="lpT">–</div></div>
+        <div class="ro"><div class="k">Volume</div><div class="v" id="lpV">–</div></div>
+        <div class="ro"><div class="k">Gazole brûlé</div><div class="v" id="lpXb">–</div></div>
+        <div class="ro"><div class="k">Levée adm. / éch.</div><div class="v" id="lpLift">–</div></div>
+        <div class="ro"><div class="k">Pression d'admission</div><div class="v" id="lpPman">–</div></div>
+      </div>
+      <h3>Injection</h3>
+      <div class="readouts">
+        <div class="ro"><div class="k">Air aspiré par cycle</div><div class="v" id="lpAir">–</div></div>
+        <div class="ro"><div class="k">Gazole injecté</div><div class="v" id="lpFuel">–</div></div>
+        <div class="ro"><div class="k">Richesse</div><div class="v" id="lpLambda">–</div></div>
+        <div class="ro"><div class="k">Pression dans la rampe</div><div class="v" id="lpRail">–</div></div>
+        <div class="ro"><div class="k">Début d'injection</div><div class="v" id="lpSoi">–</div></div>
+        <div class="ro"><div class="k">Délai d'auto‑inflammation</div><div class="v" id="lpDelay">–</div></div>
+      </div>
+      <h3>Pression au fil du cycle</h3>
+      <canvas id="pchart" aria-label="Pression dans le cylindre sur 720 degrés avec les injections"></canvas>
+      <h3>Diagramme pression / volume</h3>
+      <canvas id="pvchart" aria-label="Diagramme pression volume en échelle logarithmique"></canvas>
+    </aside>
+  </div>
+</section>
+
+<section class="block" aria-labelledby="chronoTitle">
+  <div class="block-head">
+    <h2 id="chronoTitle">Chronogramme · ordre d'allumage 1‑5‑3‑6‑2‑4</h2>
+    <div class="legend">
+      <span style="--c:var(--air)">Admission</span>
+      <span style="--c:var(--comp)">Compression</span>
+      <span style="--c:var(--amber)">Combustion / détente</span>
+      <span style="--c:var(--exh)">Échappement</span>
+      <span style="--c:var(--fuel)">Injection</span>
+    </div>
+  </div>
+  <div class="canvas-scroll"><canvas id="chrono" aria-label="Cycle à quatre temps des six cylindres sur 720 degrés"></canvas></div>
+</section>
+
+<article class="prose explain">
+  <h2><span class="num">1</span>Ce que vous regardez</h2>
+  <p>Les six cylindres sont alignés au‑dessus d'un vilebrequin à sept paliers. Ses six manetons sont décalés de 120° : les cylindres 1 et 6, 2 et 5, 3 et 4 montent et descendent ensemble, avec un temps d'avance de 360° l'un sur l'autre. Il y a une combustion tous les 120°, dans l'ordre <strong>1‑5‑3‑6‑2‑4</strong>.</p>
+  <p>La couleur du gaz dans chaque cylindre indique le temps en cours. Les injecteurs, au centre de la culasse, sont reliés à la rampe commune. Les gaz d'échappement font tourner la turbine du turbo, qui entraîne le compresseur : l'air est envoyé sous pression dans le collecteur d'admission.</p>
+
+  <h2><span class="num">2</span>Pourquoi un diesel n'a pas de bougie</h2>
+  <p>Un diesel comprime de l'air seul, environ <strong>17 à 18 fois</strong>, beaucoup plus qu'un moteur essence. En fin de compression, l'air dépasse 500 °C. Le gazole injecté à ce moment‑là s'enflamme tout seul, après un court délai de quelques degrés : c'est l'auto‑inflammation.</p>
+  <p>La pédale ne règle pas une ouverture de papillon. Elle fixe la quantité de gazole injectée, et l'air entre toujours au maximum. Le mélange est donc très pauvre au ralenti, avec bien plus d'air que nécessaire, et se rapproche de la limite des fumées à pleine charge.</p>
+  <p>La <strong>pré‑injection</strong> envoie une petite quantité de gazole avant l'injection principale. Elle prépare la combustion et adoucit le claquement typique du diesel. La rampe commune permet de régler précisément le moment et la quantité de chaque injection, sous une pression qui dépasse 1 500 bar à pleine charge.</p>
+
+  <h2><span class="num">3</span>Hypothèses du modèle</h2>
+  <p>Les cotes principales (alésage, course, ordre d'allumage) sont celles du moteur. Les courbes de couple suivent les valeurs maximales publiées pour chaque version. Le reste est estimé pour donner des ordres de grandeur réalistes : pression de suralimentation, pression de rampe, calage de l'injection, délai d'auto‑inflammation et pression dans le cylindre.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Grandeur</th><th>Valeur</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>Alésage × course · cylindrée</td><td class="n">84 × 90 mm · 2 993 cm³</td><td>Sources publiées</td></tr>
+      <tr><td>Ordre d'allumage</td><td class="n">1‑5‑3‑6‑2‑4</td><td>Sources publiées</td></tr>
+      <tr><td>Entraxe de bielle</td><td class="n">135 mm</td><td>Estimation</td></tr>
+      <tr><td>Rapport volumétrique</td><td class="n">17 : 1</td><td>Ordre de grandeur (17 à 18 selon la version)</td></tr>
+      <tr><td>Suralimentation maxi</td><td class="n">≈ 1,3 bar (≈ 1,8 bar biturbo)</td><td>Estimation</td></tr>
+      <tr><td>Pression de rampe maxi</td><td class="n">1 350 à 1 600 bar selon la génération</td><td>Ordre de grandeur</td></tr>
+      <tr><td>Combustion</td><td class="n">Wiebe double : pic de prémélange puis diffusion</td><td>Modèle classique</td></tr>
+    </tbody>
+  </table></div>
+</article>
+</section>
+
+<section class="tabpanel" id="tab-pieces" role="tabpanel" aria-labelledby="t-pieces" hidden>
+<div class="parts-top">
+  <div class="prose">
+    <h2 style="margin-top:0">Pièces et références</h2>
+    <p>Les pièces du M57 classées comme dans le catalogue BMW. Le M57 a connu plusieurs générations : vérifiez toujours la version de votre moteur. Cliquez sur « Situer en 3D » pour voir où se trouve la pièce.</p>
+  </div>
+  <div class="st-legend" id="stLegend"></div>
+</div>
+<div class="notice">
+  <strong>Aucune référence n'est encore vérifiée sur RealOEM.</strong> Les numéros viennent de fiches de revendeurs spécialisés, et chaque source est citée. Beaucoup de pièces changent entre M57, M57TÜ et M57TÜ2 : avant de commander, vérifiez la référence avec votre numéro de châssis.
+</div>
+<div class="parts-grid">
+  <div class="parts-list">
+    <div class="parts-filters">
+      <input type="search" id="pSearch" placeholder="Pièce ou numéro (ex. 11427788460)" aria-label="Chercher une pièce ou une référence">
+      <select id="pGroup" aria-label="Groupe"></select>
+      <select id="pStatut" aria-label="Statut">
+        <option value="">Tous les statuts</option>
+        <option value="verifiee">Vérifiée RealOEM</option>
+        <option value="recoupee">Recoupée</option>
+        <option value="a-confirmer">À confirmer</option>
+        <option value="a-renseigner">À renseigner</option>
+      </select>
+    </div>
+    <div id="pList"></div>
+  </div>
+  <div class="parts-viewer">
+    <div id="viewerSlot"></div>
+    <div class="viewer-cap" id="viewerCap">Choisissez une pièce pour la situer dans le moteur.</div>
+  </div>
+</div>
+</section>
+</main>
+
+<footer class="site-foot"><div class="in">
+  <span>Bimmer Bible · site de passionnés, indépendant, sans lien avec BMW AG.</span>
+  <span>Références pièces : toujours vérifier avec le numéro de châssis sur RealOEM avant de commander.</span>
+</div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="../../data/pieces-m57.js"></script>
+<script src="m57.js"></script>
+</body>
+</html>

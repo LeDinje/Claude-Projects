@@ -67,7 +67,7 @@ a.eng:hover{border-color:var(--amber)}
     <div>
       <div class="eyebrow">Catalogue</div>
       <h1>Les moteurs</h1>
-      <p>Les moteurs BMW essence et diesel, des années 60 à aujourd’hui, rangés par famille et par date. Les fiches complètes arrivent une par une, en commençant par le S65. Liste non exhaustive : les variantes de cylindrée sont regroupées.</p>
+      <p>Les moteurs BMW essence et diesel, des années 60 à aujourd’hui, rangés par famille et par date. Les fiches complètes arrivent une par une : S65 et M57 pour commencer. Liste non exhaustive : les variantes de cylindrée sont regroupées.</p>
     </div>
     <div class="hint" id="count"></div>
   </div>
@@ -123,7 +123,8 @@ a.eng:hover{border-color:var(--amber)}
         <span class="state ${m.fiche ? 'on' : 'off'}">${m.fiche ? 'Fiche complète →' : 'Fiche à venir'}</span>`;
       return m.fiche ? `<a class="eng card ${m.famille === 'M' ? 'm' : ''}" href="${m.fiche}">${inner}</a>` : `<div class="eng card soon">${inner}</div>`;
     }).join('') || '<p class="hint">Aucun moteur ne correspond à ces filtres.</p>';
-    document.getElementById('count').textContent = `${list.length} moteur${list.length > 1 ? 's' : ''} · ${M.filter(m => m.fiche).length} fiche complète`;
+    const nFiche = M.filter(m => m.fiche).length;
+    document.getElementById('count').textContent = `${list.length} moteur${list.length > 1 ? 's' : ''} · ${nFiche} fiche${nFiche > 1 ? 's' : ''} complète${nFiche > 1 ? 's' : ''}`;
   }
   document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e => {
     const b = e.target.closest('.fbtn'); if (!b) return;

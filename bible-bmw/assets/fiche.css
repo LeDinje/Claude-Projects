@@ -1,4 +1,4 @@
-/* Fiche S65 : styles propres à la page (le socle est dans assets/site.css) */
+/* Fiches moteur : scène 3D, pupitre, coupe du cylindre, onglets, pièces (communes à toutes les fiches) */
 /* En-tête */
 .top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 32px;padding-block:22px 16px}
 .eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
